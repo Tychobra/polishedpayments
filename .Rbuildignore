@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+srcjs/
+.travis.yml
+cran-comments.md
+^CRAN-RELEASE$
