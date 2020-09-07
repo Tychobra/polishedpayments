@@ -8,6 +8,8 @@
 #' @param custom_ui Either \code{NULL}, the default, or a list of 2 elements containing custom
 #' UI to add additional 'shinydashboard' tabs to the 'polished' "Admin Panel".
 #'
+#' @export
+#'
 #' @importFrom shiny NS icon
 #' @importFrom shinydashboard dashboardSidebar dashboardBody sidebarMenu menuItem tabItems
 #' @importFrom htmltools HTML tags tagList
@@ -129,6 +131,8 @@ app_module_ui <- function(
 #' @param input the Shiny server input
 #' @param output the Shiny server output
 #' @param session the Shiny server session
+#'
+#' @export
 #'
 #' @importFrom shiny callModule observeEvent
 #'
