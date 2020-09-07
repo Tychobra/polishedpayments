@@ -14,7 +14,7 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     htmltools,
-    httr
+    httr,
     shiny,
     shinydashboard,
     shinydashboardPlus,
