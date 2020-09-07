@@ -3,7 +3,6 @@ ui <- fluidPage(
   fluidRow(
     column(
       12,
-
       h1(
         style = "display: inline-block;",
         "Hello Shiny!"

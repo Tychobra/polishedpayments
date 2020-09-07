@@ -12,7 +12,7 @@ pricing_module_ui <- function(id) {
       tags$br(),
       tags$br(),
       tags$br(),
-      tags$h1("$100/month"),
+      tags$h1("$20/month"),
       tags$br(),
       tags$br(),
       tags$br(),
@@ -35,11 +35,11 @@ pricing_module_ui <- function(id) {
     ),
     shinydashboard::box(
       width = 3,
-      title = "Annual Plan",
+      title = "Yearly Plan",
       br(),
       br(),
       br(),
-      h1("$1,000/year"),
+      h1("$200/year"),
       br(),
       br(),
       br(),
@@ -75,7 +75,7 @@ pricing_module_ui <- function(id) {
 
 
 
-pricing_module <- function(input, output, session, plans, sub_info) {
+pricing_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
   sel_plan <- reactiveVal(NULL)
@@ -89,27 +89,27 @@ pricing_module <- function(input, output, session, plans, sub_info) {
     hold <- sub_info()
 
     if (is.null(hold)) {
-      hideElement("your_plan_monthly")
-      hideElement("your_plan_yearly")
+      shinyjs::hideElement("your_plan_monthly")
+      shinyjs::hideElement("your_plan_yearly")
 
-      showElement("sign_up_yearly_div")
-      showElement("sign_up_monthly_div")
+      shinyjs::showElement("sign_up_yearly_div")
+      shinyjs::showElement("sign_up_monthly_div")
 
     } else if (hold$plan_id == "price_1HHABWEEdtiBEUJqW35Bqkbq") {
 
-      hideElement("sign_up_yearly_div")
-      showElement("your_plan_yearly")
+      shinyjs::hideElement("sign_up_yearly_div")
+      shinyjs::showElement("your_plan_yearly")
 
-      hideElement("your_plan_monthly")
-      showElement("sign_up_monthly_div")
+      shinyjs::hideElement("your_plan_monthly")
+      shinyjs::showElement("sign_up_monthly_div")
 
 
     } else if (hold$plan_id == "price_1HH6mYEEdtiBEUJq8jDffNmR") {
-      hideElement("sign_up_monthly_div")
-      showElement("your_plan_monthly")
+      shinyjs::hideElement("sign_up_monthly_div")
+      shinyjs::showElement("your_plan_monthly")
 
-      hideElement("your_plan_yearly")
-      showElement("sign_up_yearly_div")
+      shinyjs::hideElement("your_plan_yearly")
+      shinyjs::showElement("sign_up_yearly_div")
     }
 
   }, ignoreNULL = FALSE)
@@ -197,12 +197,10 @@ pricing_module <- function(input, output, session, plans, sub_info) {
 
   disclaimer_text_yearly <- p(
     class = "text-center",
-    "The Annual Plan costs $1,000.00/year & grants you full access to Alpha Architect's ",
-    tags$b("Portfolio Architect"), " application tool.",
+    "The Yearly Plan costs $200/year & grants you full access to this Shiny app ",
     tags$br(),
-    "By clicking Submit, you agree to authorize ",
-    tags$b("Alpha Architect"),
-    " to collect payments in accordance with the terms of this plan."
+    "By clicking Submit, you agree to authorize us to
+     collect payments in accordance with the terms of this plan."
   )
 
   callModule(

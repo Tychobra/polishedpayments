@@ -204,7 +204,7 @@ billing_module_ui <- function(id) {
 #'
 #' @importFrom dplyr %>% select mutate
 #'
-billing_module <- function(input, output, session, app_url, sub_info) {
+billing_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
 
@@ -367,9 +367,9 @@ billing_module <- function(input, output, session, app_url, sub_info) {
 
   observe({
     if (is.null(sub_info()$trial_end)) {
-      hideElement("has_trial")
+      shinyjs::hideElement("has_trial")
     } else {
-      showElement("has_trial")
+      shinyjs::showElement("has_trial")
     }
   })
 
@@ -431,11 +431,11 @@ billing_module <- function(input, output, session, app_url, sub_info) {
 
     if (is.null(payment_methods())) {
 
-      hideElement("billing_info")
-      showElement("enable_billing_button")
+      shinyjs::hideElement("billing_info")
+      shinyjs::showElement("enable_billing_button")
     } else {
-      showElement("billing_info")
-      hideElement("enable_billing_button")
+      shinyjs::showElement("billing_info")
+      shinyjs::hideElement("enable_billing_button")
     }
 
   }, ignoreNULL = FALSE)
@@ -504,7 +504,7 @@ billing_module <- function(input, output, session, app_url, sub_info) {
       )
   })
 
-  output$invoices_table <- renderDT({
+  output$invoices_table <- DT::renderDT({
     req(invoices_table_prep())
     out <- invoices_table_prep()
 
@@ -514,7 +514,7 @@ billing_module <- function(input, output, session, app_url, sub_info) {
       dom_ <- 'lfti'
     }
 
-    datatable(
+    DT::datatable(
       out,
       rownames = FALSE,
       class = "compact cell-border stripe",
@@ -525,13 +525,13 @@ billing_module <- function(input, output, session, app_url, sub_info) {
         "Amount Paid",
         "Amount Remaining"
       ),
-      callback = JS("$( table.table().container() ).addClass( 'table-responsive' ); return table;"),
+      callback = DT::JS("$( table.table().container() ).addClass( 'table-responsive' ); return table;"),
       selection = "none",
       options = list(
         dom = dom_
       )
     ) %>%
-      formatCurrency(3:5)
+      DT::formatCurrency(3:5)
   })
 
   callModule(

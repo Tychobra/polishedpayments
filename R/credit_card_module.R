@@ -103,7 +103,7 @@ credit_card_module <- function(
       session$sendCustomMessage(
         ns("create_setup_intent"),
         message = list(
-          stripe_key = app_config$stripe$keys$publishable,
+          stripe_key = app_config$stripe$keys$pub,
           card_button_id = ns('card_button'),
           client_secret = setup_data$client_secret
         )

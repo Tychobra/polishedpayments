@@ -13,6 +13,8 @@ BugReports: https://github.com/tychobra/polishedpayments/issues
 Encoding: UTF-8
 LazyData: true
 Imports:
+    dplyr,
+    dbplyr,
     htmltools,
     httr,
     shiny,

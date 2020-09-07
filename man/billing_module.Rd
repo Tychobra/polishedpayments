@@ -8,6 +8,8 @@ billing_module(input, output, session, app_url, sub_info)
 }
 \arguments{
 \item{app_url}{the url of the app}
+
+\item{sub_infor}{the subscription information}
 }
 \description{
 billing module

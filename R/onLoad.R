@@ -5,5 +5,5 @@
 #' @noRd
 #'
 .onLoad <- function(...) {
-  shiny::addResourcePath("polishedpayments", system.file("assets", package = "polished"))
+  shiny::addResourcePath("polishedpayments", system.file("assets", package = "polishedpayments"))
 }
