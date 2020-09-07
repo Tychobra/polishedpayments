@@ -2,38 +2,38 @@ pricing_module_ui <- function(id) {
   ns <- NS(id)
 
 
-  fluidRow(
+  shiny::fluidRow(
     style = "margin-top: 100px",
     class = "text-center",
-    column(3),
-    box(
+    shiny::column(3),
+    shinydashboard::box(
       width = 3,
       title = "Monthly Plan",
-      br(),
-      br(),
-      br(),
-      h1("$100/month"),
-      br(),
-      br(),
-      br(),
-      br(),
-      div(
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$h1("$100/month"),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$div(
         id = ns("sign_up_monthly_div"),
-        actionButton(
+        shiny::actionButton(
           ns("sign_up_monthly"),
           "Sign Up Now",
           class = "btn-primary btn-lg",
           style = "color: #FFF; width: 100%; margin-top: 54px;"
         )
       ),
-      actionButton(
+      shinyjs::hidden(actionButton(
         ns("your_plan_monthly"),
         "Your Plan",
         class = "btn-primary btn-lg",
         style = "color: #FFF; width: 100%; height: 100px;"
-      ) %>% shinyjs::hidden()
+      ))
     ),
-    box(
+    shinydashboard::box(
       width = 3,
       title = "Annual Plan",
       br(),
@@ -53,12 +53,12 @@ pricing_module_ui <- function(id) {
           style = "color: #FFF; width: 100%; margin-top: 54px;"
         )
       ),
-      actionButton(
+      shinyjs::hidden(actionButton(
         ns("your_plan_yearly"),
         "Your Plan",
         class = "btn-primary btn-lg",
         style = "color: #FFF; width: 100%; height: 100px;"
-      ) %>% shinyjs::hidden()
+      ))
     ),
     column(
       12,
@@ -248,7 +248,7 @@ pricing_module <- function(input, output, session, plans, sub_info) {
 
     billing <- session$userData$billing()
     hold_sub_info <- sub_info()
-    removeModal()
+    shiny::removeModal()
 
     # update the pricing plan for an existing subscription
     tryCatch({

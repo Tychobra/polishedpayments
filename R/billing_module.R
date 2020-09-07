@@ -13,146 +13,146 @@ billing_module_ui <- function(id) {
         text-align: center;
       }
     ")),
-    fluidRow(
-      box(
+    shiny::fluidRow(
+      shinydashboard::box(
         title = "Account Information",
         width = 12,
-        column(
+        shiny::column(
           12,
-          div(
+          tags$div(
             style = "width: 150px; display: inline-block;",
-            h4(tags$strong("Plan"))
+            tags$h4(tags$strong("Plan"))
           ),
-          div(
+          tags$div(
             style = "display: inline-block",
-            h4(textOutput(ns("plan_name_out")))
+            tags$h4(textOutput(ns("plan_name_out")))
           ),
-          hr(style = "margin: 0;")
+          tags$hr(style = "margin: 0;")
         ),
-        column(
+        shiny::column(
           12,
-          div(
+          tags$div(
             style = "width: 150px; display: inline-block;",
-            h4(tags$strong("Amount"))
+            tags$h4(tags$strong("Amount"))
           ),
-          div(
+          tags$div(
             style = "display: inline-block",
-            h4(textOutput(ns("plan_amount_out")))
+            tags$h4(textOutput(ns("plan_amount_out")))
           ),
-          hr(style = "margin: 0;")
+          tags$hr(style = "margin: 0;")
         ),
-        column(
+        shiny::column(
           12,
-          div(
+          tags$div(
             style = "width: 150px; display: inline-block;",
-            h4(tags$strong("Start Date"))
+            tags$h4(tags$strong("Start Date"))
           ),
-          div(
+          tags$div(
             style = "display: inline-block",
-            h4(textOutput(ns("account_created_out")))
+            tags$h4(textOutput(ns("account_created_out")))
           ),
-          hr(style = "margin: 0;")
+          tags$hr(style = "margin: 0;")
         ),
-        column(
+        shiny::column(
           12,
           id = ns("has_trial"),
-          div(
+          tags$div(
             style = "width: 150px; display: inline-block;",
             h4(tags$strong("Trial End"))
           ),
-          div(
+          tags$div(
             style = "display: inline-block",
             h4(textOutput(ns("trial_end_out")))
           ),
-          hr(style = "margin: 0;")
+          tags$hr(style = "margin: 0;")
         ),
-        column(
+        shiny::column(
           12,
-          br(),
-          actionButton(
+          tags$br(),
+          shinyjs::hidden(shiny::actionButton(
             ns("cancel_subscription"),
             "Cancel Subscription",
             class = "btn-primary pull-right",
             style = "color: #FFF; width: 150px;"
-          ) %>% hidden()
+          ))
         )
       )
     ),
 
 
 
-    div(
+    tags$div(
       id = ns("billing_info_box"),
-      fluidRow(
-        box(
+      shiny::fluidRow(
+        shinydashboard::box(
           title = "Billing Information",
           width = 12,
-          div(
+          tags$div(
             id = ns("billing_info"),
-            column(
+            shiny::column(
               12,
-              div(
+              tags$div(
                 style = "width: 150px; display: inline-block;",
-                h4(tags$strong("Name"))
+                tags$h4(tags$strong("Name"))
               ),
-              div(
+              tags$div(
                 style = "display: inline-block",
                 h4(textOutput(ns("name_out")))
               ),
-              hr(style = "margin: 0;")
+              tags$hr(style = "margin: 0;")
             ),
-            column(
+            shiny::column(
               12,
-              div(
+              tags$div(
                 style = "width: 150px; display: inline-block;",
-                h4(tags$strong("Zip Code"))
+                tags$h4(tags$strong("Zip Code"))
               ),
-              div(
+              tags$div(
                 style = "display: inline-block",
-                h4(textOutput(ns("postal_code")))
+                tags$h4(textOutput(ns("postal_code")))
               ),
-              hr(style = "margin: 0;")
+              tags$hr(style = "margin: 0;")
             ),
-            column(
+            shiny::column(
               12,
-              div(
+              tags$div(
                 style = "width: 150px; display: inline-block;",
-                h4(tags$strong("Brand"))
+                tags$h4(tags$strong("Brand"))
               ),
-              div(
+              tags$div(
                 style = "display: inline-block",
-                h4(textOutput(ns("card_brand_out")))
+                tags$h4(textOutput(ns("card_brand_out")))
               ),
-              hr(style = "margin: 0;")
+              tags$hr(style = "margin: 0;")
             ),
-            column(
+            shiny::column(
               12,
-              div(
+              tags$div(
                 style = "width: 150px; display: inline-block;",
-                h4(tags$strong("Number"))
+                tags$h4(tags$strong("Number"))
               ),
-              div(
+              tags$div(
                 style = "display: inline-block",
-                h4(textOutput(ns("last_4_out")))
+                tags$h4(textOutput(ns("last_4_out")))
               ),
-              hr(style = "margin: 0;")
+              tags$hr(style = "margin: 0;")
             ),
-            column(
+            shiny::column(
               12,
-              div(
+              tags$div(
                 style = "width: 150px; display: inline-block;",
-                h4(tags$strong("Expires"))
+                tags$h4(tags$strong("Expires"))
               ),
-              div(
+              tags$div(
                 style = "display: inline-block",
-                h4(textOutput(ns("card_exp_out")))
+                tags$h4(textOutput(ns("card_exp_out")))
               ),
-              hr(style = "margin: 0;")
+              tags$hr(style = "margin: 0;")
             ),
-            column(
+            shiny::column(
               12,
-              br(),
-              actionButton(
+              tags$br(),
+              shiny::actionButton(
                 ns("update_billing_info"),
                 "Update Billing",
                 class = "btn-primary pull-right",
@@ -160,12 +160,12 @@ billing_module_ui <- function(id) {
               )
             )
           ),
-          div(
+          shinyjs::hidden(tags$div(
             id = ns("enable_billing_button"),
             class = "text-center",
             h3("Billing is not enabled"),
             br(),
-            actionButton(
+            shiny::actionButton(
               ns("enable_billing"),
               "Enable Billing",
               class = "btn-primary btn-lg",
@@ -175,15 +175,15 @@ billing_module_ui <- function(id) {
             br(),
             br(),
             br()
-          ) %>% hidden()
+          ))
         )
       )
     ),
-    fluidRow(
-      box(
+    shiny::fluidRow(
+      shinydashboard::box(
         title = "Invoices",
         width = 12,
-        DTOutput(ns("invoices_table"))
+        DT::DTOutput(ns("invoices_table"))
       )
     ),
     br(), br(), br(),
@@ -200,8 +200,9 @@ billing_module_ui <- function(id) {
 #' billing module
 #'
 #' @param app_url the url of the app
+#' @param sub_infor the subscription information
 #'
-#'
+#' @importFrom dplyr %>% select mutate
 #'
 billing_module <- function(input, output, session, app_url, sub_info) {
   ns <- session$ns
@@ -493,8 +494,8 @@ billing_module <- function(input, output, session, app_url, sub_info) {
     )
 
     dat$data %>%
-      select(period_start, period_end, amount_due, amount_paid, amount_remaining) %>%
-      mutate(
+      dplyr::select(period_start, period_end, amount_due, amount_paid, amount_remaining) %>%
+      dplyr::mutate(
         amount_due = amount_due / 100,
         amount_paid = amount_paid / 100,
         amount_remaining = amount_remaining / 100,

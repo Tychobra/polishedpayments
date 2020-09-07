@@ -27,22 +27,22 @@ app_module_ui <- function(
 ) {
   ns <- shiny::NS(id)
 
-  stopifnot(is.null(custom_admin_ui) || names(custom_admin_ui) == c("menu_items", "tab_items"))
+  stopifnot(is.null(custom_ui) || names(custom_ui) == c("menu_items", "tab_items"))
 
+  stripe_key_publishable <- "pk_test_P6RyZfb9X5UDWkaa88og5FeP00RMX1hfRr"#app_config$stripe$keys$publishable
+
+  browser()
   head <- shinydashboardPlus::dashboardHeaderPlus(
-    title = options$title,
+    title = "Payments",
     polished::profile_module_ui(ns("profile"))
   )
 
-  if (is.null(custom_admin_ui$menu_items)) {
+  if (is.null(custom_ui$menu_items)) {
     sidebar <- shinydashboard::dashboardSidebar(
       shinydashboard::sidebarMenu(
         id = ns("sidebar_menu"),
         shinydashboard::menuItem("Pricing", tabName = ns("pricing"), icon = icon("usd")),
-        shinydashboard::menuItem("Billing", tabName = ns("billing"), icon = icon("credit-card")),
-
-
-        options$sidebar_branding
+        shinydashboard::menuItem("Billing", tabName = ns("billing"), icon = icon("credit-card"))
       )
     )
   } else {
@@ -55,41 +55,39 @@ app_module_ui <- function(
           icon = shiny::icon("users")
         ),
 
-        custom_admin_ui$menu_items,
-
-        options$sidebar_branding
+        custom_ui$menu_items
       )
     )
   }
 
 
-  if (is.null(custom_admin_ui$tab_items)) {
+  if (is.null(custom_ui$tab_items)) {
     tab_items <- shinydashboard::tabItems(
       shinydashboard::tabItem(
         tabName = ns("pricing"),
-        pricing_module_ui("pricing")
+        pricing_module_ui(ns("pricing"))
       ),
       shinydashboard::tabItem(
         tabName = ns("billing"),
-        billing_module_ui("billing")
+        billing_module_ui(ns("billing"))
       )
     )
   } else {
     tab_items <- shinydashboard::tabItems(
       shinydashboard::tabItem(
         tabName = ns("pricing"),
-        pricing_module_ui("pricing")
+        pricing_module_ui(ns("pricing"))
       ),
       shinydashboard::tabItem(
         tabName = ns("billing"),
-        billing_module_ui("billing")
+        billing_module_ui(ns("billing"))
       ),
-      custom_admin_ui$tab_items
+      custom_ui$tab_items
     )
   }
 
 
-  shiny_app_button <- tag$div(
+  shiny_app_button <- tags$div(
     style = "position: fixed; bottom: 15px; right: 15px; z-index: 1000;",
     shiny::actionButton(
       ns("go_to_shiny_app"),
@@ -104,7 +102,7 @@ app_module_ui <- function(
     tags$head(
       tags$link(rel = "shortcut icon", href = "images/alpha-arch-logo-square.png"),
       tags$script(src="https://js.stripe.com/v3"),
-      tags$script(paste0("var stripe = Stripe('", app_config$stripe$keys$publishable, "');")),
+      tags$script(paste0("var stripe = Stripe('", stripe_key_publishable, "');")),
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
@@ -135,6 +133,7 @@ app_module_ui <- function(
 #' @export
 #'
 #' @importFrom shiny callModule observeEvent
+#' @importFrom polished remove_query_string
 #'
 #' @noRd
 #'
@@ -149,12 +148,13 @@ app_module <- function(input, output, session) {
   shiny::observeEvent(input$go_to_shiny_app, {
 
     # to to the Shiny app
-    remove_query_string()
+    polished::remove_query_string()
 
     session$reload()
 
   }, ignoreInit = TRUE)
 
-  shiny::callModule(user_access_module, "user_access")
+  shiny::callModule(pricing_module, "pricing")
+  shiny::callModule(billing_module, "billing")
 }
 
