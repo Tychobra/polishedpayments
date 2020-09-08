@@ -87,14 +87,17 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
   # for the plan
   observeEvent(sub_info(), {
 
-    if (sub_info()$plan_id == plan_id) {
+    if (is.null(sub_info())) {
+      shinyjs::showElement("sign_up_div")
+      shinyjs::hideElement("your_plan")
+    } else if (sub_info()$plan_id == plan_id) {
       shinyjs::hideElement("sign_up_div")
       shinyjs::showElement("your_plan")
     } else {
       shinyjs::showElement("sign_up_div")
       shinyjs::hideElement("your_plan")
     }
-  })
+  }, ignoreNULL = FALSE)
 
   open_credit_card <- reactiveVal(0)
   open_confirm <- reactiveVal(0)
@@ -121,7 +124,7 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
     credit_card_module,
     "change_plan",
     open_modal_trigger = open_credit_card,
-    plan_to_enable = price_id,
+    plan_to_enable = plan_id,
     disclaimer_text = disclaimer_text,
     sub_info = sub_info
   )

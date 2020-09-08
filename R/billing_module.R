@@ -274,7 +274,7 @@ billing_module <- function(input, output, session, sub_info) {
       # Remove Subscription ID from 'billing' table ##
       dbExecute(
         conn,
-        "UPDATE billing SET stripe_subscription_id=?, free_trial_days_remaining_at_cancel=? WHERE uid=?",
+        "UPDATE polished.subscriptions SET stripe_subscription_id=$1, free_trial_days_remaining_at_cancel=$2 WHERE uid=$3",
         params = list(
           NA,
           subscription$trial_days_remaining,
