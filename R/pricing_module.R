@@ -4,12 +4,30 @@ pricing_module_ui <- function(id) {
 
   all_prices <- app_config$stripe$prices
 
-  price_box_width <-  6 / length(all_prices)
+  n_prices <- length(all_prices)
+
+  if (!(n_prices %in% 1:4)) {
+    stop("you must supply between 1 and 4 prices", call. = FALSE)
+  }
+
+  if (n_prices == 1) {
+    gutter <- shiny::column(4)
+    price_box_width <- 4
+  } else if (n_prices == 2) {
+    gutter <- shiny::column(2)
+    price_box_width <- 4
+  } else if (n_prices == 3) {
+    gutter <- NULL
+    price_box_width <- 4
+  } else if (n_prices == 4) {
+    gutter <- NULL
+    price_box_width <- 3
+  }
 
   shiny::fluidRow(
     style = "margin-top: 100px",
     class = "text-center",
-    shiny::column(3),
+    gutter,
     lapply(all_prices, function(price) {
       price_box_module_ui(
         ns(price),
