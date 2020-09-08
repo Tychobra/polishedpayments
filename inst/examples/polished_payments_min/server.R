@@ -11,7 +11,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$go_to_payments, {
     shiny::updateQueryString(
-      queryString = "?page=payments",
+      queryString = "?page=account",
       session = session,
       mode = "replace"
     )
@@ -25,4 +25,7 @@ server <- function(input, output, session) {
 
 }
 
-secure_server(server)
+secure_server(
+  server,
+  account_module = polishedpayments::app_module
+)

@@ -211,7 +211,7 @@ billing_module <- function(input, output, session, sub_info) {
   ### CANCEL SUBSCRIPTION ###
   observeEvent(input$cancel_subscription, {
     req(sub_info())
-    subscription_name <- paste0("Portfolio Architect - ", sub_info()$nickname)
+    subscription_name <- sub_info()$nickname
 
     showModal(
       shiny::modalDialog(

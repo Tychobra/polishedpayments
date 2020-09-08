@@ -31,4 +31,7 @@ ui <- fluidPage(
   )
 )
 
-secure_ui(ui)
+secure_ui(
+  ui,
+  account_module_ui = polishedpayments::app_module_ui("account")
+)

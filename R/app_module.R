@@ -321,7 +321,7 @@ app_module <- function(input, output, session) {
   sub_info <- reactive({
     req(session$userData$billing())
     session$userData$sub_info_trigger()
-    browser()
+
     out <- NULL
 
     billing <- session$userData$billing()
