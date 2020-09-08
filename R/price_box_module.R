@@ -75,6 +75,7 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
     hold_plan <- plan_data()
 
     paste0(
+      "$",
       format(as.numeric(hold_plan$amount) / 100, big.mark = ","),
       "/",
       hold_plan$interval
