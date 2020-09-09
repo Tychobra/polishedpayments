@@ -172,15 +172,31 @@ app_module <- function(input, output, session) {
     hold_user_uid <- session$userData$user()$user_uid
     hold_user_email <- session$userData$user()$email
 
-    out <- NULL
+    out <- list()
     tryCatch({
 
-      # TODO: API query to get user's billing information from the "subscriptions" table
-      # res <- httr::GET()
-      out <- conn %>%
-        tbl(in_schema("polished", "subscriptions")) %>%
-        filter(user_uid == hold_user_uid) %>%
-        collect()
+      # API query to get user's billing information from the "subscriptions" table
+      # update to use subscriptions endpoints of polishedapi
+      res <- httr::GET(
+        url = paste0(app_config$api_url, "/subscriptions"),
+        encode = "json",
+        body = list(
+          user_uid = hold_user_uid
+        ),
+        httr::authenticate(
+          user = app_config$api_key,
+          password = ""
+        )
+      )
+
+      out <- jsonlite::fromJSON(
+        httr::content(res, "text", encoding = "UTF-8")
+      )
+
+      if (!identical(httr::status_code(res), 200L)) {
+
+        stop(res_content, call. = FALSE)
+      }
 
     }, error = function(err) {
       print(err)
@@ -189,7 +205,7 @@ app_module <- function(input, output, session) {
 
 
 
-    if (nrow(out) == 0) {
+    if (length(out) == 0) {
       # user does not yet have an entry in the billings table, so this is the
       # first sign in, we will add the user to the users table, create a Stripe
       # account for the user, and add an entry for the user to the billing table
@@ -233,24 +249,33 @@ app_module <- function(input, output, session) {
 
         billing_uid <- uuid::UUIDgenerate()
         # add the newly created Stripe customer to the "billing" table
+        # send API request and determine the account uid based on the
+        # API key sent with the request.
+        res <- httr::POST(
+          paste0(app_config$api_url, "/subscriptions"),
+          body = list(
+            "user_uid" = hold_user_uid,
+            "stripe_customer_id" = customer_id,
+            "stripe_subscription_id" = stripe_subscription_id
+          ),
+          encode = "json",
+          httr::authenticate(
+            user = app_config$stripe$keys$secret,
+            password = ""
+          )
+        )
+
+        res_content <- jsonlite::fromJSON(
+          httr::content(res, "text", encoding = "UTF-8")
+        )
 
         out <- list(
-          uid = billing_uid,
-          # just using my development account UID for initial development
-          account_uid = "1d03c693-20e4-434d-b2b8-c1876dc2014b",
+          uid = res_content$uid,
           user_uid = hold_user_uid,
           stripe_customer_id = customer_id,
           stripe_subscription_id = stripe_subscription_id
         )
 
-        # TODO: update this to be an API request and determine the account uid based on the
-        # API key sent with the request.
-        DBI::dbExecute(
-          conn,
-          "INSERT INTO polished.subscriptions ( uid, account_uid, user_uid, stripe_customer_id, stripe_subscription_id )
-          VALUES ( $1, $2, $3, $4, $5 )",
-          params = unname(out)
-        )
 
         out$created_at <- Sys.time()
         out$free_trial_days_remaining_at_cancel <- NA

@@ -51,6 +51,7 @@ get_stripe_subscription <- function(conn, subscription_id, api_key) {
   if (!identical(status, 200L) || res_content$status == "canceled") {
     print(res_content)
 
+    # TODO: update to use API key
     dbExecute(
       conn,
       "UPDATE polished.subscriptions SET stripe_subscription_id=$1 WHERE uid=$2",

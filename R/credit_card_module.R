@@ -226,16 +226,28 @@ credit_card_module <- function(
           new_subscription_id <- res_content$id
           hold_user <- billing$user_uid
 
-          # TODO: update to use subscriptions endpoints of polishedapi
-          #httr::POST()
-          DBI::dbExecute(
-            conn,
-            "UPDATE polished.subscriptions SET stripe_subscription_id=$1 WHERE user_uid=$2",
-            params = list(
-              new_subscription_id,
-              hold_user
+          # update to use subscriptions endpoints of polishedapi
+          res <- httr::PUT(
+            url = paste0(app_config$api_url, "/subscriptions"),
+            encode = "json",
+            body = list(
+              stripe_subscription_id = new_subscription_id,
+              user_uid = hold_user
+            ),
+            httr::authenticate(
+              user = app_config$api_key,
+              password = ""
             )
           )
+
+          if (!identical(httr::status_code(res), 200L)) {
+
+            res_content <- jsonlite::fromJSON(
+              httr::content(res, "text", encoding = "UTF-8")
+            )
+
+            stop(res_content, call. = FALSE)
+          }
 
         }
 
