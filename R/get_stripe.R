@@ -27,11 +27,11 @@ get_stripe_customer_subscription <- function(customer_id) {
   )
 }
 
-#noRd
-get_stripe_subscription <- function(conn, subscription_id, api_key) {
+#' @noRd
+get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_id, api_key) {
 
   res <- httr::GET(
-    paste0("https://api.stripe.com/v1/subscriptions/", subscription_id),
+    paste0("https://api.stripe.com/v1/subscriptions/", stripe_subscription_id),
     encode = "form",
     httr::authenticate(
       user = api_key,
@@ -51,14 +51,13 @@ get_stripe_subscription <- function(conn, subscription_id, api_key) {
   if (!identical(status, 200L) || res_content$status == "canceled") {
     print(res_content)
 
-    # TODO: update to use API key
     # add newly created subscription to polished db via polished API
     res <- httr::PUT(
       url = paste0(app_config$api_url, "/subscriptions"),
       encode = "json",
       body = list(
-        stripe_subscription_id = NA,
-        subscription_uid = billing$uid
+        subscription_uid = subscription_uid,
+        stripe_subscription_id = NA
       ),
       httr::authenticate(
         user = app_config$api_key,

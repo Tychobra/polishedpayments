@@ -198,7 +198,7 @@ app_module <- function(input, output, session) {
       }
 
       if (is.null(out$stripe_subscription_id)) out$stripe_subscription_id <- NA
-      if (is.null(out$free_trial_days_remaining)) out$free_trial_days_remaining <- NA
+      if (is.null(out$free_trial_days_remaining_at_cancel)) out$free_trial_days_remaining_at_cancel <- NA
 
     }, error = function(err) {
       print(err)
@@ -375,14 +375,16 @@ app_module <- function(input, output, session) {
 
         out <- get_stripe_subscription(
           conn,
-          billing$stripe_subscription_id,
+          subscription_uid = billing$uid,
+          stripe_subscription_id = billing$stripe_subscription_id,
           api_key = app_config$stripe$keys$secret
         )
 
       }, error = function(err) {
         print(err)
-
+        session$userData$billing_trigger(session$userData$billing_trigger() + 1)
         shinyFeedback::showToast("error", "subscription not found")
+
       })
     }
 

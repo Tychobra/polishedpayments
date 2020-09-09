@@ -270,7 +270,7 @@ billing_module <- function(input, output, session, sub_info) {
         print(paste0("status code: ", res_code))
         stop("unable to delete subscription")
       }
-      browser()
+
       # Remove Subscription ID from 'billing' table ##
       res <- httr::PUT(
         url = paste0(app_config$api_url, "/subscriptions"),
