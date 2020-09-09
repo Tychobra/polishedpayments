@@ -270,17 +270,30 @@ billing_module <- function(input, output, session, sub_info) {
         print(paste0("status code: ", res_code))
         stop("unable to delete subscription")
       }
-
+      browser()
       # Remove Subscription ID from 'billing' table ##
-      dbExecute(
-        conn,
-        "UPDATE polished.subscriptions SET stripe_subscription_id=$1, free_trial_days_remaining_at_cancel=$2 WHERE uid=$3",
-        params = list(
-          NA,
-          subscription$trial_days_remaining,
-          billing$uid
+      res <- httr::PUT(
+        url = paste0(app_config$api_url, "/subscriptions"),
+        encode = "json",
+        body = list(
+          subscription_uid = billing$uid,
+          stripe_subscription_id = NA,
+          free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
+        ),
+        httr::authenticate(
+          user = app_config$api_key,
+          password = ""
         )
       )
+
+      if (!identical(httr::status_code(res), 200L)) {
+
+        res_content <- jsonlite::fromJSON(
+          httr::content(res, "text", encoding = "UTF-8")
+        )
+
+        stop(res_content, call. = FALSE)
+      }
 
       session$userData$billing_trigger(session$userData$billing_trigger() + 1)
       shinyFeedback::showToast("success", "Subscription Cancelled Successfully")
@@ -359,10 +372,7 @@ billing_module <- function(input, output, session, sub_info) {
   output$account_created_out <- renderText({
     billing <- session$userData$billing()
 
-    format(billing$created_at, format = "%Y-%m-%d")
-
-    # req(sub_info())
-    # format(as.POSIXct(sub_info()$start_date, origin = "1970-01-01"), format = "%Y-%m-%d")
+    as.character(as.Date(billing$created_at))
   })
 
   observe({
@@ -374,12 +384,9 @@ billing_module <- function(input, output, session, sub_info) {
   })
 
   output$trial_end_out <- renderText({
-    # req(sub_info())
-    # format(as.POSIXct(sub_info()$trial_end, origin = "1970-01-01"), format = "%Y-%m-%d")
-
-    billing <- session$userData$billing()
-
-    format(billing$created_at + lubridate::days(31), format = "%Y-%m-%d")
+    req(sub_info())
+    hold <- sub_info()
+    as.character(Sys.Date() + hold$trial_days_remaining)
   })
 
   # get payment method information for display to user

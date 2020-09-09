@@ -138,6 +138,7 @@ credit_card_module <- function(
     hold_sub_info <- sub_info()
 
     tryCatch({
+
       # GET payment method ID for this Setup Intent
       si_payment_method <- httr::GET(
         paste0("https://api.stripe.com/v1/setup_intents/", setup_intent_id),
@@ -194,7 +195,7 @@ credit_card_module <- function(
         # if user has already created a free trial, and then canceled their free trial part way through,
         # we keep track of their free trial days used and send them with the create subscription request
         # so that the user does not get to completely restart their free trial.
-        if (!is.na(billing$free_trial_days_remaining_at_cancel)) {
+        if (is.na(billing$free_trial_days_remaining_at_cancel)) {
           post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
         } else {
           post_body$trial_period_days <- app_config$stripe$trial_period_days
@@ -224,7 +225,6 @@ credit_card_module <- function(
 
           # update the subscription saved to the database
           new_subscription_id <- res_content$id
-          hold_user <- billing$user_uid
 
           # update to use subscriptions endpoints of polishedapi
           res <- httr::PUT(
@@ -232,7 +232,7 @@ credit_card_module <- function(
             encode = "json",
             body = list(
               stripe_subscription_id = new_subscription_id,
-              user_uid = hold_user
+              subscription_uid = billing$uid
             ),
             httr::authenticate(
               user = app_config$api_key,

@@ -20,18 +20,26 @@ price_box_module_ui <- function(id, width) {
         actionButton(
           ns("sign_up"),
           "Sign Up Now",
-          class = "btn-primary btn-lg sign_up_btn",
+          class = "btn-primary btn-lg",
           style = "color: #FFF; width: 100%; margin-top: 54px;",
         )
       ),
+      shinyjs::hidden(div(
+        id = ns("change_plan_div"),
+        actionButton(
+          ns("change_plan"),
+          "Change Plan",
+          class = "btn-default btn-lg",
+          style = "width: 100%; margin-top: 54px;",
+        )
+      )),
       shinyjs::hidden(tags$div(
         id = ns("your_plan"),
-        class = "btn-primary btn-lg your_plan",
-        style = "color: #FFF; width: 100%; height: 100px; width: 100%;",
-        "Your Plan"
+        style = "width: 100%; height: 100px; width: 100%; background-color: #3c8dbc; font-size: 45px; color: #FFF;",
+        div(style = "padding-top: 18px;", "Your Plan")
       ))
     ),
-    credit_card_module_ui(ns("change_plan"))
+    credit_card_module_ui(ns("change_plan_modal"))
   )
 }
 
@@ -91,12 +99,15 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
     if (is.null(sub_info())) {
       shinyjs::showElement("sign_up_div")
       shinyjs::hideElement("your_plan")
+      shinyjs::hideElement("change_plan_div")
     } else if (sub_info()$plan_id == plan_id) {
       shinyjs::hideElement("sign_up_div")
       shinyjs::showElement("your_plan")
+      shinyjs::hideElement("change_plan_div")
     } else {
-      shinyjs::showElement("sign_up_div")
+      shinyjs::hideElement("sign_up_div")
       shinyjs::hideElement("your_plan")
+      shinyjs::showElement("change_plan_div")
     }
   }, ignoreNULL = FALSE)
 
@@ -113,17 +124,26 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
 
     } else {
 
-      open_confirm(open_confirm() + 1)
+      # this should not happen
+      showToast("error", "You already have a plan")
 
     }
 
   }, ignoreInit = TRUE)
 
+  observeEvent(input$change_plan, {
 
+    if (!is.null(sub_info()) && is.na(sub_info()$default_payment_method)) {
+      open_credit_card(open_credit_card() + 1)
+    } else {
+      open_confirm(open_confirm() + 1)
+    }
+
+  }, ignoreInit = TRUE)
 
   callModule(
     credit_card_module,
-    "change_plan",
+    "change_plan_modal",
     open_modal_trigger = open_credit_card,
     plan_to_enable = plan_id,
     disclaimer_text = disclaimer_text,
@@ -140,8 +160,10 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
         disclaimer_text,
         title = "Plan Change Confirmation",
         footer = tags$span(
-          modalButton(
-            label = "Cancel"
+          tags$button(
+            type = "button", class = "btn btn-default pull-left",
+            `data-dismiss` = "modal",
+            "Cancel"
           ),
           shinyFeedback::loadingButton(
             ns('new_plan'),

@@ -194,9 +194,11 @@ app_module <- function(input, output, session) {
       )
 
       if (!identical(httr::status_code(res), 200L)) {
-
         stop(res_content, call. = FALSE)
       }
+
+      if (is.null(out$stripe_subscription_id)) out$stripe_subscription_id <- NA
+      if (is.null(out$free_trial_days_remaining)) out$free_trial_days_remaining <- NA
 
     }, error = function(err) {
       print(err)
@@ -245,9 +247,6 @@ app_module <- function(input, output, session) {
           days_remaining = app_config$stripe$trial_period_days
         )
 
-
-
-        billing_uid <- uuid::UUIDgenerate()
         # add the newly created Stripe customer to the "billing" table
         # send API request and determine the account uid based on the
         # API key sent with the request.
@@ -260,14 +259,19 @@ app_module <- function(input, output, session) {
           ),
           encode = "json",
           httr::authenticate(
-            user = app_config$stripe$keys$secret,
+            user = app_config$api_key,
             password = ""
           )
         )
 
-        res_content <- jsonlite::fromJSON(
+        res_content <- base::unserialize(
           httr::content(res, "text", encoding = "UTF-8")
         )
+
+        if (!identical(httr::status_code(res), 200L)) {
+          print(res_content)
+          stop("Error saving subsciption to db", call. = FALSE)
+        }
 
         out <- list(
           uid = res_content$uid,
@@ -302,14 +306,29 @@ app_module <- function(input, output, session) {
             days_remaining = trial_period_days
           )
 
-          dbExecute(
-            conn,
-            "UPDATE polished.subscriptions SET stripe_subscription_id=$1 WHERE uid=$2",
-            params = list(
-              stripe_subscription_id,
-              out$uid
+          # add newly created subscription to polished db via polished API
+          res <- httr::PUT(
+            url = paste0(app_config$api_url, "/subscriptions"),
+            encode = "json",
+            body = list(
+              stripe_subscription_id = stripe_subscription_id,
+              subscription_uid = out$uid
+            ),
+            httr::authenticate(
+              user = app_config$api_key,
+              password = ""
             )
           )
+
+          if (!identical(httr::status_code(res), 200L)) {
+
+            res_content <- jsonlite::fromJSON(
+              httr::content(res, "text", encoding = "UTF-8")
+            )
+
+            stop(res_content, call. = FALSE)
+          }
+
 
           session$userData$billing_trigger(session$userData$billing_trigger() + 1)
         }, error = function(err) {

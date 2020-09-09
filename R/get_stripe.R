@@ -52,14 +52,28 @@ get_stripe_subscription <- function(conn, subscription_id, api_key) {
     print(res_content)
 
     # TODO: update to use API key
-    dbExecute(
-      conn,
-      "UPDATE polished.subscriptions SET stripe_subscription_id=$1 WHERE uid=$2",
-      params = list(
-        NA,
-        billing$uid
+    # add newly created subscription to polished db via polished API
+    res <- httr::PUT(
+      url = paste0(app_config$api_url, "/subscriptions"),
+      encode = "json",
+      body = list(
+        stripe_subscription_id = NA,
+        subscription_uid = billing$uid
+      ),
+      httr::authenticate(
+        user = app_config$api_key,
+        password = ""
       )
     )
+
+    if (!identical(httr::status_code(res), 200L)) {
+
+      res_content <- jsonlite::fromJSON(
+        httr::content(res, "text", encoding = "UTF-8")
+      )
+
+      stop(res_content, call. = FALSE)
+    }
 
     stop("error getting subscription")
   }
