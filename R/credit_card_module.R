@@ -123,11 +123,11 @@ credit_card_module <- function(
 
   # FAILED Payment Method
   observeEvent(input$setup_intent_error, {
-    removeModal()
-
+    hold_error <- input$setup_intent_error
+    print(hold_error)
     shinyFeedback::showToast(
       type = 'error',
-      message = 'We are unable to authenticate your payment method. Please choose a different payment method and try again.'
+      message = hold_error$message
     )
   })
 

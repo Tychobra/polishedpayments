@@ -67,7 +67,8 @@ function credit_card_module(ns_prefix) {
         ).then(function(result) {
           if (result.error) {
             // Display error.message in your UI.
-            Shiny.setInputValue(ns_prefix + "setup_intent_error", 1, { priority: "event"});
+
+            Shiny.setInputValue(ns_prefix + "setup_intent_error", result.error, { priority: "event"});
             console.log(result.error);
           } else {
             // The setup has succeeded. Display a success message.
