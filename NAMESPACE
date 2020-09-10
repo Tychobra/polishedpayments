@@ -3,6 +3,7 @@
 export(app_module)
 export(app_module_ui)
 export(get_polished_payments)
+export(get_stripe_subscription)
 export(polished_payments_config)
 importFrom(dplyr,"%>%")
 importFrom(dplyr,mutate)

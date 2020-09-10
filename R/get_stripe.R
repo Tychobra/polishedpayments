@@ -1,13 +1,24 @@
 
 
-#' @noRd
-get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_id, api_key) {
+
+
+#' Get information on the user's Stripe subscription
+#'
+#' @param stripe_subscription_id Your user's Stripe subscription ID.
+#' @param stripe_api_key Your Stripe API secret key.
+#'
+#' @export
+#'
+get_stripe_subscription <- function(
+  stripe_subscription_id,
+  stripe_api_key = getOption("pp")$keys$secret
+) {
 
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/subscriptions/", stripe_subscription_id),
     encode = "form",
     httr::authenticate(
-      user = api_key,
+      user = stripe_api_key,
       password = ""
     )
   )
@@ -21,33 +32,12 @@ get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_
 
 
 
-  if (!identical(status, 200L) || res_content$status == "canceled") {
+  if (!identical(status, 200L)) {
     print(res_content)
-
-    # add newly created subscription to polished db via polished API
-    res <- httr::PUT(
-      url = paste0(getOption("polished")$api_url, "/subscriptions"),
-      encode = "json",
-      body = list(
-        subscription_uid = subscription_uid,
-        stripe_subscription_id = NA
-      ),
-      httr::authenticate(
-        user = getOption("polished")$api_key,
-        password = ""
-      )
-    )
-
-    if (!identical(httr::status_code(res), 200L)) {
-
-      res_content <- jsonlite::fromJSON(
-        httr::content(res, "text", encoding = "UTF-8")
-      )
-
-      stop(res_content, call. = FALSE)
-    }
-
-    stop("error getting subscription")
+    stop("error getting Stripe subscription", call. = FALSE)
+  }
+  if (res_content$status == "canceled") {
+    stop("subscription canceled", call. = FALSE)
   }
 
   out <- list(
@@ -81,6 +71,8 @@ get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_
 
   out
 }
+
+
 
 #' noRd
 get_stripe_customer <- function(customer_id) {
