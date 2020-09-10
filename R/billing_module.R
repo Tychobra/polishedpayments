@@ -273,7 +273,7 @@ billing_module <- function(input, output, session, sub_info) {
 
       # Remove Subscription ID from 'billing' table ##
       res <- httr::PUT(
-        url = paste0(app_config$api_url, "/subscriptions"),
+        url = paste0(getOption("polished")$api_url, "/subscriptions"),
         encode = "json",
         body = list(
           subscription_uid = billing$uid,
@@ -281,7 +281,7 @@ billing_module <- function(input, output, session, sub_info) {
           free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
         ),
         httr::authenticate(
-          user = app_config$api_key,
+          user = getOption("polished")$api_key,
           password = ""
         )
       )

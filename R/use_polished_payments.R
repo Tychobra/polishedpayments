@@ -21,9 +21,9 @@ get_polished_payments <- function(polished_api_key, session = getDefaultReactive
     tryCatch({
 
       res <- httr::GET(
-        paste0(app_config$api_key, "/subscriptions"),
+        paste0(getOption("polished")$api_url, "/subscriptions"),
         httr::authenticate(
-          user = .global_sessions:::api_key,
+          user = getOption("polished")$api_key,
           password = ""
         ),
         encode = "json",

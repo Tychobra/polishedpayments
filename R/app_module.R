@@ -177,13 +177,13 @@ app_module <- function(input, output, session) {
       # API query to get user's billing information from the "subscriptions" table
       # update to use subscriptions endpoints of polishedapi
       res <- httr::GET(
-        url = paste0(app_config$api_url, "/subscriptions"),
+        url = paste0(getOption("polished")$api_url, "/subscriptions"),
         encode = "json",
         body = list(
           user_uid = hold_user_uid
         ),
         httr::authenticate(
-          user = app_config$api_key,
+          user = getOption("polished")$api_key,
           password = ""
         )
       )
@@ -250,7 +250,7 @@ app_module <- function(input, output, session) {
         # send API request and determine the account uid based on the
         # API key sent with the request.
         res <- httr::POST(
-          paste0(app_config$api_url, "/subscriptions"),
+          paste0(getOption("polished")$api_url, "/subscriptions"),
           body = list(
             "user_uid" = hold_user_uid,
             "stripe_customer_id" = customer_id,
@@ -258,7 +258,7 @@ app_module <- function(input, output, session) {
           ),
           encode = "json",
           httr::authenticate(
-            user = app_config$api_key,
+            user = getOption("polished")$api_key,
             password = ""
           )
         )
@@ -307,14 +307,14 @@ app_module <- function(input, output, session) {
 
           # add newly created subscription to polished db via polished API
           res <- httr::PUT(
-            url = paste0(app_config$api_url, "/subscriptions"),
+            url = paste0(getOption("polished")$api_url, "/subscriptions"),
             encode = "json",
             body = list(
               stripe_subscription_id = stripe_subscription_id,
               subscription_uid = out$uid
             ),
             httr::authenticate(
-              user = app_config$api_key,
+              user = getOption("polished")$api_key,
               password = ""
             )
           )

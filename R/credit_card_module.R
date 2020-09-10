@@ -228,14 +228,14 @@ credit_card_module <- function(
 
           # update to use subscriptions endpoints of polishedapi
           res <- httr::PUT(
-            url = paste0(app_config$api_url, "/subscriptions"),
+            url = paste0(getOption("polished")$api_url, "/subscriptions"),
             encode = "json",
             body = list(
               stripe_subscription_id = new_subscription_id,
               subscription_uid = billing$uid
             ),
             httr::authenticate(
-              user = app_config$api_key,
+              user = getOption("polished")$api_key,
               password = ""
             )
           )

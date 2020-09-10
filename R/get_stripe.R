@@ -26,14 +26,14 @@ get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_
 
     # add newly created subscription to polished db via polished API
     res <- httr::PUT(
-      url = paste0(app_config$api_url, "/subscriptions"),
+      url = paste0(getOption("polished")$api_url, "/subscriptions"),
       encode = "json",
       body = list(
         subscription_uid = subscription_uid,
         stripe_subscription_id = NA
       ),
       httr::authenticate(
-        user = app_config$api_key,
+        user = getOption("polished")$api_key,
         password = ""
       )
     )
