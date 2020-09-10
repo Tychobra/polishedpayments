@@ -7,6 +7,7 @@
 #' @param id the Shiny module id
 #' @param custom_ui Either \code{NULL}, the default, or a list of 2 elements containing custom
 #' UI to add additional 'shinydashboard' tabs to the 'polished' "Admin Panel".
+#' @param app_name the app name to display to users.
 #'
 #' @export
 #'
@@ -23,7 +24,8 @@
 #' @noRd
 app_module_ui <- function(
   id,
-  custom_ui = NULL
+  custom_ui = NULL,
+  app_name = "Shiny App"
 ) {
   ns <- shiny::NS(id)
 
@@ -33,6 +35,13 @@ app_module_ui <- function(
 
   head <- shinydashboardPlus::dashboardHeaderPlus(
     title = "Payments",
+    left_menu = tagList(
+      shiny::actionLink(
+        ns("go_to_shiny_app"),
+        paste0("Go to ", app_name),
+        style = "margin-left: -15px; margin-top: -7.5px; color: #1a8dc7; font-size: 18px;"
+      )
+    ),
     polished::profile_module_ui(ns("profile"))
   )
 
@@ -86,16 +95,7 @@ app_module_ui <- function(
   }
 
 
-  shiny_app_button <- tags$div(
-    style = "position: fixed; bottom: 15px; right: 15px; z-index: 1000;",
-    shiny::actionButton(
-      ns("go_to_shiny_app"),
-      "Shiny App",
-      icon = shiny::icon("rocket"),
-      class = "btn-primary btn-lg",
-      style = "color: #FFFFFF;"
-    )
-  )
+
 
   body <- shinydashboard::dashboardBody(
     tags$head(
@@ -105,8 +105,8 @@ app_module_ui <- function(
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
-
-    shiny_app_button,
+    waiter::use_waiter(),
+    waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
 
     tab_items
   )
