@@ -20,6 +20,7 @@ get_polished_payments <- function(polished_api_key, session = getDefaultReactive
     out <- NULL
     tryCatch({
 
+      # get the user's subscription from the "subscriptions" table via the API
       res <- httr::GET(
         paste0(getOption("polished")$api_url, "/subscriptions"),
         httr::authenticate(
@@ -28,6 +29,7 @@ get_polished_payments <- function(polished_api_key, session = getDefaultReactive
         ),
         encode = "json",
         body = list(
+          app_uid = getOption("polished")$app_uid,
           user_uid = session$userData$user()$user_uid
         )
       )

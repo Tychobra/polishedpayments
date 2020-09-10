@@ -180,6 +180,7 @@ app_module <- function(input, output, session) {
         url = paste0(getOption("polished")$api_url, "/subscriptions"),
         encode = "json",
         body = list(
+          app_uid = getOption("polished")$app_uid,
           user_uid = hold_user_uid
         ),
         httr::authenticate(
@@ -196,8 +197,12 @@ app_module <- function(input, output, session) {
         stop(res_content, call. = FALSE)
       }
 
-      if (is.null(out$stripe_subscription_id)) out$stripe_subscription_id <- NA
-      if (is.null(out$free_trial_days_remaining_at_cancel)) out$free_trial_days_remaining_at_cancel <- NA
+      # correct possible dropped subscription columns if the subscription exists.
+      if (length(out) > 0) {
+        if (is.null(out$stripe_subscription_id)) out$stripe_subscription_id <- NA
+        if (is.null(out$free_trial_days_remaining_at_cancel)) out$free_trial_days_remaining_at_cancel <- NA
+      }
+
 
     }, error = function(err) {
       print(err)
@@ -227,11 +232,15 @@ app_module <- function(input, output, session) {
           )
         )
 
-        httr::stop_for_status(res)
-
         res_data <- jsonlite::fromJSON(
           httr::content(res, "text", encoding = "UTF-8")
         )
+
+        if (!identical(httr::status_code(res), 200L)) {
+          print(res_data)
+          stop("error creating Stripe user", call. = FALSE)
+        }
+
 
         customer_id <- res_data$id
         if (is.null(customer_id)) {
@@ -252,6 +261,7 @@ app_module <- function(input, output, session) {
         res <- httr::POST(
           paste0(getOption("polished")$api_url, "/subscriptions"),
           body = list(
+            "app_uid" = getOption("polished")$app_uid,
             "user_uid" = hold_user_uid,
             "stripe_customer_id" = customer_id,
             "stripe_subscription_id" = stripe_subscription_id
@@ -263,7 +273,7 @@ app_module <- function(input, output, session) {
           )
         )
 
-        res_content <- base::unserialize(
+        res_content <- jsonlite::fromJSON(
           httr::content(res, "text", encoding = "UTF-8")
         )
 
@@ -373,14 +383,33 @@ app_module <- function(input, output, session) {
       tryCatch({
 
         out <- get_stripe_subscription(
-          conn,
-          subscription_uid = billing$uid,
-          stripe_subscription_id = billing$stripe_subscription_id,
-          api_key = getOption("pp")$keys$secret
+          stripe_subscription_id = billing$stripe_subscription_id
         )
 
       }, error = function(err) {
         print(err)
+        # set the subscription to polished db via polished API
+        res <- httr::PUT(
+          url = paste0(getOption("polished")$api_url, "/subscriptions"),
+          encode = "json",
+          body = list(
+            subscription_uid = billing$uid,
+            stripe_subscription_id = NA
+          ),
+          httr::authenticate(
+            user = getOption("polished")$api_key,
+            password = ""
+          )
+        )
+        # hard fail if above query fails so that app does not somehow go into look
+        if (!identical(httr::status_code(res), 200L)) {
+          res_content <- jsonlite::fromJSON(
+            httr::content(res, "text", encoding = "UTF-8")
+          )
+          print(res_content)
+          stop("failure to sync Stripe subscription with DB", call. = FALSE)
+        }
+
         session$userData$billing_trigger(session$userData$billing_trigger() + 1)
         shinyFeedback::showToast("error", "subscription not found")
 

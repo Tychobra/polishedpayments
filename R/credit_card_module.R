@@ -196,9 +196,9 @@ credit_card_module <- function(
         # we keep track of their free trial days used and send them with the create subscription request
         # so that the user does not get to completely restart their free trial.
         if (is.na(billing$free_trial_days_remaining_at_cancel)) {
-          post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
-        } else {
           post_body$trial_period_days <- getOption("pp")$trial_period_days
+        } else {
+          post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
         }
 
         # Create the subscription and attach Customer & payment method to newly created subscription
@@ -223,16 +223,15 @@ credit_card_module <- function(
 
         } else {
 
-          # update the subscription saved to the database
+          # update the Stripe subscription id saved to the database
           new_subscription_id <- res_content$id
 
-          # update to use subscriptions endpoints of polishedapi
           res <- httr::PUT(
             url = paste0(getOption("polished")$api_url, "/subscriptions"),
             encode = "json",
             body = list(
-              stripe_subscription_id = new_subscription_id,
-              subscription_uid = billing$uid
+              subscription_uid = billing$uid,
+              stripe_subscription_id = new_subscription_id
             ),
             httr::authenticate(
               user = getOption("polished")$api_key,

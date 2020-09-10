@@ -271,7 +271,9 @@ billing_module <- function(input, output, session, sub_info) {
         stop("unable to delete subscription")
       }
 
-      # Remove Subscription ID from 'billing' table ##
+      # Remove Subscription ID from 'billing' table and update the free trial days
+      # remaining at cancel. The "free_trial_days_remaining_at_cancel" will be used
+      # to set the proper amount of free trial days if the user restarts their subscription.
       res <- httr::PUT(
         url = paste0(getOption("polished")$api_url, "/subscriptions"),
         encode = "json",
