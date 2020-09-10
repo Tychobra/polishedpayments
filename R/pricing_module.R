@@ -66,14 +66,15 @@ pricing_module <- function(input, output, session, sub_info) {
 
 
 
-  lapply(all_pricing_plans, function(pricing_plan) {
+  lapply(seq_along(all_pricing_plans), function(i) {
+
     callModule(
       price_box_module,
-      id = pricing_plan,
-      plan_id = pricing_plan,
+      id = all_pricing_plans[i],
+      plan_id = all_pricing_plans[i],
       sub_info = sub_info,
-      disclaimer_text = disclaimer_text
+      disclaimer_text = disclaimer_text,
+      hide_waiter = if (i == length(all_pricing_plans)) TRUE else FALSE
     )
   })
-
 }

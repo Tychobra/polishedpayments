@@ -43,7 +43,12 @@ price_box_module_ui <- function(id, width) {
   )
 }
 
-price_box_module <- function(input, output, session, plan_id, sub_info, disclaimer_text = "I am a disclaimer") {
+price_box_module <- function(input, output, session,
+  plan_id,
+  sub_info,
+  disclaimer_text = "I am a disclaimer",
+  hide_waiter = FALSE
+) {
   ns <- session$ns
 
   plan_data <- reactiveVal(NULL)
@@ -73,6 +78,11 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
       print(err)
       shinyFeedback::showToast("error", err$message)
     })
+
+    if (isTRUE(hide_waiter)) {
+      waiter::waiter_hide()
+    }
+
   })
 
   output$plan_name <- renderText({

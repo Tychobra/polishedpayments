@@ -1,8 +1,7 @@
 library(shiny)
 library(polished)
-library(RPostgres)
-library(DBI)
 library(polishedpayments)
+library(waiter)
 
 app_config <- config::get()
 

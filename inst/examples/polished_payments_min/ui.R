@@ -1,5 +1,7 @@
 
 ui <- fluidPage(
+  waiter::use_waiter(),
+  waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
   fluidRow(
     column(
       12,

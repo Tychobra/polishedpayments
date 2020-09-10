@@ -32,6 +32,7 @@ server <- function(input, output, session) {
       session$userData$subscription()
     })
 
+    waiter_hide()
   }, once = TRUE)
 
 
