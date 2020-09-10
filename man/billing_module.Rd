@@ -4,7 +4,7 @@
 \alias{billing_module}
 \title{billing module}
 \usage{
-billing_module(input, output, session, app_url, sub_info)
+billing_module(input, output, session, sub_info)
 }
 \arguments{
 \item{app_url}{the url of the app}

@@ -55,7 +55,7 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
       res <- httr::GET(
         paste0("https://api.stripe.com/v1/plans/", plan_id),
         httr::authenticate(
-          user = app_config$stripe$keys$secret,
+          user = getOption("pp")$keys$secret,
           password = ""
         )
       )
@@ -196,7 +196,7 @@ price_box_module <- function(input, output, session, plan_id, sub_info, disclaim
         ),
         encode = "form",
         httr::authenticate(
-          user = app_config$stripe$keys$secret,
+          user = getOption("pp")$keys$secret,
           password = ""
         )
       )

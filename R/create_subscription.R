@@ -36,7 +36,7 @@ create_subscription <- function(customer_id, plan_to_enable, days_remaining = 30
     body = post_body,
     encode = "form",
     httr::authenticate(
-      user = app_config$stripe$keys$secret,
+      user = getOption("pp")$keys$secret,
       password = ""
     )
   )

@@ -29,7 +29,7 @@ app_module_ui <- function(
 
   stopifnot(is.null(custom_ui) || names(custom_ui) == c("menu_items", "tab_items"))
 
-  stripe_key_publishable <- app_config$stripe$keys$pub#app_config$stripe$keys$publishable
+  stripe_key_public <- getOption("pp")$keys$public
 
   head <- shinydashboardPlus::dashboardHeaderPlus(
     title = "Payments",
@@ -101,7 +101,7 @@ app_module_ui <- function(
     tags$head(
       tags$link(rel = "shortcut icon", href = "images/alpha-arch-logo-square.png"),
       tags$script(src="https://js.stripe.com/v3"),
-      tags$script(paste0("var stripe = Stripe('", stripe_key_publishable, "');")),
+      tags$script(paste0("var stripe = Stripe('", stripe_key_public, "');")),
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
@@ -131,11 +131,10 @@ app_module_ui <- function(
 #'
 #' @export
 #'
-#' @importFrom shiny callModule observeEvent
+#' @importFrom httr GET POST status_code content
+#' @importFrom shiny callModule observeEvent reactiveVal reactive
 #' @importFrom polished remove_query_string
 #' @importFrom shinyFeedback showToast
-#' @importFrom dplyr %>% tbl filter collect
-#' @importFrom dbplyr in_schema
 #'
 #' @noRd
 #'
@@ -223,7 +222,7 @@ app_module <- function(input, output, session) {
           ),
           encode = "form",
           httr::authenticate(
-            user = app_config$stripe$keys$secret,
+            user = getOption("pp")$keys$secret,
             password = ""
           )
         )
@@ -243,8 +242,8 @@ app_module <- function(input, output, session) {
         # subscription without a credit card
         stripe_subscription_id <- create_subscription(
           customer_id,
-          plan_to_enable = app_config$stripe$prices[[1]],
-          days_remaining = app_config$stripe$trial_period_days
+          plan_to_enable = getOption("pp")$prices[[1]],
+          days_remaining = getOption("pp")$trial_period_days
         )
 
         # add the newly created Stripe customer to the "billing" table
@@ -296,13 +295,13 @@ app_module <- function(input, output, session) {
       # go ahead and create a subscription
       if (is.na(out$stripe_subscription_id) && is.na(out$free_trial_days_remaining_at_cancel)) {
 
-        trial_period_days <- app_config$stripe$trial_period_days
+        trial_period_days <- getOption("pp")$trial_period_days
 
         tryCatch({
 
           stripe_subscription_id <- create_subscription(
             out$stripe_customer_id,
-            plan_to_enable = app_config$stripe$prices[[1]],
+            plan_to_enable = getOption("pp")$stripe$prices[[1]],
             days_remaining = trial_period_days
           )
 
@@ -360,9 +359,9 @@ app_module <- function(input, output, session) {
   }, priority = 10)
 
 
-  session$userData$sub_info_trigger <- reactiveVal(0)
+  session$userData$sub_info_trigger <- shiny::reactiveVal(0)
   ### GET USER'S SUBSCRIPTION ###
-  sub_info <- reactive({
+  sub_info <- shiny::reactive({
     req(session$userData$billing())
     session$userData$sub_info_trigger()
 
@@ -377,7 +376,7 @@ app_module <- function(input, output, session) {
           conn,
           subscription_uid = billing$uid,
           stripe_subscription_id = billing$stripe_subscription_id,
-          api_key = app_config$stripe$keys$secret
+          api_key = getOption("pp")$keys$secret
         )
 
       }, error = function(err) {

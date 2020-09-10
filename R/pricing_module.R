@@ -2,7 +2,7 @@
 pricing_module_ui <- function(id) {
   ns <- NS(id)
 
-  all_prices <- app_config$stripe$prices
+  all_prices <- getOption("pp")$prices
 
   n_prices <- length(all_prices)
 
@@ -62,7 +62,7 @@ pricing_module <- function(input, output, session, sub_info) {
     collect payments in accordance with the terms of this plan."
   )
 
-  all_pricing_plans <- app_config$stripe$prices
+  all_pricing_plans <- getOption("pp")$prices
 
 
 

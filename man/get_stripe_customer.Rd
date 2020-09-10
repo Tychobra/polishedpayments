@@ -4,7 +4,7 @@
 \alias{get_stripe_customer}
 \title{noRd}
 \usage{
-get_stripe_customer(customer_id, api_key = app_config$stripe$keys$secret)
+get_stripe_customer(customer_id)
 }
 \description{
 noRd

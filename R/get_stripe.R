@@ -1,31 +1,4 @@
-#' get the Stripe customer info from the Stripe API
-#'
-#' @param customer_id the Stripe customer ID
-#'
-#' @importFrom httr GET stop_for_status
-#' @importFrom jsonlite fromJSON
-#'
-#' @return a list of data on the Stripe customer
-#'
-#' @noRd
-#'
-get_stripe_customer_subscription <- function(customer_id) {
-  res <- httr::GET(
-    paste0("https://api.stripe.com/v1/subscriptions"),
-    query = list(customer = customer_id),
-    encode = "form",
-    httr::authenticate(
-      user = app_config$stripe$keys$secret,
-      password = ""
-    )
-  )
 
-  httr::stop_for_status(res)
-
-  jsonlite::fromJSON(
-    httr::content(res, "text", encoding = "UTF-8")
-  )
-}
 
 #' @noRd
 get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_id, api_key) {
@@ -110,12 +83,12 @@ get_stripe_subscription <- function(conn, subscription_uid, stripe_subscription_
 }
 
 #' noRd
-get_stripe_customer <- function(customer_id, api_key = app_config$stripe$keys$secret) {
+get_stripe_customer <- function(customer_id) {
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/customers/", customer_id),
     encode = "form",
     httr::authenticate(
-      user = api_key,
+      user = getOption("pp")$keys$secret,
       password = ""
     )
   )

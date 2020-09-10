@@ -35,7 +35,7 @@ credit_card_module <- function(
         ),
         encode = "form",
         httr::authenticate(
-          user = app_config$stripe$keys$secret,
+          user = getOption("pp")$keys$secret,
           password = ""
         )
       )
@@ -103,7 +103,7 @@ credit_card_module <- function(
       session$sendCustomMessage(
         ns("create_setup_intent"),
         message = list(
-          stripe_key = app_config$stripe$keys$pub,
+          stripe_key = getOption("pp")$keys$pub,
           card_button_id = ns('card_button'),
           client_secret = setup_data$client_secret
         )
@@ -144,7 +144,7 @@ credit_card_module <- function(
         paste0("https://api.stripe.com/v1/setup_intents/", setup_intent_id),
         encode = "form",
         httr::authenticate(
-          user = app_config$stripe$keys$secret,
+          user = getOption("pp")$keys$secret,
           password = ""
         )
       )
@@ -169,7 +169,7 @@ credit_card_module <- function(
           ),
           encode = "form",
           httr::authenticate(
-            user = app_config$stripe$keys$secret,
+            user = getOption("pp")$keys$secret,
             password = ""
           )
         )
@@ -198,7 +198,7 @@ credit_card_module <- function(
         if (is.na(billing$free_trial_days_remaining_at_cancel)) {
           post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
         } else {
-          post_body$trial_period_days <- app_config$stripe$trial_period_days
+          post_body$trial_period_days <- getOption("pp")$trial_period_days
         }
 
         # Create the subscription and attach Customer & payment method to newly created subscription
@@ -207,7 +207,7 @@ credit_card_module <- function(
           body = post_body,
           encode = "form",
           httr::authenticate(
-            user = app_config$stripe$keys$secret,
+            user = getOption("pp")$keys$secret,
             password = ""
           )
         )

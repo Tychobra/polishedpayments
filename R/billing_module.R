@@ -255,7 +255,7 @@ billing_module <- function(input, output, session, sub_info) {
         paste0("https://api.stripe.com/v1/subscriptions/", subscription$id),
         encode = "form",
         httr::authenticate(
-          user = app_config$stripe$keys$secret,
+          user = getOption("pp")$keys$secret,
           password = ""
         )
       )
@@ -401,7 +401,7 @@ billing_module <- function(input, output, session, sub_info) {
       paste0("https://api.stripe.com/v1/payment_methods/", default_payment_method),
       encode = "form",
       httr::authenticate(
-        user = app_config$stripe$keys$secret,
+        user = getOption("pp")$keys$secret,
         password = ""
       )
     )
@@ -489,7 +489,7 @@ billing_module <- function(input, output, session, sub_info) {
       ),
       encode = "form",
       httr::authenticate(
-        user = app_config$stripe$keys$secret,
+        user = getOption("pp")$keys$secret,
         password = ""
       )
     )
