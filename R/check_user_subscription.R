@@ -29,7 +29,6 @@ check_user_subscription <- function(
   session$userData$subscription <- reactiveVal(NULL)
 
   shiny::observeEvent(session$userData$user(), {
-    browser()
 
     hold_user <- session$userData$user()
 
