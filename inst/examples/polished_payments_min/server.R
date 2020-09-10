@@ -2,6 +2,9 @@
 
 server <- function(input, output, session) {
 
+  # check user's subscription status and payment method
+  check_user_subscription()
+
   observeEvent(input$sign_out, {
 
     polished::sign_out_from_shiny()
@@ -19,9 +22,18 @@ server <- function(input, output, session) {
   })
 
 
-  output$polished_user <- renderPrint({
-    session$userData$user()
-  })
+  observeEvent(session$userData$subscription(), {
+
+    output$polished_user <- renderPrint({
+      session$userData$user()
+    })
+
+    output$polished_subscription <- renderPrint({
+      session$userData$subscription()
+    })
+
+  }, once = TRUE)
+
 
 }
 

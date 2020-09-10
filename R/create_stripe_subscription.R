@@ -12,7 +12,7 @@
 #'
 #' @noRd
 #'
-create_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NA) {
+create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NA) {
 
   post_body <- list(
     "customer" = customer_id,

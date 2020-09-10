@@ -5,7 +5,7 @@ ui <- fluidPage(
       12,
       h1(
         style = "display: inline-block;",
-        "Hello Shiny!"
+        "Shiny with Stripe Subscription!"
       ),
       actionLink(
         "sign_out",
@@ -21,12 +21,23 @@ ui <- fluidPage(
         style = "display: inline-block; margin-top: 25px;",
         class = "pull-right"
       ),
+      br(),
+      br(),
+      br()
     )
   ),
   fluidRow(
     column(
-      12,
+      width = 6,
+      class = "text-center",
+      h2("Authenticated User"),
       verbatimTextOutput("polished_user")
+    ),
+    column(
+      width = 6,
+      class = "text-center",
+      h2("Stripe Subscription"),
+      verbatimTextOutput("polished_subscription")
     )
   )
 )

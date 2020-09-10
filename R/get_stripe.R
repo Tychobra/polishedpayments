@@ -5,20 +5,18 @@
 #' Get information on the user's Stripe subscription
 #'
 #' @param stripe_subscription_id Your user's Stripe subscription ID.
-#' @param stripe_api_key Your Stripe API secret key.
 #'
 #' @export
 #'
 get_stripe_subscription <- function(
-  stripe_subscription_id,
-  stripe_api_key = getOption("pp")$keys$secret
+  stripe_subscription_id
 ) {
 
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/subscriptions/", stripe_subscription_id),
     encode = "form",
     httr::authenticate(
-      user = stripe_api_key,
+      user = getOption("pp")$keys$secret,
       password = ""
     )
   )

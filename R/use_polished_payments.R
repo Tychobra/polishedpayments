@@ -27,8 +27,7 @@ get_polished_payments <- function(polished_api_key, session = getDefaultReactive
           user = getOption("polished")$api_key,
           password = ""
         ),
-        encode = "json",
-        body = list(
+        query = list(
           app_uid = getOption("polished")$app_uid,
           user_uid = session$userData$user()$user_uid
         )

@@ -178,8 +178,7 @@ app_module <- function(input, output, session) {
       # update to use subscriptions endpoints of polishedapi
       res <- httr::GET(
         url = paste0(getOption("polished")$api_url, "/subscriptions"),
-        encode = "json",
-        body = list(
+        query = list(
           app_uid = getOption("polished")$app_uid,
           user_uid = hold_user_uid
         ),
@@ -218,44 +217,20 @@ app_module <- function(input, output, session) {
       tryCatch({
 
 
-        # create Stripe user
-        res <- httr::POST(
-          "https://api.stripe.com/v1/customers",
-          body = list(
-            "email" = hold_user_email,
-            "metadata[polished_uid]" = hold_user_uid
-          ),
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
+        # create Stripe customer
+        customer_id <- create_stripe_customer(
+          email = hold_user_email,
+          user_uid = hold_user_uid
         )
 
-        res_data <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
-
-        if (!identical(httr::status_code(res), 200L)) {
-          print(res_data)
-          stop("error creating Stripe user", call. = FALSE)
-        }
-
-
-        customer_id <- res_data$id
-        if (is.null(customer_id)) {
-          stop("no customer id received from Stripe")
-        }
-
-        # if the trial period days is set in config.yml, then go ahead and set up the
-        # subscription without a credit card
-        stripe_subscription_id <- create_subscription(
+        # add the subscription to polished
+        stripe_subscription_id <- create_stripe_subscription(
           customer_id,
           plan_to_enable = getOption("pp")$prices[[1]],
           days_remaining = getOption("pp")$trial_period_days
         )
 
-        # add the newly created Stripe customer to the "billing" table
+        # add the newly created Stripe customer to the "subscriptions" table
         # send API request and determine the account uid based on the
         # API key sent with the request.
         res <- httr::POST(
@@ -309,7 +284,7 @@ app_module <- function(input, output, session) {
 
         tryCatch({
 
-          stripe_subscription_id <- create_subscription(
+          stripe_subscription_id <- create_stripe_subscription(
             out$stripe_customer_id,
             plan_to_enable = getOption("pp")$stripe$prices[[1]],
             days_remaining = trial_period_days
@@ -348,19 +323,19 @@ app_module <- function(input, output, session) {
 
       # check that Stripe customer does not have any issues and log any potential
       # issues
-      tryCatch({
-        stripe_customer <- get_stripe_customer(out$stripe_customer_id)
-
-        if (isTRUE(stripe_customer$deleted)) {
-          stop("[Stripe Error] Stripe customer deleted")
-        }
-      }, error = function(err) {
-
-
-        print("[Stripe Error] getting the Stripe customer")
-        print(err)
-
-      })
+      #tryCatch({
+      #  stripe_customer <- get_stripe_customer(out$stripe_customer_id)
+      #
+      #  if (isTRUE(stripe_customer$deleted)) {
+      #    stop("[Stripe Error] Stripe customer deleted")
+      #  }
+      #}, error = function(err) {
+      #
+      #
+      #  print("[Stripe Error] getting the Stripe customer")
+      #  print(err)
+      #
+      #})
 
     }
 
