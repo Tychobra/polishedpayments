@@ -4,17 +4,14 @@
 \alias{check_user_subscription}
 \title{check that the user has a subscription}
 \usage{
-check_user_subscription(
-  free_roles = character(0),
-  session = shiny::getDefaultReactiveDomain()
-)
+check_user_subscription(session = shiny::getDefaultReactiveDomain())
 }
 \arguments{
+\item{session}{the Shiny session}
+
 \item{free_roles}{An optional character vector of free user roles.  If a user has one
 of these roles, then we bypass checking their subscription all togther than just let
 them access the app.}
-
-\item{session}{the Shiny session}
 }
 \description{
 This function should be placed at the top of your Shiny server function
