@@ -34,7 +34,7 @@ check_user_subscription <- function(
 
     # if the user has a role that allows them free access to the Shiny app, then
     # let them access the app.
-    if (hold_user$roles %in% free_roles) {
+    if (length(intersect(hold_user$roles, free_roles)) > 0) {
       session$userData$subscription(list(
         free_user = TRUE
       ))
