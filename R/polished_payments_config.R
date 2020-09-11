@@ -3,33 +3,46 @@
 
 #' configure R options for Polished Payments
 #'
-#' @param .options a list containing your Stripe configuration.  The list should be
-#' in the following format:
-#' list(
-#'   keys = list(
-#'     secret: <your Stripe secret key>
-#'     public: <your Stripe public key>
-#'   ),
-#'   prices = c(<character vector of 1 to 4 pricing options>)
-#'   free_trial_days = <number of days for your free trial>
-#' )
+#' @param stripe_secret_key the Stripe secret key
+#' @param stripe_public_key the Stripe publishable key
+#' @param prices a character vector of Stripe prices for your subscription.  e.g. monthly and
+#' yearly pricing options.
+#' @param trial_period_days the number of days to offer for a free trial period.  All pricing options
+#' will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.
+#' @param free_roles Polished user roles that can bypass having to set up a aubscription and get free
+#' access to your Shiny app.  This is often used to give certain users (e.g. your beta testers) free
+#' access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role and add that
+#' role to specific users.
 #'
 #' @export
 #'
 #' @examples
 #'
 #' polished_payments_config(
-#'   list(
-#'     keys = list(
-#'       secret: "fake_key_hjkasdhgkjashdkfj"
-#'       public: "fake_key_hjaksdfhjaksldhfkj"
-#'     ),
-#'     prices = c("price_jkashdkfjh", "price_jakhkljgakwf")
-#'     free_trial_days = 30
-#'   )
+#'   stripe_secret_key = "<your Stripe secret API key>",
+#'   stripe_public_key = "<your Stripe publishable key>",
+#'   prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
+#'   free_trial_days = 30,
+#'   free_roles = "free_user"
 #' )
 #'
 #'
-polished_payments_config <- function(.options) {
-  options("pp" = .options)
+#'
+polished_payments_config <- function(
+  stripe_secret_key,
+  stripe_public_key,
+  stripe_prices,
+  trial_period_days = 0,
+  free_roles = character(0)
+) {
+
+  options("pp" = list(
+    keys = list(
+      secret = stripe_secret_key,
+      public = stripe_public_key
+    ),
+    prices = stripe_prices,
+    trial_period_days = trial_period_days,
+    free_roles = free_roles
+  ))
 }

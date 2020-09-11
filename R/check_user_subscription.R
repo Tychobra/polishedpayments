@@ -10,9 +10,6 @@
 #' but they have not yet enabled a payment method, then redirect them to their
 #' account page where they can set up their subscription.
 #'
-#' @param free_roles An optional character vector of free user roles.  If a user has one
-#' of these roles, then we bypass checking their subscription all togther than just let
-#' them access the app.
 #' @param session the Shiny session
 #'
 #' @importFrom shiny getDefaultReactiveDomain observeEvent
@@ -22,7 +19,6 @@
 #' @export
 #'
 check_user_subscription <- function(
-  free_roles = character(0),
   session = shiny::getDefaultReactiveDomain()
 ) {
 
@@ -34,7 +30,7 @@ check_user_subscription <- function(
 
     # if the user has a role that allows them free access to the Shiny app, then
     # let them access the app.
-    if (length(intersect(hold_user$roles, free_roles)) > 0) {
+    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0) {
       session$userData$subscription(list(
         free_user = TRUE
       ))
