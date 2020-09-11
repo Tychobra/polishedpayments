@@ -13,31 +13,45 @@ price_box_module_ui <- function(id, width) {
       h1(textOutput(ns("price"))),
       br(),
       br(),
-      br(),
-      br(),
       div(
         id = ns("sign_up_div"),
+        br(),
+        br(),
+        br(),
         actionButton(
           ns("sign_up"),
           "Sign Up Now",
           class = "btn-primary btn-lg",
-          style = "color: #FFF; width: 100%; margin-top: 54px;",
+          style = "color: #FFF; width: 100%; margin-top: 55px;",
         )
       ),
       shinyjs::hidden(div(
         id = ns("change_plan_div"),
+        br(),
+        br(),
+        br(),
         actionButton(
           ns("change_plan"),
           "Change Plan",
           class = "btn-default btn-lg",
-          style = "width: 100%; margin-top: 54px;",
+          style = "width: 100%; margin-top: 55px;",
         )
       )),
-      shinyjs::hidden(tags$div(
-        id = ns("your_plan"),
-        style = "width: 100%; height: 100px; width: 100%; background-color: #3c8dbc; font-size: 45px; color: #FFF;",
-        div(style = "padding-top: 18px;", "Your Plan")
-      ))
+      shinyjs::hidden(
+        actionButton(
+          ns("your_plan"),
+          label = tagList(
+            div(style = "padding-top: 10px;", "Your Plan"),
+            div(style = "padding-bottom: 10px;", "Go To App")
+          ),
+          class = "btn btn-primary",
+          style = "
+            width: 100%;
+            font-size: 45px;
+            color: #FFF;
+          "
+        )
+      )
     ),
     credit_card_module_ui(ns("change_plan_modal"))
   )
@@ -225,6 +239,13 @@ price_box_module <- function(input, output, session,
     })
 
   }, ignoreInit = TRUE)
+
+  observeEvent(input$your_plan, {
+    # to to the Shiny app
+    polished::remove_query_string()
+    session$reload()
+  })
+
 
   invisible()
 }

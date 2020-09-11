@@ -56,10 +56,9 @@ pricing_module <- function(input, output, session, sub_info) {
 
   disclaimer_text = p(
     class = "text-center",
-    "The Monthly Plan grants you full access to the Shiny app",
+    "This plan grants you full access to the ", getOption('polished')$app_name_display, " app",
     tags$br(),
-    "By clicking Submitting, you agree to authorize us to
-    collect payments in accordance with the terms of this plan."
+    "By clicking Submit, you agree to authorize collection of payments in accordance with the terms of this plan."
   )
 
   all_pricing_plans <- getOption("pp")$prices
