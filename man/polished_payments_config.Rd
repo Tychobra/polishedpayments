@@ -8,7 +8,7 @@ polished_payments_config(
   stripe_secret_key,
   stripe_public_key,
   stripe_prices,
-  free_trial_period = 0,
+  trial_period_days = 0,
   free_roles = character(0)
 )
 }
@@ -17,6 +17,9 @@ polished_payments_config(
 
 \item{stripe_public_key}{the Stripe publishable key}
 
+\item{trial_period_days}{the number of days to offer for a free trial period.  All pricing options
+will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.}
+
 \item{free_roles}{Polished user roles that can bypass having to set up a aubscription and get free
 access to your Shiny app.  This is often used to give certain users (e.g. your beta testers) free
 access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role and add that
@@ -24,9 +27,6 @@ role to specific users.}
 
 \item{prices}{a character vector of Stripe prices for your subscription.  e.g. monthly and
 yearly pricing options.}
-
-\item{free_trial_days}{the number of days to offer for a free trial period.  All pricing options
-will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.}
 }
 \description{
 configure R options for Polished Payments
