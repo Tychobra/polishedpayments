@@ -217,7 +217,8 @@ app_module <- function(input, output, session) {
       )
 
       if (!identical(httr::status_code(res), 200L)) {
-        stop(res_content, call. = FALSE)
+        print(out)
+        stop("error getting subscription", call. = FALSE)
       }
 
       # correct possible dropped subscription columns if the subscription exists.
