@@ -46,5 +46,18 @@ ui <- fluidPage(
 
 secure_ui(
   ui,
+  sign_in_page_ui = sign_in_ui_default(
+    color = "#5469d4",
+    company_name = "Tychobra",
+    logo_top = tags$div(
+      style = "width: 300px; max-width: 100%; color: #5469d4;",
+      class = "text-center",
+      h1("Polished", style = "margin-bottom: 0; margin-top: 30px;"),
+      h1("Payments", style = "margin-bottom: 0; margin-top: 10px;"),
+      h1("Demo", style = "margin-bottom: 15px; margin-top: 10px;"),
+      br()
+    ),
+    background_image = "background_image.png"
+  ),
   account_module_ui = polishedpayments::app_module_ui("account")
 )
