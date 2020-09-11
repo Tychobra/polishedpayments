@@ -25,7 +25,7 @@
 app_module_ui <- function(
   id,
   custom_ui = NULL,
-  app_name = "Shiny App"
+  app_name = getOption("polished")$app_name_display
 ) {
   ns <- shiny::NS(id)
 
@@ -147,11 +147,35 @@ app_module <- function(input, output, session) {
   )
 
   shiny::observeEvent(input$go_to_shiny_app, {
+    hold_sub <- sub_info()
+    hold_user <- session$userData$user()
 
-    # to to the Shiny app
-    polished::remove_query_string()
 
-    session$reload()
+    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0) {
+       # User has a free role, so go to the Shiny app
+       polished::remove_query_string()
+
+       session$reload()
+    } else if (is.null(hold_sub)) {
+
+      shinyWidgets::show_alert(
+        title = "Update Subscription",
+        text = "Please select a subscription to access the Shiny app.",
+        type = "error"
+      )
+
+    } else if (hold_sub$trial_days_remaining > 0 || !is.na(hold_sub$default_payment_method)) {
+      # to to the Shiny app
+      polished::remove_query_string()
+
+      session$reload()
+    } else {
+      shinyWidgets::show_alert(
+        title = "Update Payment Method",
+        text = 'Go to the "Billing" page and enter your credit card information to access the app.',
+        type = "error"
+      )
+    }
 
   }, ignoreInit = TRUE)
 
