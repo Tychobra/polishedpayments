@@ -207,6 +207,7 @@ price_box_module <- function(input, output, session,
     hold_sub_info <- sub_info()
     shiny::removeModal()
 
+
     # update the pricing plan for an existing subscription
     tryCatch({
       res <- httr::POST(
@@ -215,8 +216,7 @@ price_box_module <- function(input, output, session,
           cancel_at_period_end="false",
           proration_behavior="create_prorations",
           `items[0][id]`= hold_sub_info$item_id,
-          `items[0][price]`= plan_id,
-          trial_from_plan="true"
+          `items[0][price]`= plan_id
         ),
         encode = "form",
         httr::authenticate(
@@ -225,7 +225,13 @@ price_box_module <- function(input, output, session,
         )
       )
 
-      httr::stop_for_status(res)
+      if (!identical(httr::status_code(res), 200L)) {
+        res_error <- jsonlite::fromJSON(
+          httr::content(res, "text", encoding = "UTF-8")
+        )
+        print(res_error)
+        stop("Error changing pricing plan", call. = FALSE)
+      }
 
       session$userData$sub_info_trigger(session$userData$sub_info_trigger() + 1)
 
@@ -234,7 +240,7 @@ price_box_module <- function(input, output, session,
     }, error = function(err) {
 
       print(err)
-      shinyFeedback::showToast("error", "Error Changing Pricing")
+      shinyFeedback::showToast("error", err$message)
 
     })
 
