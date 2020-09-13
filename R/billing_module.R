@@ -171,7 +171,7 @@ billing_module_ui <- function(id) {
               class = "btn-primary btn-lg",
               style = "color: #FFF"
             ),
-            tasg$br(),
+            tags$br(),
             tags$br(),
             tags$br(),
             tags$br()
