@@ -3,7 +3,7 @@
 #' Create a new Stripe customer
 #'
 #' @param email The new Stripe customer's email address.
-#' @param user_user the new Stripe customer's polished user uid.
+#' @param user_uid the new Stripe customer's polished user uid.
 #'
 #' @export
 #'

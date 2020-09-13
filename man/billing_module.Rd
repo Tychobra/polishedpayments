@@ -7,9 +7,13 @@
 billing_module(input, output, session, sub_info)
 }
 \arguments{
-\item{app_url}{the url of the app}
+\item{input}{the Shiny server input}
 
-\item{sub_infor}{the subscription information}
+\item{output}{the Shiny server output}
+
+\item{session}{the Shiny server session}
+
+\item{sub_info}{the subscription information}
 }
 \description{
 billing module

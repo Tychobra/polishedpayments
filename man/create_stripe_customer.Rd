@@ -9,7 +9,7 @@ create_stripe_customer(email, user_uid)
 \arguments{
 \item{email}{The new Stripe customer's email address.}
 
-\item{user_user}{the new Stripe customer's polished user uid.}
+\item{user_uid}{the new Stripe customer's polished user uid.}
 }
 \description{
 Create a new Stripe customer

@@ -48,15 +48,15 @@ credit_card_module <- function(
 
       setup_intent_id(setup_data$id)
 
-      showModal(
-        modalDialog(
-          textInput(
+      shiny::showModal(
+        shiny::modalDialog(
+          shiny::textInput(
             ns("cardholder_name"),
             "Name on Card",
             width = "100%",
             placeholder = 'John K Smith'
           ),
-          br(),
+          tags$br(),
           tags$form(
             action = "/charge",
             method = "post",
@@ -75,7 +75,7 @@ credit_card_module <- function(
               )
             )
           ),
-          hr(),
+          tags$hr(),
           tags$p(
             style = "text-align: center;",
             disclaimer_text
@@ -84,7 +84,7 @@ credit_card_module <- function(
           footer = tags$span(
             tags$div(
               class = 'pull-left',
-              actionButton(
+              shiny::actionButton(
                 ns('close_billing_modal'),
                 'Cancel'
               )
@@ -111,14 +111,14 @@ credit_card_module <- function(
 
     }, error = function(err) {
       print(err)
-      showToast("error", "Error in Setup Intent")
+      shinyFeedback::showToast("error", "Error in Setup Intent")
     })
 
   }, ignoreInit = TRUE)
 
   # CANCEL Update Payment
   observeEvent(input$close_billing_modal, {
-    removeModal()
+    shiny::removeModal()
   })
 
   # FAILED Payment Method
@@ -262,11 +262,11 @@ credit_card_module <- function(
       )
     }, error = function(err) {
       print(err)
-      showToast("error", "Payment method authenticated, but there was an error saving your Payment Method")
+      shinyFeedback::showToast("error", "Payment method authenticated, but there was an error saving your Payment Method")
     })
 
     setup_intent_id(NULL)
-    removeModal()
+    shiny::removeModal()
   })
 
 }

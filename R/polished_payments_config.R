@@ -21,8 +21,8 @@
 #' polished_payments_config(
 #'   stripe_secret_key = "<your Stripe secret API key>",
 #'   stripe_public_key = "<your Stripe publishable key>",
-#'   prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
-#'   free_trial_days = 30,
+#'   stripe_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
+#'   trial_period_days = 30,
 #'   free_roles = "free_user"
 #' )
 #'

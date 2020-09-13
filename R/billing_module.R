@@ -7,9 +7,9 @@ billing_module_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    tags$style(stringr::str_interp("
-      #${ns('invoices_table')} th,
-      #${ns('invoices_table')} td {
+    tags$style(paste0("
+      #", ns('invoices_table'), " th,
+      #", ns('invoices_table'), " td {
         text-align: center;
       }
     ")),
@@ -25,7 +25,7 @@ billing_module_ui <- function(id) {
           ),
           tags$div(
             style = "display: inline-block",
-            tags$h4(textOutput(ns("plan_name_out")))
+            tags$h4(shiny::textOutput(ns("plan_name_out")))
           ),
           tags$hr(style = "margin: 0;")
         ),
@@ -58,11 +58,11 @@ billing_module_ui <- function(id) {
           id = ns("has_trial"),
           tags$div(
             style = "width: 150px; display: inline-block;",
-            h4(tags$strong("Trial End"))
+            tags$h4(tags$strong("Trial End"))
           ),
           tags$div(
             style = "display: inline-block",
-            h4(textOutput(ns("trial_end_out")))
+            tags$h4(textOutput(ns("trial_end_out")))
           ),
           tags$hr(style = "margin: 0;")
         ),
@@ -97,7 +97,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                h4(textOutput(ns("name_out")))
+                tags$h4(textOutput(ns("name_out")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -163,18 +163,18 @@ billing_module_ui <- function(id) {
           shinyjs::hidden(tags$div(
             id = ns("enable_billing_button"),
             class = "text-center",
-            h3("Billing is not enabled"),
-            br(),
+            tags$h3("Billing is not enabled"),
+            tags$br(),
             shiny::actionButton(
               ns("enable_billing"),
               "Enable Billing",
               class = "btn-primary btn-lg",
               style = "color: #FFF"
             ),
-            br(),
-            br(),
-            br(),
-            br()
+            tasg$br(),
+            tags$br(),
+            tags$br(),
+            tags$br()
           ))
         )
       )
@@ -186,7 +186,7 @@ billing_module_ui <- function(id) {
         DT::DTOutput(ns("invoices_table"))
       )
     ),
-    br(), br(), br(),
+    tags$br(), tags$br(), tags$br(),
     credit_card_module_ui(
       ns("enable_billing")
     ),
@@ -199,10 +199,18 @@ billing_module_ui <- function(id) {
 
 #' billing module
 #'
-#' @param app_url the url of the app
-#' @param sub_infor the subscription information
+#'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param sub_info the subscription information
 #'
 #' @importFrom dplyr %>% select mutate
+#' @importFrom DT renderDT datatable
+#' @importFrom jsonlite fromJSON
+#' @importFrom shiny callModule req showModal modalDialog modalButton removeModal observeEvent renderPrint renderText observe reactive
+#' @importFrom htmltools tags HTML
+#' @importFrom httr DELETE PUT GET content status_code
 #'
 billing_module <- function(input, output, session, sub_info) {
   ns <- session$ns
@@ -213,12 +221,12 @@ billing_module <- function(input, output, session, sub_info) {
     req(sub_info())
     subscription_name <- sub_info()$nickname
 
-    showModal(
+    shiny::showModal(
       shiny::modalDialog(
         title = "Cancel Subscription",
         footer = list(
-          modalButton("Cancel"),
-          actionButton(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(
             ns("submit_cancel"),
             "Submit",
             class = "btn-danger",
@@ -227,23 +235,23 @@ billing_module <- function(input, output, session, sub_info) {
         ),
         size = "m",
         easyClose = TRUE,
-        div(
+        tags$div(
           class = "text-center",
-          br(),
-          h3(
+          tags$br(),
+          tags$h3(
             style = "line-height: 1.5",
-            HTML(paste0(
+            htmltools::HTML(paste0(
               'Are you sure you want to cancel the subscription ', tags$b(subscription_name), '?'
             ))
           ),
-          br(), br()
+          tags$br(), tags$br()
         )
       )
     )
   })
 
-  observeEvent(input$submit_cancel, {
-    req(sub_info())
+  shiny::observeEvent(input$submit_cancel, {
+    shiny::req(sub_info())
 
     billing <- session$userData$billing()
     subscription <- sub_info()
@@ -305,14 +313,10 @@ billing_module <- function(input, output, session, sub_info) {
       shinyFeedback::showToast("error", "Error Cancelling Subscription")
     })
 
-    removeModal()
+    shiny::removeModal()
   })
 
-  output$session_data <- renderPrint({
-    checkout_session_data_out()
-  })
-
-  observeEvent(session$userData$billing(), {
+  shiny::observeEvent(session$userData$billing(), {
     billing <- session$userData$billing()
 
     if (is.na(billing$stripe_subscription_id)) {
@@ -324,20 +328,20 @@ billing_module <- function(input, output, session, sub_info) {
     }
   })
 
-  output$plan_name_out <- renderText({
+  output$plan_name_out <- shiny::renderText({
     billing <- session$userData$billing()
 
     if (is.na(billing$stripe_subscription_id)) {
       out <- "No Plan"
     } else {
-      req(sub_info())
+      shiny::req(sub_info())
       out <- sub_info()$nickname
     }
 
     out
   })
 
-  output$plan_amount_out <- renderText({
+  output$plan_amount_out <- shiny::renderText({
     billing <- session$userData$billing()
 
     if (is.na(billing$stripe_subscription_id)) {
@@ -371,13 +375,13 @@ billing_module <- function(input, output, session, sub_info) {
     out
   })
 
-  output$account_created_out <- renderText({
+  output$account_created_out <- shiny::renderText({
     billing <- session$userData$billing()
 
     as.character(as.Date(billing$created_at))
   })
 
-  observe({
+  shiny::observe({
     if (is.null(sub_info()$trial_end)) {
       shinyjs::hideElement("has_trial")
     } else {
@@ -392,7 +396,7 @@ billing_module <- function(input, output, session, sub_info) {
   })
 
   # get payment method information for display to user
-  payment_methods <- reactive({
+  payment_methods <- shiny::reactive({
     req(sub_info())
     billing <- session$userData$billing()
     req(!is.na(billing$stripe_subscription_id))
@@ -451,34 +455,34 @@ billing_module <- function(input, output, session, sub_info) {
 
 
   # billing information outputs -----------
-  output$name_out <- renderText({
+  output$name_out <- shiny::renderText({
     req(payment_methods())
 
     payment_methods()$name
   })
 
-  output$postal_code <- renderText({
+  output$postal_code <- shiny::renderText({
     req(payment_methods())
     payment_methods()$address$postal_code
   })
 
   # credit card output --------------------
-  output$card_brand_out <- renderText({
+  output$card_brand_out <- shiny::renderText({
     req(payment_methods())
     payment_methods()$card_brand
   })
 
-  output$last_4_out <- renderText({
+  output$last_4_out <- shiny::renderText({
     req(payment_methods())
     paste0("XXXX-XXXX-XXXX-", payment_methods()$card_last4)
   })
 
-  output$card_exp_out <- renderText({
+  output$card_exp_out <- shiny::renderText({
     req(payment_methods())
     paste0(payment_methods()$exp_month, "/", payment_methods()$exp_year)
   })
 
-  invoices_table_prep <- reactive({
+  invoices_table_prep <- shiny::reactive({
     # Trigger after a subscription change
     session$userData$sub_info_trigger()
 
@@ -503,7 +507,7 @@ billing_module <- function(input, output, session, sub_info) {
     )
 
     dat$data %>%
-      dplyr::select(period_start, period_end, amount_due, amount_paid, amount_remaining) %>%
+      dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
       dplyr::mutate(
         amount_due = amount_due / 100,
         amount_paid = amount_paid / 100,
@@ -543,18 +547,18 @@ billing_module <- function(input, output, session, sub_info) {
       DT::formatCurrency(3:5)
   })
 
-  callModule(
+  shiny::callModule(
     credit_card_module,
     "enable_billing",
     open_modal_trigger = reactive({input$enable_billing}),
-    disclaimer_text = p(
+    disclaimer_text = tags$p(
       class = "text-center",
       "Your subscription payments will be paid using the above credit card."
     ),
     sub_info = sub_info
   )
 
-  callModule(
+  shiny::callModule(
     credit_card_module,
     "change_credit_card",
     open_modal_trigger = reactive({input$update_billing_info}),

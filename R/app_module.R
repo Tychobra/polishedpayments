@@ -21,7 +21,6 @@
 #'
 #' @return the UI for the "Admin Panel"
 #'
-#' @noRd
 app_module_ui <- function(
   id,
   custom_ui = NULL,
@@ -132,17 +131,16 @@ app_module_ui <- function(
 #' @export
 #'
 #' @importFrom httr GET POST status_code content
-#' @importFrom shiny callModule observeEvent reactiveVal reactive
-#' @importFrom polished remove_query_string
+#' @importFrom shiny callModule observeEvent reactiveVal reactive req
+#' @importFrom polished profile_module remove_query_string
 #' @importFrom shinyFeedback showToast
 #'
-#' @noRd
 #'
 app_module <- function(input, output, session) {
   ns <- session$ns
 
   shiny::callModule(
-    profile_module,
+    polished::profile_module,
     "profile"
   )
 
@@ -372,7 +370,7 @@ app_module <- function(input, output, session) {
   session$userData$sub_info_trigger <- shiny::reactiveVal(0)
   ### GET USER'S SUBSCRIPTION ###
   sub_info <- shiny::reactive({
-    req(session$userData$billing())
+    shiny::req(session$userData$billing())
     session$userData$sub_info_trigger()
 
     out <- NULL
