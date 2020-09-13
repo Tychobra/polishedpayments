@@ -17,12 +17,13 @@ Imports:
     dbplyr,
     htmltools,
     httr,
+    jsonlite,
+    polished,
     shiny,
     shinydashboard,
     shinydashboardPlus,
     shinyFeedback,
-    shinyjs,
-    polished
+    shinyjs
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

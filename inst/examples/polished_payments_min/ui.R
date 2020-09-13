@@ -41,7 +41,10 @@ ui <- fluidPage(
       h2("Stripe Subscription"),
       verbatimTextOutput("polished_subscription")
     )
-  )
+  ),
+
+
+  free_trial_banner_module_ui("trial_banner")
 )
 
 secure_ui(
@@ -52,10 +55,9 @@ secure_ui(
     logo_top = tags$div(
       style = "width: 300px; max-width: 100%; color: #5469d4;",
       class = "text-center",
-      h1("Polished", style = "margin-bottom: 0; margin-top: 30px;"),
+      h1("Polished", style = "margin-bottom: 0; margin-top: 20px;"),
       h1("Payments", style = "margin-bottom: 0; margin-top: 10px;"),
-      h1("Demo", style = "margin-bottom: 15px; margin-top: 10px;"),
-      br()
+      h1("Demo", style = "margin-bottom: 15px; margin-top: 10px;")
     ),
     background_image = "background_image.png"
   ),

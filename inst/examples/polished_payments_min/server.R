@@ -36,6 +36,11 @@ server <- function(input, output, session) {
   }, once = TRUE)
 
 
+  callModule(
+    free_trial_banner_module,
+    "trial_banner"
+  )
+
 }
 
 secure_server(
