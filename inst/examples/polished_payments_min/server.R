@@ -24,22 +24,60 @@ server <- function(input, output, session) {
 
   observeEvent(session$userData$subscription(), {
 
-    output$polished_user <- renderPrint({
-      session$userData$user()
+    polished_user_prep <- reactive({
+      hold_user <- session$userData$user()
+
+      data.frame(
+        name = names(hold_user),
+        value = unlist(hold_user, use.names = FALSE)
+      )
     })
 
-    output$polished_subscription <- renderPrint({
-      session$userData$subscription()
+    output$polished_user <- DT::renderDT({
+      out <- polished_user_prep()
+
+      DT::datatable(
+        out,
+        rownames = FALSE,
+        selection = "none",
+        options = list(
+          dom = "t",
+          ordering = FALSE
+        )
+      )
+    })
+
+    polished_subscription_prep <- reactive({
+      hold_sub <- session$userData$subscription()
+
+      data.frame(
+        name = names(hold_sub),
+        value = unlist(hold_sub, use.names = FALSE)
+      )
+    })
+
+    output$polished_subscription <- DT::renderDT({
+      out <- polished_subscription_prep()
+
+      DT::datatable(
+        out,
+        rownames = FALSE,
+        selection = "none",
+        options = list(
+          dom = "t",
+          ordering = FALSE
+        )
+      )
     })
 
     waiter_hide()
+
+    callModule(
+      free_trial_banner_module,
+      "trial_banner"
+    )
+
   }, once = TRUE)
-
-
-  callModule(
-    free_trial_banner_module,
-    "trial_banner"
-  )
 
 }
 

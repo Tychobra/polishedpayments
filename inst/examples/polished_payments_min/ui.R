@@ -1,7 +1,7 @@
 
 ui <- fluidPage(
   waiter::use_waiter(),
-  waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
+  waiter::waiter_show_on_load(),
   fluidRow(
     column(
       12,
@@ -31,15 +31,13 @@ ui <- fluidPage(
   fluidRow(
     column(
       width = 6,
-      class = "text-center",
-      h2("Authenticated User"),
-      verbatimTextOutput("polished_user")
+      h2("Polished User"),
+      DT::DTOutput("polished_user")
     ),
     column(
       width = 6,
-      class = "text-center",
       h2("Stripe Subscription"),
-      verbatimTextOutput("polished_subscription")
+      DT::DTOutput("polished_subscription")
     )
   ),
 
