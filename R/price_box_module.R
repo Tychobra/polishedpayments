@@ -65,10 +65,11 @@ price_box_module <- function(input, output, session,
 ) {
   ns <- session$ns
 
-  plan_data <- reactiveVal(NULL)
 
-  observe({
 
+  plan_data <- reactive({
+
+    out <- NULL
     tryCatch({
 
       res <- httr::GET(
@@ -86,7 +87,7 @@ price_box_module <- function(input, output, session,
         stop(paste0("unable to find Stripe plan ", plan_id), call. = FALSE)
       }
 
-      plan_data(res_content)
+      out <- res_content
 
     }, error = function(err) {
       print(err)
@@ -97,6 +98,7 @@ price_box_module <- function(input, output, session,
       waiter::waiter_hide()
     }
 
+    out
   })
 
   output$plan_name <- renderText({
