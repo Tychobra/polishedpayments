@@ -89,7 +89,7 @@ plan_column_module <- function(input, output, session,
     })
 
     if (isTRUE(hide_waiter)) {
-      #waiter::waiter_hide()
+      waiter::waiter_hide()
     }
 
     out
