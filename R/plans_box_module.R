@@ -1,5 +1,5 @@
 #' @noRd
-pricing_module_ui <- function(id) {
+plans_box_module_ui <- function(id) {
   ns <- NS(id)
 
   all_prices <- getOption("pp")$prices
@@ -24,22 +24,18 @@ pricing_module_ui <- function(id) {
     price_box_width <- 3
   }
 
-  shiny::fluidRow(
-    style = "margin-top: 100px",
+  shinydashboard::box(
+    title = "Plans",
+    width = 12,
     class = "text-center",
+    background = "navy",
     gutter,
     lapply(all_prices, function(price) {
-      price_box_module_ui(
+      plan_column_module_ui(
         ns(price),
         width = price_box_width
       )
-    }),
-    column(
-      12,
-      br(),
-      br(),
-      "All prices are in USD and must be paid with a valid credit card. Taxes may apply."
-    )
+    })
   )
 }
 
@@ -47,7 +43,7 @@ pricing_module_ui <- function(id) {
 
 
 #' @noRd
-pricing_module <- function(input, output, session, sub_info) {
+plans_box_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
   sel_plan <- reactiveVal(NULL)
@@ -68,7 +64,7 @@ pricing_module <- function(input, output, session, sub_info) {
   lapply(seq_along(all_pricing_plans), function(i) {
 
     callModule(
-      price_box_module,
+      plan_column_module,
       id = all_pricing_plans[i],
       plan_id = all_pricing_plans[i],
       sub_info = sub_info,

@@ -48,7 +48,7 @@ app_module_ui <- function(
     sidebar <- shinydashboard::dashboardSidebar(
       shinydashboard::sidebarMenu(
         id = ns("sidebar_menu"),
-        shinydashboard::menuItem("Pricing", tabName = ns("pricing"), icon = icon("usd")),
+        #shinydashboard::menuItem("Pricing", tabName = ns("pricing"), icon = icon("usd")),
         shinydashboard::menuItem("Billing", tabName = ns("billing"), icon = icon("credit-card"))
       )
     )
@@ -70,10 +70,10 @@ app_module_ui <- function(
 
   if (is.null(custom_ui$tab_items)) {
     tab_items <- shinydashboard::tabItems(
-      shinydashboard::tabItem(
-        tabName = ns("pricing"),
-        pricing_module_ui(ns("pricing"))
-      ),
+      #shinydashboard::tabItem(
+      #  tabName = ns("pricing"),
+      #  pricing_module_ui(ns("pricing"))
+      #),
       shinydashboard::tabItem(
         tabName = ns("billing"),
         billing_module_ui(ns("billing"))
@@ -81,10 +81,10 @@ app_module_ui <- function(
     )
   } else {
     tab_items <- shinydashboard::tabItems(
-      shinydashboard::tabItem(
-        tabName = ns("pricing"),
-        pricing_module_ui(ns("pricing"))
-      ),
+      #shinydashboard::tabItem(
+      #  tabName = ns("pricing"),
+      #  pricing_module_ui(ns("pricing"))
+      #),
       shinydashboard::tabItem(
         tabName = ns("billing"),
         billing_module_ui(ns("billing"))
@@ -104,8 +104,6 @@ app_module_ui <- function(
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
-    waiter::use_waiter(),
-    waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
 
     tab_items
   )
@@ -417,11 +415,6 @@ app_module <- function(input, output, session) {
     out
   })
 
-  shiny::callModule(
-    pricing_module,
-    "pricing",
-    sub_info = sub_info
-  )
   shiny::callModule(
     billing_module,
     "billing",

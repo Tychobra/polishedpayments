@@ -80,6 +80,10 @@ billing_module_ui <- function(id) {
     ),
 
 
+    fluidRow(
+      plans_box_module_ui(ns("my_plans"))
+    ),
+
 
     tags$div(
       id = ns("billing_info_box"),
@@ -328,6 +332,7 @@ billing_module <- function(input, output, session, sub_info) {
     }
   })
 
+
   output$plan_name_out <- shiny::renderText({
     billing <- session$userData$billing()
 
@@ -394,6 +399,14 @@ billing_module <- function(input, output, session, sub_info) {
     hold <- sub_info()
     as.character(Sys.Date() + hold$trial_days_remaining)
   })
+
+
+  callModule(
+    plans_box_module,
+    "my_plans",
+    sub_info = sub_info
+  )
+
 
   # get payment method information for display to user
   payment_methods <- shiny::reactive({

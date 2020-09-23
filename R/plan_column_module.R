@@ -1,6 +1,6 @@
 
 
-price_box_module_ui <- function(id, width) {
+plan_column_module_ui <- function(id, width) {
   ns <- shiny::NS(id)
 
   htmltools::tagList(
@@ -10,44 +10,38 @@ price_box_module_ui <- function(id, width) {
       br(),
       br(),
       br(),
-      h1(textOutput(ns("price"))),
+      h1(style="color: #000", textOutput(ns("price_out"))),
+      br(),
+      br(),
+      br(),
+      br(),
       br(),
       br(),
       div(
         id = ns("sign_up_div"),
-        br(),
-        br(),
-        br(),
         actionButton(
           ns("sign_up"),
           "Sign Up Now",
           class = "btn-primary btn-lg",
-          style = "color: #FFF; width: 100%; margin-top: 55px;",
+          style = "color: #FFF; width: 100%;",
         )
       ),
       shinyjs::hidden(div(
         id = ns("change_plan_div"),
-        br(),
-        br(),
-        br(),
         actionButton(
           ns("change_plan"),
           "Change Plan",
           class = "btn-default btn-lg",
-          style = "width: 100%; margin-top: 55px;",
+          style = "width: 100%;",
         )
       )),
       shinyjs::hidden(
         actionButton(
           ns("your_plan"),
-          label = tagList(
-            div(style = "padding-top: 10px;", "Your Plan"),
-            div(style = "padding-bottom: 10px;", "Go To App")
-          ),
-          class = "btn btn-primary",
+          label = "Your Plan",
+          class = "btn btn-primary btn-lg",
           style = "
             width: 100%;
-            font-size: 45px;
             color: #FFF;
           "
         )
@@ -57,7 +51,7 @@ price_box_module_ui <- function(id, width) {
   )
 }
 
-price_box_module <- function(input, output, session,
+plan_column_module <- function(input, output, session,
   plan_id,
   sub_info,
   disclaimer_text = "I am a disclaimer",
@@ -95,7 +89,7 @@ price_box_module <- function(input, output, session,
     })
 
     if (isTRUE(hide_waiter)) {
-      waiter::waiter_hide()
+      #waiter::waiter_hide()
     }
 
     out
@@ -105,7 +99,7 @@ price_box_module <- function(input, output, session,
     plan_data()$nickname
   })
 
-  output$price <- renderText({
+  output$price_out <- renderText({
     hold_plan <- plan_data()
 
     paste0(
@@ -248,11 +242,11 @@ price_box_module <- function(input, output, session,
 
   }, ignoreInit = TRUE)
 
-  observeEvent(input$your_plan, {
-    # to to the Shiny app
-    polished::remove_query_string()
-    session$reload()
-  })
+  #observeEvent(input$your_plan, {
+  #  # to to the Shiny app
+  #  polished::remove_query_string()
+  #  session$reload()
+  #})
 
 
   invisible()
