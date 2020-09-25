@@ -4,14 +4,10 @@
 \alias{app_module}
 \title{The server logic for the "Admin Panel" 'shinydashboard'}
 \usage{
-app_module(input, output, session)
+app_module(id)
 }
 \arguments{
-\item{input}{the Shiny server input}
-
-\item{output}{the Shiny server output}
-
-\item{session}{the Shiny server session}
+\item{id}{the module id}
 }
 \description{
 The 'shiny' module server logic for the Admin Panel.
