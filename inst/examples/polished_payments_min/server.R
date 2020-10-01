@@ -13,12 +13,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$go_to_payments, {
-    shiny::updateQueryString(
-      queryString = "?page=account",
-      session = session,
-      mode = "replace"
-    )
-    session$reload()
+    polishedpayments::go_to_account(session)
   })
 
 
