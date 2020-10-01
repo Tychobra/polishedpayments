@@ -1,5 +1,5 @@
 #'
-#' accountPageTrigger
+#' go_to_account
 #'
 #' trigger event to redirect user to Account (payments) page,
 #' typically used in an `observeEvent`
@@ -11,7 +11,7 @@
 #' @export
 #'
 
-accountPageTrigger <- function(
+go_to_account <- function(
   session = shiny::getDefaultReactiveDomain()
 ) {
 
