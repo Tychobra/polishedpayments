@@ -5,7 +5,7 @@
 #'
 #' If the user has a subscription that is either in it's free trial period, or the
 #' user has set up a payment method, then allow the user to continue on to the
-#' app.  If they do user does not have a subscription, set them up with the default
+#' app.  If the user does not have a subscription, set them up with the default
 #' subscription.  If the user has a subscription in which the free trial has expired,
 #' but they have not yet enabled a payment method, then redirect them to their
 #' account page where they can set up their subscription.
