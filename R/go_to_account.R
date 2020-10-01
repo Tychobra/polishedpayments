@@ -16,9 +16,9 @@ go_to_account <- function(
 ) {
 
   shiny::updateQueryString(
-    queryString = "?page=test",
+    queryString = "?page=account",
     session = session,
-    mode = "replace"
+    mode = "push"
   )
 
   session$reload()
