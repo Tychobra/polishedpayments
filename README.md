@@ -4,8 +4,6 @@
 
 R package to easily add a [Stripe](https://stripe.com/) subscription with multiple price tiers to a Shiny app using the [polished R package](https://github.com/Tychobra/polished).
 
-# Don't use this yet.  Package is still undocumented and in flux. 
-
 ### Installation
 
 ```
