@@ -1,6 +1,6 @@
 # Polished Payments
 
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 
 R package to easily add a [Stripe](https://stripe.com/) subscription with multiple price tiers to a Shiny app using the [polished R package](https://github.com/Tychobra/polished).
 
@@ -33,8 +33,6 @@ remotes::install_github("tychobra/polishedpayments")
         stripe_public_key = <stripe_public_key>,
         stripe_prices = <stripe_price(s)>,
         trial_period_days = <stripe_trial_period_days>,
-        # Assign 'User Role(s)' with 'polished' to users that don't require payment
-        #     and supply the name of the role(s) to the 'free_roles' argument below
         free_roles = <polished_role_for_free_users>
       )
       ```
@@ -69,10 +67,7 @@ remotes::install_github("tychobra/polishedpayments")
       
     - **NOTE:** This function should be placed at the top of your `server` function  
   
-7. Add custom event to redirect user to 'Account' page with `go_to_account()`  
-
-    - This is typically used inside an `observeEvent` with a button or link to trigger the event  
-
+7. (Optional) Add button or link to redirect user to 'Account' page with `go_to_account()`  
 
 - Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
 
