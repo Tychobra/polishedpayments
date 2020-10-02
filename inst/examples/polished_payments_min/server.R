@@ -13,7 +13,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$go_to_payments, {
-    polishedpayments::go_to_account(session)
+    polishedpayments::go_to_account()
   })
 
 
