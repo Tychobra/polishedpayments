@@ -416,41 +416,46 @@ billing_module <- function(input, output, session, sub_info) {
 
     default_payment_method <- sub_info()$default_payment_method
 
-    res <- httr::GET(
-      paste0("https://api.stripe.com/v1/payment_methods/", default_payment_method),
-      encode = "form",
-      httr::authenticate(
-        user = getOption("pp")$keys$secret,
-        password = ""
+    if (is.na(default_payment_method)) {
+      out <- NULL
+    } else {
+      res <- httr::GET(
+        paste0("https://api.stripe.com/v1/payment_methods/", default_payment_method),
+        encode = "form",
+        httr::authenticate(
+          user = getOption("pp")$keys$secret,
+          password = ""
+        )
       )
-    )
+
+      dat <- jsonlite::fromJSON(
+        httr::content(res, "text", encoding = "UTF-8")
+      )
+
+      if (!identical(httr::status_code(res), 200L)) {
+        print("error getting payment information")
+        print(dat)
+        return(NULL)
+      }
 
 
-    dat <- jsonlite::fromJSON(
-      httr::content(res, "text", encoding = "UTF-8")
-    )
-
-    if (!identical(httr::status_code(res), 200L)) {
-      print("error getting payment information")
-      print(dat)
-      return(NULL)
+      out <- list(
+        "name" = dat$billing_details$name,
+        "address" = list(
+          "city" = dat$billing_details$address$city,
+          "line1" = dat$billing_details$address$line1,
+          "line2" = dat$billing_details$address$line2,
+          "postal_code" = dat$billing_details$address$postal_code,
+          "state" = dat$billing_details$address$state
+        ),
+        "card_brand" = dat$card$brand,
+        "card_last4" = dat$card$last4,
+        "exp_month" = dat$card$exp_month,
+        "exp_year" = dat$card$exp_year
+      )
     }
 
-
-    list(
-      "name" = dat$billing_details$name,
-      "address" = list(
-        "city" = dat$billing_details$address$city,
-        "line1" = dat$billing_details$address$line1,
-        "line2" = dat$billing_details$address$line2,
-        "postal_code" = dat$billing_details$address$postal_code,
-        "state" = dat$billing_details$address$state
-      ),
-      "card_brand" = dat$card$brand,
-      "card_last4" = dat$card$last4,
-      "exp_month" = dat$card$exp_month,
-      "exp_year" = dat$card$exp_year
-    )
+    out
   })
 
   observeEvent(payment_methods(), {
