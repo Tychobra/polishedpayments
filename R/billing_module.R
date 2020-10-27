@@ -229,10 +229,10 @@ billing_module <- function(input, output, session, sub_info) {
       shiny::modalDialog(
         title = "Cancel Subscription",
         footer = list(
-          shiny::modalButton("Cancel"),
+          shiny::modalButton("No, Close"),
           shiny::actionButton(
             ns("submit_cancel"),
-            "Submit",
+            "Yes, Submit",
             class = "btn-danger",
             style = "color: #FFF"
           )
@@ -245,7 +245,7 @@ billing_module <- function(input, output, session, sub_info) {
           tags$h3(
             style = "line-height: 1.5",
             htmltools::HTML(paste0(
-              'Are you sure you want to cancel the subscription ', tags$b(subscription_name), '?'
+              'Are you sure you want to cancel the ', tags$b(subscription_name), 'subscription?'
             ))
           ),
           tags$br(), tags$br()
