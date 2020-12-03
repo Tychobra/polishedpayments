@@ -36,17 +36,25 @@ remotes::install_github("tychobra/polishedpayments")
         free_roles = <polished_role_for_free_users>
       )
       ```
+
+5. Wrap your Shiny server in `payments_server()`. e.g.
+
+      ```
+      my_server <- polishedpayments::payments_server(function(input, output, session) (
+        
+        # your custom Shiny app's server logic
+        
+      ))
+      
+      ```
   
-5. Add the "Account" page to your app using `app_module_ui` in `secure_ui` & `app_module` in `secure_server`  
+5. Add the "Account" page to your app using `app_module_ui` in `secure_ui` & `app_module` in `secure_server`   
   
     - **NOTE**: You must use "account" as the `id` for `app_module_ui`  
     
     ```
     # Server
-    polished::secure_server(
-      server,
-      account_module = polishedpayments::app_module
-    )
+    polished::secure_server(my_server, account_module = polishedpayments::app_module)
     
     # UI
     polished::secure_ui(
@@ -55,7 +63,7 @@ remotes::install_github("tychobra/polishedpayments")
     )
     ```
   
-6. Check the user's subscription status with `check_user_subscription()` immediately after they've signed in.  
+The user's subscription status will now be checked before your Shiny's apps server logic runs.  
 
     - Details:  
     
@@ -67,7 +75,7 @@ remotes::install_github("tychobra/polishedpayments")
       
     - **NOTE:** This function should be placed at the top of your `server` function  
   
-7. (Optional) Add button or link to redirect user to 'Account' page with `go_to_account()`  
+6. (Optional) Add button or link to redirect user to 'Account' page with `go_to_account()`  
 
 - Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
 

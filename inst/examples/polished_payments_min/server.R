@@ -2,9 +2,6 @@
 
 server <- function(input, output, session) {
 
-  # check user's subscription status and payment method
-  check_user_subscription()
-
   observeEvent(input$sign_out, {
 
     polished::sign_out_from_shiny()
@@ -76,7 +73,5 @@ server <- function(input, output, session) {
 
 }
 
-secure_server(
-  server,
-  account_module = polishedpayments::app_module
-)
+payments_server(server) %>%
+  secure_server(account_module = polishedpayments::app_module)

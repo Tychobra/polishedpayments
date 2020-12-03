@@ -1,5 +1,6 @@
 library(shiny)
 library(DT)
+library(magrittr)
 library(polished)
 library(polishedpayments)
 library(waiter)
