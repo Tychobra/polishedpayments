@@ -2,7 +2,6 @@
 
 export(app_module)
 export(app_module_ui)
-export(check_user_subscription)
 export(create_stripe_customer)
 export(free_trial_banner_module)
 export(free_trial_banner_module_ui)
