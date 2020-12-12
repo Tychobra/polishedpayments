@@ -63,17 +63,7 @@ remotes::install_github("tychobra/polishedpayments")
     )
     ```
   
-The user's subscription status will now be checked before your Shiny's apps server logic runs.  
-
-    - Details:  
-    
-      - If the user does not have a subscription, set them up with the default subscription.  
-      
-      - If the user has a subscription that is either in it's free trial period, or the user has set up a payment method, then allow the user to continue on to the app.   
-      
-      - If the user has a subscription in which the free trial has expired, but they have not yet enabled a payment method, then redirect them to their account page where they can set up their subscription.   
-      
-    - **NOTE:** This function should be placed at the top of your `server` function  
+The user's subscription status will now be checked before your Shiny's apps server logic runs.  If the user does not have a subscription, `polishedpayments` will set them up with the default subscription.  If the user has a subscription that is either in it's free trial period, or the user has set up a payment method, then `polishedpayments` will allow the user to continue on to the app.   If the user has a subscription in which the free trial has expired, but they have not yet enabled a payment method, then `polishedpayments` will redirect them to their account page where they can set up their subscription.   
   
 6. (Optional) Add button or link to redirect user to 'Account' page with `go_to_account()`  
 
