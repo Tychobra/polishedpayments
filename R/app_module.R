@@ -89,8 +89,8 @@ app_module_ui <- function(
 
   body <- shinydashboard::dashboardBody(
     tags$head(
-      tags$link(rel = "shortcut icon", href = "images/alpha-arch-logo-square.png"),
-      tags$script(src="https://js.stripe.com/v3"),
+      tags$link(rel = "shortcut icon", href = "polishedpayments/images/polished_logo_transparent.png"),
+      tags$script(src = "https://js.stripe.com/v3"),
       tags$script(paste0("var stripe = Stripe('", stripe_key_public, "');")),
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
