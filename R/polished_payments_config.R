@@ -5,8 +5,8 @@
 #'
 #' @param stripe_secret_key the Stripe secret key
 #' @param stripe_public_key the Stripe publishable key
-#' @param prices a character vector of Stripe prices for your subscription.  e.g. monthly and
-#' yearly pricing options.
+#' @param stripe_prices an unnamed character vector of Stripe price ids for your subscription.  e.g. monthly and
+#' yearly pricing options.  A Stripe price id looks like this "price_64t6gq76vr78sdhf".
 #' @param trial_period_days the number of days to offer for a free trial period.  All pricing options
 #' will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.
 #' @param free_roles Polished user roles that can bypass having to set up a aubscription and get free
