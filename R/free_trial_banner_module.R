@@ -43,7 +43,7 @@ free_trial_banner_module_ui <- function(id) {
             style = "color: white;",
             "You have ",
             tags$b(
-              textOutput(ns("trial_days_remaining_out"), inline = TRUE)
+              shiny::textOutput(ns("trial_days_remaining_out"), inline = TRUE)
             ),
             " days remaining in your free trial!"
           ),

@@ -7,7 +7,7 @@
 payments_server(server)
 }
 \arguments{
-\item{session}{the Shiny server function}
+\item{server}{the Shiny server function}
 }
 \description{
 Wrap your Shiny server in this function to add polished payments to your Shiny

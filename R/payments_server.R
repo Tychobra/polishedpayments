@@ -7,7 +7,7 @@
 #' Wrap your Shiny server in this function to add polished payments to your Shiny
 #' server before your custom Shiny app's server logic runs.
 #'
-#' @param session the Shiny server function
+#' @param server the Shiny server function
 #'
 #' @importFrom shiny getDefaultReactiveDomain observeEvent
 #' @importFrom httr GET authenticate content status_code

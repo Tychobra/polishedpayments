@@ -72,7 +72,7 @@ get_stripe_subscription <- function(
 
 
 
-#' noRd
+#' @noRd
 get_stripe_customer <- function(customer_id) {
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/customers/", customer_id),

@@ -1,6 +1,6 @@
 Package: polishedpayments
 Type: Package
-Title: Easily add a Stripe subscription to your Shiny app.
+Title: Easily add a Stripe subscription to your Shiny app
 Version: 0.0.0.9000
 Authors@R: person("Andy", "Merlino", email = "andy.merlino@tychobra.com", role = c("aut", "cre"))
 Maintainer: Andy Merlino <andy.merlino@tychobra.com>

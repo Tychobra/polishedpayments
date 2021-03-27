@@ -1,34 +1,39 @@
 
-
+#' @noRd
+#'
+#' @importFrom htmltools tags tagList
+#' @importFrom shiny actionButton
+#' @importFrom shinyjs hidden
+#' @importFrom shinydashboard box
 plan_column_module_ui <- function(id, width) {
   ns <- shiny::NS(id)
 
   htmltools::tagList(
     shinydashboard::box(
       width = width,
-      title = textOutput(ns("plan_name")),
-      br(),
-      br(),
-      br(),
-      h1(style="color: #000", textOutput(ns("price_out"))),
-      br(),
-      br(),
-      br(),
-      br(),
-      br(),
-      br(),
-      div(
+      title = shiny::textOutput(ns("plan_name")),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$h1(style="color: #000", shiny::textOutput(ns("price_out"))),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$br(),
+      tags$div(
         id = ns("sign_up_div"),
-        actionButton(
+        shiny::actionButton(
           ns("sign_up"),
           "Sign Up Now",
           class = "btn-primary btn-lg",
           style = "color: #FFF; width: 100%;",
         )
       ),
-      shinyjs::hidden(div(
+      shinyjs::hidden(tags$div(
         id = ns("change_plan_div"),
-        actionButton(
+        shiny::actionButton(
           ns("change_plan"),
           "Change Plan",
           class = "btn-default btn-lg",
@@ -36,7 +41,7 @@ plan_column_module_ui <- function(id, width) {
         )
       )),
       shinyjs::hidden(
-        actionButton(
+        shiny::actionButton(
           ns("your_plan"),
           label = "Your Plan",
           class = "btn btn-primary btn-lg",

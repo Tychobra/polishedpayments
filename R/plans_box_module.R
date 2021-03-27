@@ -43,6 +43,9 @@ plans_box_module_ui <- function(id) {
 
 
 #' @noRd
+#'
+#' @importFrom htmltools tags
+#'
 plans_box_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
@@ -50,7 +53,7 @@ plans_box_module <- function(input, output, session, sub_info) {
 
   # highlight the user's subscription if the user is signed up for a subscription
 
-  disclaimer_text = p(
+  disclaimer_text = tags$p(
     class = "text-center",
     "This plan grants you full access to the ", getOption('polished')$app_name_display, " app",
     tags$br(),

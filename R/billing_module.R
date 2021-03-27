@@ -37,7 +37,7 @@ billing_module_ui <- function(id) {
           ),
           tags$div(
             style = "display: inline-block",
-            tags$h4(textOutput(ns("plan_amount_out")))
+            tags$h4(shiny::textOutput(ns("plan_amount_out")))
           ),
           tags$hr(style = "margin: 0;")
         ),
@@ -49,7 +49,7 @@ billing_module_ui <- function(id) {
           ),
           tags$div(
             style = "display: inline-block",
-            tags$h4(textOutput(ns("account_created_out")))
+            tags$h4(shiny::textOutput(ns("account_created_out")))
           ),
           tags$hr(style = "margin: 0;")
         ),
@@ -62,7 +62,7 @@ billing_module_ui <- function(id) {
           ),
           tags$div(
             style = "display: inline-block",
-            tags$h4(textOutput(ns("trial_end_out")))
+            tags$h4(shiny::textOutput(ns("trial_end_out")))
           ),
           tags$hr(style = "margin: 0;")
         ),
@@ -80,7 +80,7 @@ billing_module_ui <- function(id) {
     ),
 
 
-    fluidRow(
+    shiny::fluidRow(
       plans_box_module_ui(ns("my_plans"))
     ),
 
@@ -101,7 +101,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                tags$h4(textOutput(ns("name_out")))
+                tags$h4(shiny::textOutput(ns("name_out")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -113,7 +113,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                tags$h4(textOutput(ns("postal_code")))
+                tags$h4(shiny::textOutput(ns("postal_code")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -125,7 +125,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                tags$h4(textOutput(ns("card_brand_out")))
+                tags$h4(shiny::textOutput(ns("card_brand_out")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -137,7 +137,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                tags$h4(textOutput(ns("last_4_out")))
+                tags$h4(shiny::textOutput(ns("last_4_out")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -149,7 +149,7 @@ billing_module_ui <- function(id) {
               ),
               tags$div(
                 style = "display: inline-block",
-                tags$h4(textOutput(ns("card_exp_out")))
+                tags$h4(shiny::textOutput(ns("card_exp_out")))
               ),
               tags$hr(style = "margin: 0;")
             ),
@@ -209,7 +209,7 @@ billing_module_ui <- function(id) {
 #' @param session the Shiny server session
 #' @param sub_info the subscription information
 #'
-#' @importFrom dplyr %>% select mutate
+#' @importFrom dplyr %>% select mutate .data
 #' @importFrom DT renderDT datatable
 #' @importFrom jsonlite fromJSON
 #' @importFrom shiny callModule req showModal modalDialog modalButton removeModal observeEvent renderPrint renderText observe reactive
@@ -527,11 +527,11 @@ billing_module <- function(input, output, session, sub_info) {
     dat$data %>%
       dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
       dplyr::mutate(
-        amount_due = amount_due / 100,
-        amount_paid = amount_paid / 100,
-        amount_remaining = amount_remaining / 100,
-        period_end = as.Date(as.POSIXct(period_end, origin = "1970-01-01")),
-        period_start = as.Date(as.POSIXct(period_start, origin = "1970-01-01"))
+        amount_due = .data$amount_due / 100,
+        amount_paid = .data$amount_paid / 100,
+        amount_remaining = .data$amount_remaining / 100,
+        period_end = as.Date(as.POSIXct(.data$period_end, origin = "1970-01-01")),
+        period_start = as.Date(as.POSIXct(.data$period_start, origin = "1970-01-01"))
       )
   })
 
@@ -580,7 +580,7 @@ billing_module <- function(input, output, session, sub_info) {
     credit_card_module,
     "change_credit_card",
     open_modal_trigger = reactive({input$update_billing_info}),
-    disclaimer_text = p(
+    disclaimer_text = tags$p(
       class = "text-center",
       "Future subscription payments will be paid using the above credit card."
     ),
