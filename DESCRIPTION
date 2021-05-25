@@ -22,7 +22,6 @@ Imports:
     polished,
     shiny,
     shinydashboard,
-    shinydashboardPlus,
     shinyFeedback,
     shinyjs,
     shinyWidgets,

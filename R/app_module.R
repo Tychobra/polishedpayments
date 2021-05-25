@@ -12,11 +12,10 @@
 #' @export
 #'
 #' @importFrom shiny NS icon
-#' @importFrom shinydashboard dashboardSidebar dashboardBody sidebarMenu menuItem tabItems
+#' @importFrom shinydashboard dashboardSidebar dashboardBody sidebarMenu menuItem tabItems dashboardHeader dashboardPage
 #' @importFrom htmltools HTML tags tagList
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shinyFeedback useShinyFeedback
-#' @importFrom shinydashboardPlus dashboardHeaderPlus dashboardPagePlus
 #' @importFrom polished profile_module_ui
 #'
 #' @return the UI for the "Admin Panel"
@@ -32,7 +31,7 @@ app_module_ui <- function(
 
   stripe_key_public <- getOption("pp")$keys$public
 
-  head <- shinydashboardPlus::dashboardHeaderPlus(
+  head <- shinydashboard::dashboardHeader(
     title = "Payments",
     left_menu = tagList(
       shiny::actionLink(
@@ -101,12 +100,11 @@ app_module_ui <- function(
     tab_items
   )
 
-  shinydashboardPlus::dashboardPagePlus(
+  shinydashboard::dashboardPage(
     head,
     sidebar,
     body,
-    title = "Polished",
-    skin = "black-light"
+    skin = "black"
   )
 }
 
@@ -150,7 +148,8 @@ app_module <- function(id) {
           session$reload()
         } else if (is.null(hold_sub)) {
 
-          shinyWidgets::show_alert(
+          shinyWidgets::sendSweetAlert(
+            session = session,
             title = "Update Subscription",
             text = "Please select a subscription to access the Shiny app.",
             type = "error"
@@ -162,7 +161,8 @@ app_module <- function(id) {
 
           session$reload()
         } else {
-          shinyWidgets::show_alert(
+          shinyWidgets::sendSweetAlert(
+            session = session,
             title = "Update Payment Method",
             text = 'Go to the "Billing" page and enter your credit card information to access the app.',
             type = "error"
@@ -240,12 +240,27 @@ app_module <- function(id) {
               user_uid = hold_user_uid
             )
 
-            # add the subscription to polished
-            stripe_subscription_id <- create_stripe_subscription(
-              customer_id,
-              plan_to_enable = getOption("pp")$prices[[1]],
-              days_remaining = getOption("pp")$trial_period_days
-            )
+
+            if (getOption("pp")$trial_period_days > 0) {
+              # add the subscription to polished
+              stripe_subscription_id <- create_stripe_subscription(
+                customer_id,
+                plan_to_enable = getOption("pp")$prices[[1]],
+                days_remaining = getOption("pp")$trial_period_days
+              )
+            } else {
+              # there is no trial period, and the user has not enabled a payment method,
+              # so we cannot go ahead and set up a subscription.
+              shinyWidgets::sendSweetAlert(
+                session = session,
+                title = "Update Subscription",
+                text = "You must have a subscription to access the Shiny app.",
+                type = "info"
+              )
+              stripe_subscription_id <- NA
+
+            }
+
 
             # add the newly created Stripe customer to the "subscriptions" table
             # send API request and determine the account uid based on the
@@ -289,6 +304,8 @@ app_module <- function(id) {
 
             print(err)
             shinyFeedback::showToast("error", "Error Setting up your account")
+
+            invisible()
           })
 
         } else {
@@ -357,14 +374,18 @@ app_module <- function(id) {
         }
 
 
-        session$userData$billing(as.list(out))
+        if (!identical(length(out), 0L)) {
+          session$userData$billing(as.list(out))
+        }
       }, priority = 10)
 
 
       session$userData$sub_info_trigger <- shiny::reactiveVal(0)
       ### GET USER'S SUBSCRIPTION ###
       sub_info <- shiny::reactive({
-        shiny::req(session$userData$billing())
+        if (is.null(session$userData$billing())) {
+          return(NULL)
+        }
         session$userData$sub_info_trigger()
 
         out <- NULL
