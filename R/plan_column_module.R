@@ -26,7 +26,7 @@ plan_column_module_ui <- function(id, width) {
         id = ns("sign_up_div"),
         shiny::actionButton(
           ns("sign_up"),
-          "Sign Up Now",
+          "Choose Plan",
           class = "btn-primary btn-lg",
           style = "color: #FFF; width: 100%;",
         )
