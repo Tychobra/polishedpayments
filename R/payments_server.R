@@ -116,7 +116,7 @@ payments_server <- function(
           if (is.null(res_content$stripe_subscription_id)) res_content$stripe_subscription_id <- NA
           if (is.null(res_content$free_trial_days_remaining_at_cancel)) res_content$free_trial_days_remaining_at_cancel <- NA
 
-          # if subscription in NA, that means the user has canceled their subscription, so redirect them to the
+          # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
           # account page for them to restart their subscription
           if (is.na(res_content$stripe_subscription_id)) {
             shiny::updateQueryString(

@@ -189,6 +189,7 @@ app_module <- function(id) {
         hold_user_email <- session$userData$user()$email
 
         out <- list()
+        err_out <- NULL
         tryCatch({
 
           # API query to get user's billing information from the "subscriptions" table
@@ -222,13 +223,22 @@ app_module <- function(id) {
 
 
         }, error = function(err) {
+          msg <- 'Error getting subscription info'
+          print(msg)
           print(err)
-          shinyFeedback::showToast('error', 'Error getting subscription info')
+          err_out <<- err$message
+          shinyFeedback::showToast('error', msg)
+          invisible()
         })
 
+        if (!is.null(err_out)) {
+          return()
+        }
 
 
         if (length(out) == 0) {
+
+
           # user does not yet have an entry in the billings table, so this is the
           # first sign in, we will add the user to the users table, create a Stripe
           # account for the user, and add an entry for the user to the billing table
@@ -252,12 +262,6 @@ app_module <- function(id) {
             } else {
               # there is no trial period, and the user has not enabled a payment method,
               # so we cannot go ahead and set up a subscription.
-              shinyWidgets::sendSweetAlert(
-                session = session,
-                title = "Update Subscription",
-                text = "You must have a subscription to access the Shiny app.",
-                type = "info"
-              )
               stripe_subscription_id <- NA
 
             }
@@ -316,44 +320,64 @@ app_module <- function(id) {
           if (is.na(out$stripe_subscription_id) && is.na(out$free_trial_days_remaining_at_cancel)) {
 
             trial_period_days <- getOption("pp")$trial_period_days
+            query_list <- shiny::getQueryString()
 
-            tryCatch({
+            if (trial_period_days <= 0) {
 
-              stripe_subscription_id <- create_stripe_subscription(
-                out$stripe_customer_id,
-                plan_to_enable = getOption("pp")$stripe$prices[[1]],
-                days_remaining = trial_period_days
-              )
-
-              # add newly created subscription to polished db via polished API
-              res <- httr::PUT(
-                url = paste0(getOption("polished")$api_url, "/subscriptions"),
-                encode = "json",
-                body = list(
-                  stripe_subscription_id = stripe_subscription_id,
-                  subscription_uid = out$uid
-                ),
-                httr::authenticate(
-                  user = getOption("polished")$api_key,
-                  password = ""
+              if (!identical(query_list$page, "account")) {
+                # there is no free trial,, so redirect to the account page for them
+                # to choose a subscription and enable billing.
+                shiny::updateQueryString(
+                  queryString = "?page=account",
+                  session = session,
+                  mode = "replace"
                 )
-              )
-
-              if (!identical(httr::status_code(res), 200L)) {
-
-                res_content <- jsonlite::fromJSON(
-                  httr::content(res, "text", encoding = "UTF-8")
-                )
-
-                stop(res_content, call. = FALSE)
+                session$reload()
+              } else {
+                return()
               }
 
 
-              session$userData$billing_trigger(session$userData$billing_trigger() + 1)
-            }, error = function(err) {
-              print(err)
-              shinyFeedback::showToast("error", "Error creating subscription")
-            })
+            } else {
+              tryCatch({
+
+                stripe_subscription_id <- create_stripe_subscription(
+                  out$stripe_customer_id,
+                  plan_to_enable = getOption("pp")$stripe$prices[[1]],
+                  days_remaining = trial_period_days
+                )
+
+                # add newly created subscription to polished db via polished API
+                res <- httr::PUT(
+                  url = paste0(getOption("polished")$api_url, "/subscriptions"),
+                  encode = "json",
+                  body = list(
+                    stripe_subscription_id = stripe_subscription_id,
+                    subscription_uid = out$uid
+                  ),
+                  httr::authenticate(
+                    user = getOption("polished")$api_key,
+                    password = ""
+                  )
+                )
+
+                if (!identical(httr::status_code(res), 200L)) {
+
+                  res_content <- jsonlite::fromJSON(
+                    httr::content(res, "text", encoding = "UTF-8")
+                  )
+
+                  stop(res_content, call. = FALSE)
+                }
+
+
+                session$userData$billing_trigger(session$userData$billing_trigger() + 1)
+              }, error = function(err) {
+                print(err)
+                shinyFeedback::showToast("error", "Error creating subscription")
+              })
+            }
+
           }
 
           # check that Stripe customer does not have any issues and log any potential

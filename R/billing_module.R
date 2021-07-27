@@ -502,39 +502,70 @@ billing_module <- function(input, output, session, sub_info) {
     paste0(payment_methods()$exp_month, "/", payment_methods()$exp_year)
   })
 
+  enpty_invoices_table <- tibble::tibble(
+    period_start = as.Date(character(0)),
+    period_end = as.Date(character(0)),
+    amount_due = double(0),
+    amount_paid = double(0),
+    amount_remaining = double(0)
+  )
+
   invoices_table_prep <- shiny::reactive({
     # Trigger after a subscription change
     session$userData$sub_info_trigger()
 
     billing <- session$userData$billing()
 
-    res <- httr::GET(
-      "https://api.stripe.com/v1/invoices",
-      query = list(
-        customer = billing$stripe_customer_id
-      ),
-      encode = "form",
-      httr::authenticate(
-        user = getOption("pp")$keys$secret,
-        password = ""
-      )
-    )
+    out <- NULL
 
-    httr::stop_for_status(res)
+    if (is.null(billing)) {
+      out <- enpty_invoices_table
+    } else {
+      tryCatch({
+        res <- httr::GET(
+          "https://api.stripe.com/v1/invoices",
+          query = list(
+            customer = billing$stripe_customer_id
+          ),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
+        )
 
-    dat <- jsonlite::fromJSON(
-      httr::content(res, "text", encoding = "UTF-8")
-    )
+        httr::stop_for_status(res)
 
-    dat$data %>%
-      dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
-      dplyr::mutate(
-        amount_due = .data$amount_due / 100,
-        amount_paid = .data$amount_paid / 100,
-        amount_remaining = .data$amount_remaining / 100,
-        period_end = as.Date(as.POSIXct(.data$period_end, origin = "1970-01-01")),
-        period_start = as.Date(as.POSIXct(.data$period_start, origin = "1970-01-01"))
-      )
+        dat <- jsonlite::fromJSON(
+          httr::content(res, "text", encoding = "UTF-8")
+        )
+        if (identical(length(dat$data), 0L)) {
+          out <- enpty_invoices_table
+        } else {
+          out <- dat$data %>%
+            dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
+            dplyr::mutate(
+              amount_due = .data$amount_due / 100,
+              amount_paid = .data$amount_paid / 100,
+              amount_remaining = .data$amount_remaining / 100,
+              period_end = as.Date(as.POSIXct(.data$period_end, origin = "1970-01-01")),
+              period_start = as.Date(as.POSIXct(.data$period_start, origin = "1970-01-01"))
+            )
+        }
+
+      }, error = function(err) {
+
+        msg <- "unable to get invoices"
+        print(msg)
+        print(err)
+        shinyFeedback::showToast("error", msg)
+
+        invisible()
+      })
+    }
+
+
+    out
   })
 
   output$invoices_table <- DT::renderDT({
