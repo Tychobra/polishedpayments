@@ -343,7 +343,7 @@ app_module <- function(id) {
 
                 stripe_subscription_id <- create_stripe_subscription(
                   out$stripe_customer_id,
-                  plan_to_enable = getOption("pp")$stripe$prices[[1]],
+                  plan_to_enable = getOption("pp")$prices[[1]],
                   days_remaining = trial_period_days
                 )
 

@@ -16,7 +16,7 @@ create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaini
 
   post_body <- list(
     "customer" = customer_id,
-    `items[0][plan]` = plan_to_enable
+    `items[0][price]` = plan_to_enable
   )
 
   if (!is.na(default_payment_method)) {
