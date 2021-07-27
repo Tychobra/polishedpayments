@@ -334,6 +334,7 @@ billing_module <- function(input, output, session, sub_info) {
 
 
   output$plan_name_out <- shiny::renderText({
+    req(session$userData$billing())
     billing <- session$userData$billing()
 
     if (is.na(billing$stripe_subscription_id)) {
@@ -347,6 +348,7 @@ billing_module <- function(input, output, session, sub_info) {
   })
 
   output$plan_amount_out <- shiny::renderText({
+    req(session$userData$billing())
     billing <- session$userData$billing()
 
     if (is.na(billing$stripe_subscription_id)) {
