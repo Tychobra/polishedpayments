@@ -39,8 +39,11 @@ payments_server <- function(
         return()
       }
 
+
       tryCatch({
         # otherwise start checking their subscription
+
+        # get any existing subscriptions from Polished API
         res <- httr::GET(
           paste0(getOption("polished")$api_url, "/subscriptions"),
           httr::authenticate(
@@ -53,20 +56,20 @@ payments_server <- function(
           )
         )
 
-        res_content <- jsonlite::fromJSON(
+        sub_db <- jsonlite::fromJSON(
           httr::content(res, "text", encoding = "UTF-8")
         )
 
         if (!identical(httr::status_code(res), 200L)) {
-          print(res_content)
-          stop(res_content, call. = FALSE)
+          print(sub_db)
+          stop("error getting subscription from Polished API", call. = FALSE)
         }
 
 
-
+        sub_db <- api_list_to_df(sub_db)
         # user does not have a subscription, so set up the user up with the
         # default subscription.
-        if (length(res_content) == 0) {
+        if (identical(nrow(sub_db), 0L)) {
 
           # set the user up with the default subscription
           # Step 1: create Stripe customer
@@ -84,7 +87,7 @@ payments_server <- function(
 
 
           # Step 3: add the newly created Stripe customer + subscription to the "subscriptions" table
-          res2 <- httr::POST(
+          post_sub_res <- httr::POST(
             paste0(getOption("polished")$api_url, "/subscriptions"),
             body = list(
               "app_uid" = getOption("polished")$app_uid,
@@ -99,12 +102,12 @@ payments_server <- function(
             )
           )
 
-          res2_content <- jsonlite::fromJSON(
-            httr::content(res, "text", encoding = "UTF-8")
+          post_sub_res_content <- jsonlite::fromJSON(
+            httr::content(post_sub_res, "text", encoding = "UTF-8")
           )
 
-          if (!identical(httr::status_code(res2), 200L)) {
-            print(res_content)
+          if (!identical(httr::status_code(post_sub_res), 200L)) {
+            print(post_sub_res_content)
             stop("Error saving subsciption to db", call. = FALSE)
           }
 
@@ -112,13 +115,9 @@ payments_server <- function(
           session$reload()
         } else {
 
-          # correct possible dropped subscription columns if the subscription exists.
-          if (is.null(res_content$stripe_subscription_id)) res_content$stripe_subscription_id <- NA
-          if (is.null(res_content$free_trial_days_remaining_at_cancel)) res_content$free_trial_days_remaining_at_cancel <- NA
-
           # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
           # account page for them to restart their subscription
-          if (is.na(res_content$stripe_subscription_id)) {
+          if (is.na(sub_db$stripe_subscription_id)) {
             shiny::updateQueryString(
               queryString = "?page=account",
               session = session,
@@ -126,13 +125,12 @@ payments_server <- function(
             )
             session$reload()
           } else {
-            stripe_sub <- get_stripe_subscription(res_content$stripe_subscription_id)
+            stripe_sub <- get_stripe_subscription(sub_db$stripe_subscription_id)
 
             if (stripe_sub$trial_days_remaining > 0 || !is.na(stripe_sub$default_payment_method)) {
+
               # user is either in trial period or they already have a subscription with
               # billing enabled, so let them access the app.
-
-
               session$userData$subscription(list(
                 free_user = FALSE,
                 price_id = stripe_sub$plan_id,
@@ -141,12 +139,11 @@ payments_server <- function(
                 trial_days_remaining = stripe_sub$trial_days_remaining
               ))
 
-
               return()
             } else {
 
               # user's free trial is over and they have not enabled billing, so redirect
-              # to the account page for them to choose a subacription and enable billing.
+              # to the account page for them to choose a subscription and enable billing.
               shiny::updateQueryString(
                 queryString = "?page=account",
                 session = session,
@@ -160,7 +157,7 @@ payments_server <- function(
 
       }, error = function(err) {
 
-        print(err$message)
+        print(err)
 
         if (identical(err$message, "unable to create subscription") || identical(err$message, "subscription canceled")) {
           # you can't create a Stripe subscription until after the Stripe user
