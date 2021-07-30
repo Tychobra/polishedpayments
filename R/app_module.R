@@ -183,7 +183,7 @@ app_module <- function(input, output, session) {
     hold_user_uid <- session$userData$user()$user_uid
     hold_user_email <- session$userData$user()$email
 
-    out <- list()
+    sub_db <- list()
     err_out <- NULL
     tryCatch({
 
@@ -282,7 +282,7 @@ app_module <- function(input, output, session) {
           stop("Error saving subsciption to db", call. = FALSE)
         }
 
-        out <- list(
+        sub_db <- list(
           uid = res_content$uid,
           user_uid = hold_user_uid,
           stripe_customer_id = customer_id,
@@ -290,8 +290,10 @@ app_module <- function(input, output, session) {
         )
 
 
-        out$created_at <- Sys.time()
-        out$free_trial_days_remaining_at_cancel <- NA
+        sub_db$created_at <- Sys.time()
+        sub_db$free_trial_days_remaining_at_cancel <- NA
+
+        sub_db <- tibble::as_tibble(sub_db)
 
       }, error = function(err) {
 
@@ -321,8 +323,6 @@ app_module <- function(input, output, session) {
               mode = "replace"
             )
             session$reload()
-          } else {
-            return()
           }
 
 
