@@ -252,7 +252,7 @@ app_module <- function(input, output, session) {
         } else {
           # there is no trial period, and the user has not enabled a payment method,
           # so we cannot go ahead and set up a subscription.
-          stripe_subscription_id <- NA
+          stripe_subscription_id <- NULL
 
         }
 
@@ -420,7 +420,7 @@ app_module <- function(input, output, session) {
           encode = "json",
           body = list(
             subscription_uid = billing$uid,
-            stripe_subscription_id = NA
+            stripe_subscription_id = NULL
           ),
           httr::authenticate(
             user = getOption("polished")$api_key,
