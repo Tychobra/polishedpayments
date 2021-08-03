@@ -517,7 +517,6 @@ billing_module <- function(input, output, session, sub_info) {
     billing <- session$userData$billing()
 
     out <- NULL
-
     if (is.null(billing)) {
       out <- enpty_invoices_table
     } else {
@@ -539,6 +538,7 @@ billing_module <- function(input, output, session, sub_info) {
         )
 
         if (!identical(httr::status_code(res), 200L)) {
+          print(list(stripe_customer_id = billing$stripe_customer_id))
           stop(dat, call. = FALSE)
         }
 
