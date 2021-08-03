@@ -502,7 +502,7 @@ billing_module <- function(input, output, session, sub_info) {
     paste0(payment_methods()$exp_month, "/", payment_methods()$exp_year)
   })
 
-  enpty_invoices_table <- tibble::tibble(
+  empty_invoices_table <- tibble::tibble(
     period_start = as.Date(character(0)),
     period_end = as.Date(character(0)),
     amount_due = double(0),
@@ -518,7 +518,7 @@ billing_module <- function(input, output, session, sub_info) {
 
     out <- NULL
     if (is.null(billing)) {
-      out <- enpty_invoices_table
+      out <- empty_invoices_table
     } else {
       tryCatch({
         res <- httr::GET(
