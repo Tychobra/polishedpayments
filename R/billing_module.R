@@ -534,11 +534,15 @@ billing_module <- function(input, output, session, sub_info) {
           )
         )
 
-        httr::stop_for_status(res)
-
         dat <- jsonlite::fromJSON(
           httr::content(res, "text", encoding = "UTF-8")
         )
+
+        if (!identical(httr::status_code(res), 200L)) {
+          stop(dat, call. = FALSE)
+        }
+
+
         if (identical(length(dat$data), 0L)) {
           out <- enpty_invoices_table
         } else {
