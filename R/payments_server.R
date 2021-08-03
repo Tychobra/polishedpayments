@@ -12,6 +12,7 @@
 #' @importFrom shiny getDefaultReactiveDomain observeEvent
 #' @importFrom httr GET authenticate content status_code
 #' @importFrom jsonlite fromJSON
+#' @importFrom tibble as_tibble
 #'
 #' @export
 #'
@@ -66,7 +67,7 @@ payments_server <- function(
         }
 
 
-        sub_db <- api_list_to_df(sub_db)
+        sub_db <- tibble::as_tibble(sub_db)
         # user does not have a subscription, so set up the user up with the
         # default subscription.
         if (identical(nrow(sub_db), 0L)) {
@@ -78,13 +79,16 @@ payments_server <- function(
             user_uid = hold_user$user_uid
           )
 
-          # Step 2: Create the Stripe subscription on Stripe
-          stripe_subscription_id <- create_stripe_subscription(
-            customer_id,
-            plan_to_enable = getOption("pp")$prices[[1]],
-            days_remaining = getOption("pp")$trial_period_days
-          )
-
+          if (getOption("pp")$trial_period_days > 0) {
+            # Step 2: Create the Stripe subscription on Stripe
+            stripe_subscription_id <- create_stripe_subscription(
+              customer_id,
+              plan_to_enable = getOption("pp")$prices[1],
+              days_remaining = getOption("pp")$trial_period_days
+            )
+          } else {
+            stripe_subscription_id <- NULL
+          }
 
           # Step 3: add the newly created Stripe customer + subscription to the "subscriptions" table
           post_sub_res <- httr::POST(
