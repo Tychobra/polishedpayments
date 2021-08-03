@@ -36,8 +36,8 @@ polished_payments_config <- function(
   free_roles = character(0)
 ) {
 
-  if (!is.numeric(trail_period_days) && trial_period_days >= 0) {
-    stop("`trail_period_days` must be a number >= 0", call. = FALSE)
+  if (!is.numeric(trial_period_days) && trial_period_days >= 0) {
+    stop("`trial_period_days` must be a number >= 0", call. = FALSE)
   }
 
   options("pp" = list(
