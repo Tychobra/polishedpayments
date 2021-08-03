@@ -6,6 +6,8 @@ R package to easily add a [Stripe](https://stripe.com/) subscription with multip
 
 ### Installation
 
+This package requires the most recent dev version of the {polished} package.  Install it from GitHub using the following command:
+
 ```
 # Install `polished` if you don't already have it
 remotes::install_github("tychobra/polished")
@@ -54,7 +56,10 @@ remotes::install_github("tychobra/polishedpayments")
     
     ```
     # Server
-    polished::secure_server(my_server, account_module = polishedpayments::app_module)
+    polished::secure_server(
+      polishedpayments::payments_server(my_server), 
+      account_module = polishedpayments::app_module
+    )
     
     # UI
     polished::secure_ui(
