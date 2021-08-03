@@ -4,7 +4,7 @@
 \alias{app_module}
 \title{The server logic for the "Admin Panel" 'shinydashboard'}
 \usage{
-app_module(id)
+app_module(input, output, session)
 }
 \arguments{
 \item{id}{the module id}

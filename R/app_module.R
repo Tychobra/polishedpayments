@@ -122,6 +122,7 @@ app_module_ui <- function(
 #' @importFrom shiny callModule observeEvent reactiveVal reactive req moduleServer
 #' @importFrom polished profile_module remove_query_string
 #' @importFrom shinyFeedback showToast
+#' @importFrom tibble as_tibble
 #'
 #'
 app_module <- function(input, output, session) {
@@ -210,7 +211,7 @@ app_module <- function(input, output, session) {
         stop("error getting subscription", call. = FALSE)
       }
 
-      sub_db <- api_list_to_df(sub_db)
+      sub_db <- tibble::as_tibble(sub_db)
 
     }, error = function(err) {
       msg <- 'Error getting subscription info'
