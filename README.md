@@ -57,7 +57,7 @@ remotes::install_github("tychobra/polishedpayments")
     ```
     # Server
     polished::secure_server(
-      polishedpayments::payments_server(my_server), 
+      my_server, 
       account_module = polishedpayments::app_module
     )
     
