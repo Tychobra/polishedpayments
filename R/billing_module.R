@@ -557,7 +557,7 @@ billing_module <- function(input, output, session, sub_info) {
 
 
         if (identical(length(dat$data), 0L)) {
-          out <- enpty_invoices_table
+          out <- empty_invoices_table
         } else {
           out <- dat$data %>%
             dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
