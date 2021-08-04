@@ -194,7 +194,8 @@ app_module <- function(input, output, session) {
         url = paste0(getOption("polished")$api_url, "/subscriptions"),
         query = list(
           app_uid = getOption("polished")$app_uid,
-          user_uid = hold_user_uid
+          user_uid = hold_user_uid,
+          is_live = getOption("pp")$is_live
         ),
         httr::authenticate(
           user = getOption("polished")$api_key,
@@ -265,7 +266,8 @@ app_module <- function(input, output, session) {
             "app_uid" = getOption("polished")$app_uid,
             "user_uid" = hold_user_uid,
             "stripe_customer_id" = customer_id,
-            "stripe_subscription_id" = stripe_subscription_id
+            "stripe_subscription_id" = stripe_subscription_id,
+            "is_live" = getOption("pp")$is_live
           ),
           encode = "json",
           httr::authenticate(

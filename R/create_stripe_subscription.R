@@ -32,7 +32,7 @@ create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaini
 
   # Create the subscription and attach Customer & payment method to newly created subscription
   res <- httr::POST(
-    paste0("https://api.stripe.com/v1/subscriptions"),
+    "https://api.stripe.com/v1/subscriptions",
     body = post_body,
     encode = "form",
     httr::authenticate(

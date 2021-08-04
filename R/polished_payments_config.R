@@ -40,6 +40,15 @@ polished_payments_config <- function(
     stop("`trial_period_days` must be a number >= 0", call. = FALSE)
   }
 
+  # check if Stripe keys are "live" or "test"
+  if (identical(substr(stripe_secret_key, 1, 7), "sk_live")) {
+    is_live <- TRUE
+  } else if (identical(substr(stripe_secret_key, 1, 7), "sk_test")) {
+    is_live <- FALSE
+  } else {
+    stop("invalid Stripe API keys", call. = FALSE)
+  }
+
   options("pp" = list(
     keys = list(
       secret = stripe_secret_key,
@@ -47,6 +56,7 @@ polished_payments_config <- function(
     ),
     prices = stripe_prices,
     trial_period_days = trial_period_days,
-    free_roles = free_roles
+    free_roles = free_roles,
+    is_live = is_live
   ))
 }

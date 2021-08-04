@@ -53,7 +53,8 @@ payments_server <- function(
           ),
           query = list(
             app_uid = getOption("polished")$app_uid,
-            user_uid = session$userData$user()$user_uid
+            user_uid = session$userData$user()$user_uid,
+            is_live = getOption("pp")$is_live
           )
         )
 
@@ -97,7 +98,8 @@ payments_server <- function(
               "app_uid" = getOption("polished")$app_uid,
               "user_uid" = hold_user$user_uid,
               "stripe_customer_id" = customer_id,
-              "stripe_subscription_id" = stripe_subscription_id
+              "stripe_subscription_id" = stripe_subscription_id,
+              "is_live" = getOption("pp")$is_live
             ),
             encode = "json",
             httr::authenticate(
