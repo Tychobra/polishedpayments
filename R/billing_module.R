@@ -604,7 +604,7 @@ billing_module <- function(input, output, session, sub_info) {
         "Period End",
         "Amount Due",
         "Amount Paid",
-        "Amount Remaining"
+        "Unpaid Balance"
       ),
       callback = DT::JS("$( table.table().container() ).addClass( 'table-responsive' ); return table;"),
       selection = "none",
