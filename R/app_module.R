@@ -168,14 +168,14 @@ app_module <- function(input, output, session) {
 
   }, ignoreInit = TRUE)
 
-  # get the user'd billing information from the "billing" table
+  # get the user's billing information from the "billing" table
   session$userData$billing <- reactiveVal(NULL)
   session$userData$billing_trigger <- reactiveVal(0)
 
   # this observe will trigger as soon as the session starts (every time a session starts).
   # It will only trigger once per session. If the user is a new user it will create the user (
   # create a Stripe customer for the user and add a row with the user's Stripe customer ID
-  # to the "billing" table).  If the the user is a returning user, it doesn't do anything
+  # to the "subscriptions" table).  If the the user is a returning user, it doesn't do anything
   # besides trigger the next observe
   observeEvent(list(
     session$userData$user(),

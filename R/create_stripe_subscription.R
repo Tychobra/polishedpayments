@@ -5,8 +5,8 @@
 #' customer before you can create a Stripe subscription.
 #' @param plan_to_enable the Stripe plan to enable.
 #' @param days_remaining the number of free trial days remaining.
-#' @param default_payment_methos the Stripe ID for the default credit card for the Stripe subscription.
-#' Keep as NA if the user has not yet entered their credit card information.
+#' @param default_payment_method the Stripe ID for the default credit card for the Stripe subscription.
+#' Keep as `NA` if the user has not yet entered their credit card information.
 #'
 #' @return the ID of the newly created Stripe subscription
 #'
