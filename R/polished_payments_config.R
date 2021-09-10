@@ -9,10 +9,11 @@
 #' yearly pricing options.  A Stripe price id looks like this "price_64t6gq76vr78sdhf".
 #' @param trial_period_days the number of days to offer for a free trial period.  All pricing options
 #' will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.
-#' @param free_roles Polished user roles that can bypass having to set up a aubscription and get free
+#' @param free_roles Polished user roles that can bypass having to set up a subscription and get free
 #' access to your Shiny app.  This is often used to give certain users (e.g. your beta testers) free
-#' access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role and add that
-#' role to specific users.
+#' access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role
+#' and add that role to specific users, or use the `polished` package's API wrapper functions
+#' (`polished::create_role` & `polished::add_user_role`).
 #'
 #' @export
 #'
