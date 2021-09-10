@@ -114,7 +114,9 @@ app_module_ui <- function(
 #'
 #' The 'shiny' module server logic for the Admin Panel.
 #'
-#' @param id the module id
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
 #'
 #' @export
 #'
