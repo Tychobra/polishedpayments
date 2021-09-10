@@ -7,7 +7,11 @@
 app_module(input, output, session)
 }
 \arguments{
-\item{id}{the module id}
+\item{input}{the Shiny server input}
+
+\item{output}{the Shiny server output}
+
+\item{session}{the Shiny server session}
 }
 \description{
 The 'shiny' module server logic for the Admin Panel.
