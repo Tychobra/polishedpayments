@@ -10,6 +10,7 @@ app_config <- config::get()
 polished_payments_config(
   stripe_secret_key = app_config$stripe$keys$secret,
   stripe_public_key = app_config$stripe$keys$public,
+  subscription = TRUE,
   stripe_prices = app_config$stripe$prices,
   trial_period_days = 30,
   free_roles = "free_user"
