@@ -86,7 +86,10 @@ free_trial_banner_module <- function(input, output, session) {
     if (
       isFALSE(hold_sub$free_user) &&
       # show the billing banner if the user is in their free trial and they have not enebaled billing
-      (isFALSE(hold_sub$is_billing_enabled) && hold_sub$trial_days_remaining > 0)) {
+      (isFALSE(hold_sub$is_billing_enabled) && hold_sub$trial_days_remaining > 0) &&
+      # confirm `subscription` argument is `TRUE`
+      isTRUE(getOption("pp")$subscription)
+      ) {
 
       shinyjs::delay(3000, shinyjs::showElement("banner", anim = TRUE))
     }

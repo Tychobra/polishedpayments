@@ -6,6 +6,81 @@
 billing_module_ui <- function(id) {
   ns <- NS(id)
 
+  subscription_ui <- tagList(
+    if (isTRUE(getOption("pp")$subscription)) {
+      tagList(
+        shiny::fluidRow(
+          shinydashboard::box(
+            title = "Account Information",
+            width = 12,
+            shiny::column(
+              12,
+              tags$div(
+                style = "width: 150px; display: inline-block;",
+                tags$h4(tags$strong("Plan"))
+              ),
+              tags$div(
+                style = "display: inline-block",
+                tags$h4(shiny::textOutput(ns("plan_name_out")))
+              ),
+              tags$hr(style = "margin: 0;")
+            ),
+            shiny::column(
+              12,
+              tags$div(
+                style = "width: 150px; display: inline-block;",
+                tags$h4(tags$strong("Amount"))
+              ),
+              tags$div(
+                style = "display: inline-block",
+                tags$h4(shiny::textOutput(ns("plan_amount_out")))
+              ),
+              tags$hr(style = "margin: 0;")
+            ),
+            shiny::column(
+              12,
+              tags$div(
+                style = "width: 150px; display: inline-block;",
+                tags$h4(tags$strong("Start Date"))
+              ),
+              tags$div(
+                style = "display: inline-block",
+                tags$h4(shiny::textOutput(ns("account_created_out")))
+              ),
+              tags$hr(style = "margin: 0;")
+            ),
+            shiny::column(
+              12,
+              id = ns("has_trial"),
+              tags$div(
+                style = "width: 150px; display: inline-block;",
+                tags$h4(tags$strong("Trial End"))
+              ),
+              tags$div(
+                style = "display: inline-block",
+                tags$h4(shiny::textOutput(ns("trial_end_out")))
+              ),
+              tags$hr(style = "margin: 0;")
+            ),
+            shiny::column(
+              12,
+              tags$br(),
+              shinyjs::hidden(shiny::actionButton(
+                ns("cancel_subscription"),
+                "Cancel Subscription",
+                class = "btn-primary pull-right",
+                style = "color: #FFF; width: 150px;"
+              ))
+            )
+          )
+        ),
+        shiny::fluidRow(
+          plans_box_module_ui(ns("my_plans"))
+        )
+      )
+    }
+  )
+
   tagList(
     tags$style(paste0("
       #", ns('invoices_table'), " th,
@@ -13,78 +88,7 @@ billing_module_ui <- function(id) {
         text-align: center;
       }
     ")),
-    shiny::fluidRow(
-      shinydashboard::box(
-        title = "Account Information",
-        width = 12,
-        shiny::column(
-          12,
-          tags$div(
-            style = "width: 150px; display: inline-block;",
-            tags$h4(tags$strong("Plan"))
-          ),
-          tags$div(
-            style = "display: inline-block",
-            tags$h4(shiny::textOutput(ns("plan_name_out")))
-          ),
-          tags$hr(style = "margin: 0;")
-        ),
-        shiny::column(
-          12,
-          tags$div(
-            style = "width: 150px; display: inline-block;",
-            tags$h4(tags$strong("Amount"))
-          ),
-          tags$div(
-            style = "display: inline-block",
-            tags$h4(shiny::textOutput(ns("plan_amount_out")))
-          ),
-          tags$hr(style = "margin: 0;")
-        ),
-        shiny::column(
-          12,
-          tags$div(
-            style = "width: 150px; display: inline-block;",
-            tags$h4(tags$strong("Start Date"))
-          ),
-          tags$div(
-            style = "display: inline-block",
-            tags$h4(shiny::textOutput(ns("account_created_out")))
-          ),
-          tags$hr(style = "margin: 0;")
-        ),
-        shiny::column(
-          12,
-          id = ns("has_trial"),
-          tags$div(
-            style = "width: 150px; display: inline-block;",
-            tags$h4(tags$strong("Trial End"))
-          ),
-          tags$div(
-            style = "display: inline-block",
-            tags$h4(shiny::textOutput(ns("trial_end_out")))
-          ),
-          tags$hr(style = "margin: 0;")
-        ),
-        shiny::column(
-          12,
-          tags$br(),
-          shinyjs::hidden(shiny::actionButton(
-            ns("cancel_subscription"),
-            "Cancel Subscription",
-            class = "btn-primary pull-right",
-            style = "color: #FFF; width: 150px;"
-          ))
-        )
-      )
-    ),
-
-
-    shiny::fluidRow(
-      plans_box_module_ui(ns("my_plans"))
-    ),
-
-
+    subscription_ui,
     tags$div(
       id = ns("billing_info_box"),
       shiny::fluidRow(
@@ -219,195 +223,200 @@ billing_module_ui <- function(id) {
 billing_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
+  ### SUBSCRIPTION ONLY LOGIC ###
+  if (isTRUE(getOption("pp")$subscription)) {
 
-  ### CANCEL SUBSCRIPTION ###
-  observeEvent(input$cancel_subscription, {
-    req(sub_info())
-    subscription_name <- sub_info()$nickname
+    ### CANCEL SUBSCRIPTION ###
+    observeEvent(input$cancel_subscription, {
+      req(sub_info())
+      subscription_name <- sub_info()$nickname
 
-    shiny::showModal(
-      shiny::modalDialog(
-        title = "Cancel Subscription",
-        footer = list(
-          shiny::modalButton("No, Close"),
-          shiny::actionButton(
-            ns("submit_cancel"),
-            "Yes, Submit",
-            class = "btn-danger",
-            style = "color: #FFF"
-          )
-        ),
-        size = "m",
-        easyClose = TRUE,
-        tags$div(
-          class = "text-center",
-          tags$br(),
-          tags$h3(
-            style = "line-height: 1.5",
-            htmltools::HTML(paste0(
-              'Are you sure you want to cancel the ', tags$b(subscription_name), 'subscription?'
-            ))
+      shiny::showModal(
+        shiny::modalDialog(
+          title = "Cancel Subscription",
+          footer = list(
+            shiny::modalButton("No, Close"),
+            shiny::actionButton(
+              ns("submit_cancel"),
+              "Yes, Submit",
+              class = "btn-danger",
+              style = "color: #FFF"
+            )
           ),
-          tags$br(), tags$br()
+          size = "m",
+          easyClose = TRUE,
+          tags$div(
+            class = "text-center",
+            tags$br(),
+            tags$h3(
+              style = "line-height: 1.5",
+              htmltools::HTML(paste0(
+                'Are you sure you want to cancel the ', tags$b(subscription_name), 'subscription?'
+              ))
+            ),
+            tags$br(), tags$br()
+          )
         )
       )
-    )
-  })
+    })
 
-  shiny::observeEvent(input$submit_cancel, {
-    shiny::req(sub_info())
+    shiny::observeEvent(input$submit_cancel, {
+      shiny::req(sub_info())
 
-    billing <- session$userData$billing()
-    subscription <- sub_info()
+      billing <- session$userData$billing()
+      subscription <- sub_info()
 
-    tryCatch({
+      tryCatch({
 
-      ## Remove Subscription
-      res <- httr::DELETE(
-        paste0("https://api.stripe.com/v1/subscriptions/", subscription$id),
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
+        ## Remove Subscription
+        res <- httr::DELETE(
+          paste0("https://api.stripe.com/v1/subscriptions/", subscription$id),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
         )
-      )
-
-      res_content <- jsonlite::fromJSON(
-        httr::content(res, "text", encoding = "UTF-8")
-      )
-
-      res_code <- httr::status_code(res)
-      if (!identical(res_code, 200L)) {
-        print(res_content)
-        print(paste0("status code: ", res_code))
-        stop("unable to delete subscription")
-      }
-
-      # Remove Subscription ID from 'billing' table and update the free trial days
-      # remaining at cancel. The "free_trial_days_remaining_at_cancel" will be used
-      # to set the proper amount of free trial days if the user restarts their subscription.
-      res <- httr::PUT(
-        url = paste0(getOption("polished")$api_url, "/subscriptions"),
-        encode = "json",
-        body = list(
-          subscription_uid = billing$uid,
-          stripe_subscription_id = NA,
-          free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
-        ),
-        httr::authenticate(
-          user = getOption("polished")$api_key,
-          password = ""
-        )
-      )
-
-      if (!identical(httr::status_code(res), 200L)) {
 
         res_content <- jsonlite::fromJSON(
           httr::content(res, "text", encoding = "UTF-8")
         )
 
-        stop(res_content, call. = FALSE)
-      }
+        res_code <- httr::status_code(res)
+        if (!identical(res_code, 200L)) {
+          print(res_content)
+          print(paste0("status code: ", res_code))
+          stop("unable to delete subscription")
+        }
 
-      session$userData$billing_trigger(session$userData$billing_trigger() + 1)
-      shinyFeedback::showToast("success", "Subscription Cancelled Successfully")
-    }, error = function(err) {
+        # Remove Subscription ID from 'billing' table and update the free trial days
+        # remaining at cancel. The "free_trial_days_remaining_at_cancel" will be used
+        # to set the proper amount of free trial days if the user restarts their subscription.
+        res <- httr::PUT(
+          url = paste0(getOption("polished")$api_url, "/subscriptions"),
+          encode = "json",
+          body = list(
+            subscription_uid = billing$uid,
+            stripe_subscription_id = NA,
+            free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
+          ),
+          httr::authenticate(
+            user = getOption("polished")$api_key,
+            password = ""
+          )
+        )
 
-      print(err)
-      shinyFeedback::showToast("error", "Error Cancelling Subscription")
+        if (!identical(httr::status_code(res), 200L)) {
+
+          res_content <- jsonlite::fromJSON(
+            httr::content(res, "text", encoding = "UTF-8")
+          )
+
+          stop(res_content, call. = FALSE)
+        }
+
+        session$userData$billing_trigger(session$userData$billing_trigger() + 1)
+        shinyFeedback::showToast("success", "Subscription Cancelled Successfully")
+      }, error = function(err) {
+
+        print(err)
+        shinyFeedback::showToast("error", "Error Cancelling Subscription")
+      })
+
+      shiny::removeModal()
     })
 
-    shiny::removeModal()
-  })
+    shiny::observeEvent(session$userData$billing(), {
+      billing <- session$userData$billing()
 
-  shiny::observeEvent(session$userData$billing(), {
-    billing <- session$userData$billing()
-
-    if (is.na(billing$stripe_subscription_id)) {
-      shinyjs::hide("cancel_subscription")
-      shinyjs::hide("billing_info_box")
-    } else {
-      shinyjs::show("cancel_subscription")
-      shinyjs::show("billing_info_box")
-    }
-  })
-
-
-  output$plan_name_out <- shiny::renderText({
-    req(session$userData$billing())
-    billing <- session$userData$billing()
-
-    if (is.na(billing$stripe_subscription_id)) {
-      out <- "No Plan"
-    } else {
-      shiny::req(sub_info())
-      out <- sub_info()$nickname
-    }
-
-    out
-  })
-
-  output$plan_amount_out <- shiny::renderText({
-    req(session$userData$billing())
-    billing <- session$userData$billing()
-
-    if (is.na(billing$stripe_subscription_id)) {
-      out <- "$0"
-    } else {
-      req(sub_info())
-
-      hold <- sub_info()
-
-      amount_out <- paste0(
-        "$",
-        formatC(hold$amount / 100, format = "f", digits = 2, big.mark = ","),
-        "/",
-        hold$interval
-      )
-
-      # No trial or current time is after trial end
-      if (hold$trial_days_remaining <= 0) {
-
-        out <- amount_out
+      if (is.na(billing$stripe_subscription_id)) {
+        shinyjs::hide("cancel_subscription")
+        shinyjs::hide("billing_info_box")
       } else {
-
-        out <- paste0(
-          round(hold$trial_days_remaining, 0),
-          " Days Remaining in Free Trial then ",
-          amount_out
-        )
+        shinyjs::show("cancel_subscription")
+        shinyjs::show("billing_info_box")
       }
-    }
-
-    out
-  })
-
-  output$account_created_out <- shiny::renderText({
-    billing <- session$userData$billing()
-
-    as.character(as.Date(billing$created_at))
-  })
-
-  shiny::observe({
-    if (is.null(sub_info()$trial_end)) {
-      shinyjs::hideElement("has_trial")
-    } else {
-      shinyjs::showElement("has_trial")
-    }
-  })
-
-  output$trial_end_out <- renderText({
-    req(sub_info())
-    hold <- sub_info()
-    as.character(Sys.Date() + hold$trial_days_remaining)
-  })
+    })
 
 
-  callModule(
-    plans_box_module,
-    "my_plans",
-    sub_info = sub_info
-  )
+    output$plan_name_out <- shiny::renderText({
+      req(session$userData$billing())
+      billing <- session$userData$billing()
+
+      if (is.na(billing$stripe_subscription_id)) {
+        out <- "No Plan"
+      } else {
+        shiny::req(sub_info())
+        out <- sub_info()$nickname
+      }
+
+      out
+    })
+
+    output$plan_amount_out <- shiny::renderText({
+      req(session$userData$billing())
+      billing <- session$userData$billing()
+
+      if (is.na(billing$stripe_subscription_id)) {
+        out <- "$0"
+      } else {
+        req(sub_info())
+
+        hold <- sub_info()
+
+        amount_out <- paste0(
+          "$",
+          formatC(hold$amount / 100, format = "f", digits = 2, big.mark = ","),
+          "/",
+          hold$interval
+        )
+
+        # No trial or current time is after trial end
+        if (hold$trial_days_remaining <= 0) {
+
+          out <- amount_out
+        } else {
+
+          out <- paste0(
+            round(hold$trial_days_remaining, 0),
+            " Days Remaining in Free Trial then ",
+            amount_out
+          )
+        }
+      }
+
+      out
+    })
+
+    output$account_created_out <- shiny::renderText({
+      billing <- session$userData$billing()
+
+      as.character(as.Date(billing$created_at))
+    })
+
+    shiny::observe({
+      if (is.null(sub_info()$trial_end)) {
+        shinyjs::hideElement("has_trial")
+      } else {
+        shinyjs::showElement("has_trial")
+      }
+    })
+
+    output$trial_end_out <- renderText({
+      req(sub_info())
+      hold <- sub_info()
+      as.character(Sys.Date() + hold$trial_days_remaining)
+    })
+
+
+    callModule(
+      plans_box_module,
+      "my_plans",
+      sub_info = sub_info
+    )
+  } else {
+    waiter::waiter_hide()
+  }
 
 
   # get payment method information for display to user
@@ -478,10 +487,14 @@ billing_module <- function(input, output, session, sub_info) {
     if (is.null(payment_methods())) {
 
       shinyjs::hideElement("billing_info")
-      shinyjs::showElement("enable_billing_button")
+      if (isTRUE(getOption("pp")$subscription)) {
+        shinyjs::showElement("enable_billing_button")
+      }
     } else {
       shinyjs::showElement("billing_info")
-      shinyjs::hideElement("enable_billing_button")
+      if (isTRUE(getOption("pp")$subscription)) {
+        shinyjs::hideElement("enable_billing_button")
+      }
     }
 
   }, ignoreNULL = FALSE)
@@ -615,16 +628,18 @@ billing_module <- function(input, output, session, sub_info) {
       DT::formatCurrency(3:5)
   })
 
-  shiny::callModule(
-    credit_card_module,
-    "enable_billing",
-    open_modal_trigger = reactive({input$enable_billing}),
-    disclaimer_text = tags$p(
-      class = "text-center",
-      "Your subscription payments will be paid using the above credit card."
-    ),
-    sub_info = sub_info
-  )
+  if (isTRUE(getOption("pp")$subscription)) {
+    shiny::callModule(
+      credit_card_module,
+      "enable_billing",
+      open_modal_trigger = reactive({input$enable_billing}),
+      disclaimer_text = tags$p(
+        class = "text-center",
+        "Your subscription payments will be paid using the above credit card."
+      ),
+      sub_info = sub_info
+    )
+  }
 
   shiny::callModule(
     credit_card_module,

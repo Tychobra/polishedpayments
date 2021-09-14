@@ -1,5 +1,10 @@
+#' UI element for Stripe Credit Card input
+#'
+#' @param id The element's namespaced ID
+#'
+#' @export
 credit_card_module_ui <- function(id) {
-  ns <- NS(id)
+  ns <- shiny::NS(id)
 
   tagList(
     tags$script(src = "polishedpayments/js/credit_card_module.js"),
@@ -7,38 +12,75 @@ credit_card_module_ui <- function(id) {
   )
 }
 
-
+#' Server logic for Stripe Credit Card input
+#'
+#' @param input
+#' @param output
+#' @param session
+#' @param open_modal_trigger The trigger to open the Credit Card modal
+#' @param disclaimer_text the Disclaimer text
+#' @param plan_to_enable the subscription plan to enable (requires `subscription = TRUE`)
+#' @param sub_info the Customer's subscription info
+#' @param subscription whether the Credit Card is for a subscription payment (default) or one time payment
+#' @param payment_amount the amount of the one time payment (requires `subscription = FALSE`)
+#' @param currency the currency of the one time payment (requires `subscription = FALSE`)
+#'
+#' @export
 credit_card_module <- function(
   input, output, session,
   open_modal_trigger = reactive(0),
   disclaimer_text = "Disclaimer",
   plan_to_enable = NULL,
-  sub_info = NULL
+  sub_info = NULL,
+  subscription = TRUE,
+  payment_amount = NULL,
+  currency = "usd"
 ) {
   ns <- session$ns
 
-  setup_intent_id <- reactiveVal(NULL)
+  # The Setup (Subscription) or Payment (One-time-payment) Intent ID
+  intent_id <- reactiveVal(NULL)
 
-  # Customer is enabling billing, so we create Setup Intent to
+  # If Customer is enabling billing, we create Setup Intent to
   # attach a (default) payment method to the customer
+  # If Customer is making a one time payment, we create a
+  # Payment Intent & include checkbox to save Payment Method
   observeEvent(open_modal_trigger(), {
 
     billing <- session$userData$billing()
 
     tryCatch({
-      ### CREATE SETUP INTENT ###
-      setup_res <- httr::POST(
-        "https://api.stripe.com/v1/setup_intents",
-        body = list(
-          "customer" = billing$stripe_customer_id,
-          `payment_method_types[0]` = "card"
-        ),
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
+      if (isTRUE(subscription)) {
+        ### CREATE SETUP INTENT ###
+        setup_res <- httr::POST(
+          "https://api.stripe.com/v1/setup_intents",
+          body = list(
+            "customer" = billing$stripe_customer_id,
+            `payment_method_types[0]` = "card"
+          ),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
         )
-      )
+      } else if (isFALSE(subscription)) {
+        ### CREATE PAYMENT INTENT ###
+        setup_res <- httr::POST(
+          "https://api.stripe.com/v1/payment_intents",
+          body = list(
+            "customer" = billing$stripe_customer_id,
+            `payment_method_types[0]` = "card",
+            "amount" = payment_amount * 100,
+            "currency" = currency
+          ),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
+        )
+      }
 
       httr::stop_for_status(setup_res)
 
@@ -46,7 +88,7 @@ credit_card_module <- function(
         httr::content(setup_res, "text", encoding = "UTF-8")
       )
 
-      setup_intent_id(setup_data$id)
+      intent_id(setup_data$id)
 
       shiny::showModal(
         shiny::modalDialog(
@@ -55,6 +97,11 @@ credit_card_module <- function(
             "Name on Card",
             width = "100%",
             placeholder = 'John K Smith'
+          ),
+          shiny::checkboxInput(
+            ns("attach_payment_method"),
+            "Save Card for Future Payments",
+            value = FALSE
           ),
           tags$br(),
           tags$form(
@@ -99,15 +146,31 @@ credit_card_module <- function(
         )
       )
 
-      ### COLLECT CARD DETAILS ###
-      session$sendCustomMessage(
-        ns("create_setup_intent"),
-        message = list(
-          stripe_key = getOption("pp")$keys$pub,
-          card_button_id = ns('card_button'),
-          client_secret = setup_data$client_secret
+      if (isTRUE(subscription)) {
+        shinyjs::hide("attach_payment_method")
+
+        ### COLLECT CARD DETAILS ###
+        session$sendCustomMessage(
+          ns("create_setup_intent"),
+          message = list(
+            stripe_key = getOption("pp")$keys$pub,
+            card_button_id = ns('card_button'),
+            client_secret = setup_data$client_secret
+          )
         )
-      )
+      } else if (isFALSE(subscription)) {
+        shinyjs::show("attach_payment_method")
+
+        session$sendCustomMessage(
+          ns("create_payment_intent"),
+          message = list(
+            stripe_key = getOption("pp")$keys$pub,
+            card_button_id = ns('card_button'),
+            client_secret = setup_data$client_secret,
+            attach_payment_method = input$attach_payment_method
+          )
+        )
+      }
 
     }, error = function(err) {
       print(err)
@@ -121,7 +184,7 @@ credit_card_module <- function(
     shiny::removeModal()
   })
 
-  # FAILED Payment Method
+  # FAILED Payment Method (Setup Intent)
   observeEvent(input$setup_intent_error, {
     hold_error <- input$setup_intent_error
     print(hold_error)
@@ -131,10 +194,10 @@ credit_card_module <- function(
     )
   })
 
-  # SUCCESS Payment Method
+  # SUCCESS Payment Method (Setup Intent)
   observeEvent(input$setup_intent_success, {
     billing <- session$userData$billing()
-    setup_intent_id <- setup_intent_id()
+    setup_intent_id <- intent_id()
     hold_sub_info <- sub_info()
 
     tryCatch({
@@ -265,7 +328,29 @@ credit_card_module <- function(
       shinyFeedback::showToast("error", "Payment method authenticated, but there was an error saving your Payment Method")
     })
 
-    setup_intent_id(NULL)
+    intent_id(NULL)
+    shiny::removeModal()
+  })
+
+  # FAILED Payment Method (Payment Intent)
+  observeEvent(input$payment_intent_error, {
+    hold_error <- input$payment_intent_error
+    print(hold_error)
+    shinyFeedback::showToast(
+      type = 'error',
+      message = hold_error$message
+    )
+  })
+
+  observeEvent(input$payment_intent_success, {
+    hold_payment_method <- input$payment_method_id
+
+    shinyFeedback::showToast(
+      type = 'success',
+      message = 'Payment completed successfully'
+    )
+
+    intent_id(NULL)
     shiny::removeModal()
   })
 

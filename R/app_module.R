@@ -140,8 +140,8 @@ app_module <- function(input, output, session) {
     hold_user <- session$userData$user()
 
 
-    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0) {
-      # User has a free role, so go to the Shiny app
+    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || isFALSE(getOption("pp")$subscription)) {
+      # User has a free role (or `subscriptions = FALSE`), so go to the Shiny app
       polished::remove_query_string()
       session$reload()
 
@@ -246,7 +246,7 @@ app_module <- function(input, output, session) {
         )
 
 
-        if (getOption("pp")$trial_period_days > 0) {
+        if (getOption("pp")$trial_period_days > 0 && isTRUE(getOption("pp")$subscription)) {
           # add the subscription to polished
           stripe_subscription_id <- create_stripe_subscription(
             customer_id,
@@ -294,6 +294,9 @@ app_module <- function(input, output, session) {
           stripe_subscription_id = stripe_subscription_id
         )
 
+        if (isFALSE(getOption("pp")$subscription)) {
+          sub_db$stripe_subscription_id <- NA
+        }
 
         sub_db$created_at <- Sys.time()
         sub_db$free_trial_days_remaining_at_cancel <- NA
@@ -310,9 +313,9 @@ app_module <- function(input, output, session) {
 
     } else {
 
-      # if user does not have a subscription, and they have not canceled their subscription,
+      # if user does not have a subscription, and they have not canceled their subscription, and `subscriptions = TRUE`
       # go ahead and create a subscription
-      if (is.na(sub_db$stripe_subscription_id) && is.na(sub_db$free_trial_days_remaining_at_cancel)) {
+      if (is.na(sub_db$stripe_subscription_id) && is.na(sub_db$free_trial_days_remaining_at_cancel) && isTRUE(getOption("pp")$subscription)) {
 
         trial_period_days <- getOption("pp")$trial_period_days
         query_list <- shiny::getQueryString()
@@ -320,7 +323,7 @@ app_module <- function(input, output, session) {
         if (trial_period_days <= 0) {
 
           if (!identical(query_list$page, "account")) {
-            # there is no free trial,, so redirect to the account page for them
+            # there is no free trial, so redirect to the account page for them
             # to choose a subscription and enable billing.
             shiny::updateQueryString(
               queryString = "?page=account",
@@ -444,6 +447,8 @@ app_module <- function(input, output, session) {
         shinyFeedback::showToast("error", "subscription not found")
 
       })
+    } else if (!is.na(billing$stripe_customer_id) && isFALSE(getOption("pp")$subscription)) {
+      out <- get_stripe_customer(billing$stripe_customer_id)
     }
 
     out
