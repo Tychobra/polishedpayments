@@ -7,6 +7,7 @@
 polished_payments_config(
   stripe_secret_key,
   stripe_public_key,
+  subscription = TRUE,
   stripe_prices,
   trial_period_days = 0,
   free_roles = character(0)
@@ -16,6 +17,8 @@ polished_payments_config(
 \item{stripe_secret_key}{the Stripe secret key}
 
 \item{stripe_public_key}{the Stripe publishable key}
+
+\item{subscription}{use Stripe subscriptions (default `TRUE`)}
 
 \item{stripe_prices}{an unnamed character vector of Stripe price ids for your subscription.  e.g. monthly and
 yearly pricing options.  A Stripe price id looks like this "price_64t6gq76vr78sdhf".}
@@ -37,6 +40,7 @@ configure R options for Polished Payments
 polished_payments_config(
   stripe_secret_key = "<your Stripe secret API key>",
   stripe_public_key = "<your Stripe publishable key>",
+  subscription = TRUE,
   stripe_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
   trial_period_days = 30,
   free_roles = "free_user"
