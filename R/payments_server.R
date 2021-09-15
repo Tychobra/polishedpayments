@@ -32,9 +32,9 @@ payments_server <- function(
       hold_user <- session$userData$user()
 
 
-      # if the user has a role that allows them free access to the Shiny app (or `subscriptions = FALSE`), then
+      # if the user has a role that allows them free access to the Shiny app or prices == NULL, then
       # let them access the app.
-      if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 && isTRUE(getOption("pp")$subscription)) {
+      if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
         session$userData$subscription(list(
           free_user = TRUE
         ))
@@ -83,7 +83,7 @@ payments_server <- function(
             user_uid = hold_user$user_uid
           )
 
-          if (getOption("pp")$trial_period_days > 0 && isTRUE(getOption("pp")$subscription)) {
+          if (getOption("pp")$trial_period_days > 0 && !is.null(getOption("pp")$prices)) {
             # Step 2: Create the Stripe subscription on Stripe
             stripe_subscription_id <- create_stripe_subscription(
               customer_id,
@@ -126,20 +126,14 @@ payments_server <- function(
 
           # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
           # account page for them to restart their subscription
-          if (is.na(sub_db$stripe_subscription_id) && isTRUE(getOption("pp")$subscription)) {
+          if (is.na(sub_db$stripe_subscription_id)) {
             shiny::updateQueryString(
               queryString = "?page=account",
               session = session,
               mode = "replace"
             )
             session$reload()
-          } else if (isFALSE(getOption("pp")$subscription)) {
 
-            session$userData$subscription(list(
-              free_user = TRUE
-            ))
-
-            return()
           } else {
             stripe_sub <- get_stripe_subscription(sub_db$stripe_subscription_id)
 
@@ -201,8 +195,8 @@ payments_server <- function(
     })
 
 
-    observeEvent(session$userData$subscription, {
-
+    observeEvent(session$userData$subscription(), {
+      browser()
       server(input, output, session)
 
     }, once = TRUE)

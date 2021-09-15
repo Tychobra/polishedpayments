@@ -140,7 +140,7 @@ app_module <- function(input, output, session) {
     hold_user <- session$userData$user()
 
 
-    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || isFALSE(getOption("pp")$subscription)) {
+    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
       # User has a free role (or `subscriptions = FALSE`), so go to the Shiny app
       polished::remove_query_string()
       session$reload()
@@ -246,7 +246,7 @@ app_module <- function(input, output, session) {
         )
 
 
-        if (getOption("pp")$trial_period_days > 0 && isTRUE(getOption("pp")$subscription)) {
+        if (getOption("pp")$trial_period_days > 0 && !is.null(getOption("pp")$prices)) {
           # add the subscription to polished
           stripe_subscription_id <- create_stripe_subscription(
             customer_id,
@@ -294,7 +294,7 @@ app_module <- function(input, output, session) {
           stripe_subscription_id = stripe_subscription_id
         )
 
-        if (isFALSE(getOption("pp")$subscription)) {
+        if (is.null(getOption("pp")$prices)) {
           sub_db$stripe_subscription_id <- NA
         }
 
@@ -305,8 +305,10 @@ app_module <- function(input, output, session) {
 
       }, error = function(err) {
 
+        msg <- "Error Setting up your account"
+        print(msg)
         print(err)
-        shinyFeedback::showToast("error", "Error Setting up your account")
+        shinyFeedback::showToast("error", msg)
 
         invisible()
       })
@@ -315,7 +317,7 @@ app_module <- function(input, output, session) {
 
       # if user does not have a subscription, and they have not canceled their subscription, and `subscriptions = TRUE`
       # go ahead and create a subscription
-      if (is.na(sub_db$stripe_subscription_id) && is.na(sub_db$free_trial_days_remaining_at_cancel) && isTRUE(getOption("pp")$subscription)) {
+      if (!is.null(getOption("pp")$prices) && is.na(sub_db$stripe_subscription_id) && is.na(sub_db$free_trial_days_remaining_at_cancel)) {
 
         trial_period_days <- getOption("pp")$trial_period_days
         query_list <- shiny::getQueryString()
@@ -435,7 +437,7 @@ app_module <- function(input, output, session) {
             password = ""
           )
         )
-        # hard fail if above query fails so that app does not somehow go into look
+        # hard fail if above query fails so that app does not somehow go into loop
         if (!identical(httr::status_code(res), 200L)) {
           res_content <- jsonlite::fromJSON(
             httr::content(res, "text", encoding = "UTF-8")
@@ -447,10 +449,10 @@ app_module <- function(input, output, session) {
         shinyFeedback::showToast("error", "subscription not found")
 
       })
-    } else if (!is.na(billing$stripe_customer_id) && isFALSE(getOption("pp")$subscription)) {
+    } else if (!is.na(billing$stripe_customer_id) && !is.null(getOption("pp")$prices)) {
       out <- get_stripe_customer(billing$stripe_customer_id)
     }
-
+    browser()
     out
   })
 

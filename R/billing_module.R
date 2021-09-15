@@ -7,7 +7,7 @@ billing_module_ui <- function(id) {
   ns <- NS(id)
 
   subscription_ui <- tagList(
-    if (isTRUE(getOption("pp")$subscription)) {
+    if (!is.null(getOption("pp")$prices)) {
       tagList(
         shiny::fluidRow(
           shinydashboard::box(
@@ -224,7 +224,7 @@ billing_module <- function(input, output, session, sub_info) {
   ns <- session$ns
 
   ### SUBSCRIPTION ONLY LOGIC ###
-  if (isTRUE(getOption("pp")$subscription)) {
+  if (!is.null(getOption("pp")$prices)) {
 
     ### CANCEL SUBSCRIPTION ###
     observeEvent(input$cancel_subscription, {
@@ -487,12 +487,12 @@ billing_module <- function(input, output, session, sub_info) {
     if (is.null(payment_methods())) {
 
       shinyjs::hideElement("billing_info")
-      if (isTRUE(getOption("pp")$subscription)) {
+      if (!is.null(getOption("pp")$prices)) {
         shinyjs::showElement("enable_billing_button")
       }
     } else {
       shinyjs::showElement("billing_info")
-      if (isTRUE(getOption("pp")$subscription)) {
+      if (!is.null(getOption("pp")$prices)) {
         shinyjs::hideElement("enable_billing_button")
       }
     }
@@ -628,7 +628,7 @@ billing_module <- function(input, output, session, sub_info) {
       DT::formatCurrency(3:5)
   })
 
-  if (isTRUE(getOption("pp")$subscription)) {
+  if (!is.null(getOption("pp")$prices)) {
     shiny::callModule(
       credit_card_module,
       "enable_billing",
