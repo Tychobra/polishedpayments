@@ -134,13 +134,15 @@ function credit_card_module(ns_prefix) {
 
       cardButton.addEventListener("click", function(ev) {
 
-        var attachPaymentMethod = document.getElementById(ns_prefix + "attach_payment_method").checked;
-        var hold_future_usage;
-        if (attachPaymentMethod) {
-          hold_future_usage = "on_session";
-        } else {
-          hold_future_usage = null;
-        }
+        // TODO: Allow saved cards (after removing `is.na(default_payment_method)`) checks in R
+
+        // var attachPaymentMethod = document.getElementById(ns_prefix + "attach_payment_method").checked;
+        // var hold_future_usage;
+        // if (attachPaymentMethod) {
+        //   hold_future_usage = "on_session";
+        // } else {
+        //   hold_future_usage = null;
+        // }
 
         stripe.confirmCardPayment(
           clientSecret,
@@ -151,7 +153,7 @@ function credit_card_module(ns_prefix) {
                 name: cardholderName.value,
               },
             },
-            setup_future_usage: hold_future_usage
+          // setup_future_usage: hold_future_usage
           }
         ).then(function(result) {
           if (result.error) {
@@ -160,12 +162,8 @@ function credit_card_module(ns_prefix) {
             Shiny.setInputValue(ns_prefix + "payment_intent_error", result.error, { priority: "event"});
             console.log(result.error);
           } else {
-            //if (attachPaymentMethod) {
-            //  Shiny.setInputValue(ns_prefix + "payment_method_id", result.paymentIntent.payment_method, { priority: "event"});
-            //}
-
             // return Payment Method ID
-            Shiny.setInputValue(ns_prefix + "payment_method_id", result.paymentIntent.payment_method, { priority: "event"});
+            // Shiny.setInputValue(ns_prefix + "payment_method_id", result.paymentIntent.payment_method, { priority: "event"});
 
             // The setup has succeeded. Display a success message.
             Shiny.setInputValue(ns_prefix + "payment_intent_success", 1, { priority: "event"});

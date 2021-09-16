@@ -98,11 +98,11 @@ credit_card_module <- function(
             width = "100%",
             placeholder = 'John K Smith'
           ),
-          shiny::checkboxInput(
-            ns("attach_payment_method"),
-            "Save Card for Future Payments",
-            value = FALSE
-          ),
+          # shiny::checkboxInput(
+          #   ns("attach_payment_method"),
+          #   "Save Card for Future Payments",
+          #   value = FALSE
+          # ),
           tags$br(),
           tags$form(
             action = "/charge",
@@ -147,7 +147,7 @@ credit_card_module <- function(
       )
 
       if (isTRUE(subscription)) {
-        shinyjs::hide("attach_payment_method")
+        # shinyjs::hide("attach_payment_method")
 
         ### COLLECT CARD DETAILS ###
         session$sendCustomMessage(
@@ -159,15 +159,15 @@ credit_card_module <- function(
           )
         )
       } else if (isFALSE(subscription)) {
-        shinyjs::show("attach_payment_method")
+        # shinyjs::show("attach_payment_method")
 
         session$sendCustomMessage(
           ns("create_payment_intent"),
           message = list(
             stripe_key = getOption("pp")$keys$pub,
             card_button_id = ns('card_button'),
-            client_secret = setup_data$client_secret,
-            attach_payment_method = input$attach_payment_method
+            client_secret = setup_data$client_secret#,
+            # attach_payment_method = input$attach_payment_method
           )
         )
       }
@@ -343,25 +343,25 @@ credit_card_module <- function(
   })
 
   observeEvent(input$payment_intent_success, {
-    billing <- session$userData$billing()
-    hold_payment_method_id <- input$payment_method_id
+    billing <- session$userData$stripe()
+    # hold_payment_method_id <- input$payment_method_id
 
-    if (isTRUE(input$attach_payment_method)) {
-      tryCatch({
-
-        set_default_payment_method(
-          customer_id = billing$stripe_customer_id,
-          payment_method_id = hold_payment_method_id
-        )
-
-      }, error = function(err) {
-        print(err)
-        shinyFeedback::showToast(
-          "error",
-          "Error saving Credit Card for future usage"
-        )
-      })
-    }
+    # if (isTRUE(input$attach_payment_method)) {
+    #   tryCatch({
+    #
+    #     set_default_payment_method(
+    #       customer_id = billing$stripe_customer_id,
+    #       payment_method_id = hold_payment_method_id
+    #     )
+    #
+    #   }, error = function(err) {
+    #     print(err)
+    #     shinyFeedback::showToast(
+    #       "error",
+    #       "Error saving Credit Card for future usage"
+    #     )
+    #   })
+    # }
 
     shinyFeedback::showToast(
       type = 'success',
