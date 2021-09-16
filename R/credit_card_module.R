@@ -31,7 +31,6 @@ credit_card_module <- function(
   open_modal_trigger = reactive(0),
   disclaimer_text = "Disclaimer",
   plan_to_enable = NULL,
-  sub_info = NULL,
   subscription = TRUE,
   payment_amount = NULL,
   currency = "usd"
@@ -47,7 +46,7 @@ credit_card_module <- function(
   # Payment Intent & include checkbox to save Payment Method
   observeEvent(open_modal_trigger(), {
 
-    billing <- session$userData$billing()
+    billing <- session$userData$stripe()
 
     tryCatch({
       if (isTRUE(subscription)) {
@@ -196,9 +195,8 @@ credit_card_module <- function(
 
   # SUCCESS Payment Method (Setup Intent)
   observeEvent(input$setup_intent_success, {
-    billing <- session$userData$billing()
+    billing <- session$userData$stripe()
     setup_intent_id <- intent_id()
-    hold_sub_info <- sub_info()
 
     tryCatch({
 
@@ -225,7 +223,7 @@ credit_card_module <- function(
         # user is changing their default payment method.  No need to mess with subscription
         # UPDATE the default payment method
         res <- httr::POST(
-          paste0("https://api.stripe.com/v1/subscriptions/", billing$stripe_subscription_id),
+          paste0("https://api.stripe.com/v1/subscriptions/", billing$subscription$stripe_subscription_id),
           body = list(
             default_payment_method = default_payment_method,
             trial_from_plan = "true"
@@ -258,10 +256,10 @@ credit_card_module <- function(
         # if user has already created a free trial, and then canceled their free trial part way through,
         # we keep track of their free trial days used and send them with the create subscription request
         # so that the user does not get to completely restart their free trial.
-        if (is.na(billing$free_trial_days_remaining_at_cancel)) {
+        if (is.na(billing$subscription$trial_days_remaining)) {
           post_body$trial_period_days <- getOption("pp")$trial_period_days
         } else {
-          post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
+          post_body$trial_period_days <- floor(as.numeric(billing$subscription$trial_days_remaining))
         }
 
         # Create the subscription and attach Customer & payment method to newly created subscription
@@ -293,7 +291,7 @@ credit_card_module <- function(
             url = paste0(getOption("polished")$api_url, "/subscriptions"),
             encode = "json",
             body = list(
-              subscription_uid = billing$uid,
+              subscription_uid = billing$subscription$uid,
               stripe_subscription_id = new_subscription_id
             ),
             httr::authenticate(
@@ -315,9 +313,7 @@ credit_card_module <- function(
 
       }
 
-      session$userData$billing_trigger(session$userData$billing_trigger() + 1)
-      session$userData$sub_info_trigger(session$userData$sub_info_trigger() + 1)
-
+      session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
 
       shinyFeedback::showToast(
         type = 'success',

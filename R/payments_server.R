@@ -21,31 +21,14 @@ payments_server <- function(
 ) {
 
   function(input, output, session) {
-
-    session$userData$billing <- reactiveVal(NULL)
-    session$userData$billing_trigger <- reactiveVal(0)
-
-    session$userData$subscription <- reactiveVal(NULL)
+    session$userData$stripe <- reactiveVal(NULL)
+    session$userData$stripe_trigger <- reactiveVal(0)
 
     shiny::observeEvent(session$userData$user(), {
 
       hold_user <- session$userData$user()
 
-
-      # if the user has a role that allows them free access to the Shiny app or prices == NULL, then
-      # let them access the app.
-      if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
-        session$userData$subscription(list(
-          free_user = TRUE
-        ))
-
-        return()
-      }
-
-
       tryCatch({
-        # otherwise start checking their subscription
-
         # get any existing subscriptions from Polished API
         res <- httr::GET(
           paste0(getOption("polished")$api_url, "/subscriptions"),
@@ -69,12 +52,23 @@ payments_server <- function(
           stop("error getting subscription from Polished API", call. = FALSE)
         }
 
-        session$userData$billing(sub_db)
-
         sub_db <- tibble::as_tibble(sub_db)
         # user does not have a subscription, so set the user up with the
         # default subscription.
         if (identical(nrow(sub_db), 0L)) {
+
+          # if the user has a role that allows them free access to the Shiny app or prices == NULL, then
+          # let them access the app.
+          if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
+            session$userData$stripe(list(
+              stripe_customer_id = NA,
+              free_user = TRUE,
+              default_payment_method = NA,
+              subscription = NA
+            ))
+
+            return()
+          }
 
           # set the user up with the default subscription
           # Step 1: create Stripe customer
@@ -124,9 +118,22 @@ payments_server <- function(
           session$reload()
         } else {
 
+          # if the user has a role that allows them free access to the Shiny app or prices == NULL, then
+          # let them access the app.
+          if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
+            session$userData$stripe(list(
+              stripe_customer_id = sub_db$stripe_customer_id,
+              free_user = TRUE,
+              default_payment_method = NA,
+              subscription = NA
+            ))
+
+            return()
+          }
+
           # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
           # account page for them to restart their subscription
-          if (is.na(sub_db$stripe_subscription_id)) {
+          if (is.na(sub_db$stripe_subscription_id) && !is.null(getOption("pp")$prices)) {
             shiny::updateQueryString(
               queryString = "?page=account",
               session = session,
@@ -141,12 +148,23 @@ payments_server <- function(
 
               # user is either in trial period or they already have a subscription with
               # billing enabled, so let them access the app.
-              session$userData$subscription(list(
+              session$userData$stripe(list(
+                stripe_customer_id = sub_db$stripe_customer_id,
                 free_user = FALSE,
-                price_id = stripe_sub$plan_id,
-                nickname = stripe_sub$nickname,
-                is_billing_enabled = if (is.na(stripe_sub$default_payment_method)) FALSE else TRUE,
-                trial_days_remaining = stripe_sub$trial_days_remaining
+                default_payment_method = stripe_sub$default_payment_method,
+                subscription = list(
+                  uid = sub_db$uid,
+                  stripe_subscription_id = sub_db$stripe_subscription_id,
+                  item_id = stripe_sub$item_id,
+                  plan_id = stripe_sub$plan_id,
+                  nickname = stripe_sub$nickname,
+                  amount = stripe_sub$amount,
+                  interval = stripe_sub$interval,
+                  trial_end = stripe_sub$trial_end,
+                  is_billing_enabled = if (is.na(stripe_sub$default_payment_method)) FALSE else TRUE,
+                  trial_days_remaining = stripe_sub$trial_days_remaining,
+                  created_at = sub_db$created_at
+                )
               ))
 
               return()
@@ -184,24 +202,17 @@ payments_server <- function(
           showToast("error", err$message)
         }
 
-        invisible()
+        invisible(NULL)
       })
-
-
-
-
-
 
     })
 
 
-    observeEvent(session$userData$subscription(), {
-      browser()
+    observeEvent(session$userData$stripe(), {
+
       server(input, output, session)
 
     }, once = TRUE)
 
-
   }
-
 }

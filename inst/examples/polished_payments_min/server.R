@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   })
 
 
-  observeEvent(session$userData$subscription(), {
+  observeEvent(session$userData$stripe(), {
 
     polished_user_prep <- reactive({
       hold_user <- session$userData$user()
@@ -40,7 +40,8 @@ server <- function(input, output, session) {
     })
 
     polished_subscription_prep <- reactive({
-      hold_sub <- session$userData$subscription()
+      req(session$userData$stripe()$subscription)
+      hold_sub <- session$userData$stripe()$subscription
 
       data.frame(
         name = names(hold_sub),
@@ -79,7 +80,6 @@ server <- function(input, output, session) {
       class = "text-center",
       "You will be charged immediately for this one time payment."
     ),
-    sub_info = session$userData$subscription(),
     subscription = FALSE,
     payment_amount = 20.00
   )

@@ -58,7 +58,6 @@ plan_column_module_ui <- function(id, width) {
 
 plan_column_module <- function(input, output, session,
   plan_id,
-  sub_info,
   disclaimer_text = "I am a disclaimer",
   hide_waiter = FALSE
 ) {
@@ -119,13 +118,14 @@ plan_column_module <- function(input, output, session,
 
   # if plan is selected, show the selected plan banner and hide the button to sign up
   # for the plan
-  observeEvent(sub_info(), {
+  observeEvent(session$userData$stripe(), {
+    sub_info <- session$userData$stripe()$subscription
 
-    if (is.null(sub_info())) {
+    if (is.null(sub_info)) {
       shinyjs::showElement("sign_up_div")
       shinyjs::hideElement("your_plan")
       shinyjs::hideElement("change_plan_div")
-    } else if (sub_info()$plan_id == plan_id) {
+    } else if (sub_info$plan_id == plan_id) {
       shinyjs::hideElement("sign_up_div")
       shinyjs::showElement("your_plan")
       shinyjs::hideElement("change_plan_div")
@@ -140,10 +140,11 @@ plan_column_module <- function(input, output, session,
   open_confirm <- reactiveVal(0)
 
   observeEvent(input$sign_up, {
+    sub_info <- session$userData$stripe()$subscription
 
     plan_to_sign_up <- input$sign_up
 
-    if (is.null(sub_info()) || is.na(sub_info()$default_payment_method)) {
+    if (is.null(sub_info) || is.na(sub_info$default_payment_method)) {
 
       open_credit_card(open_credit_card() + 1)
 
@@ -157,8 +158,9 @@ plan_column_module <- function(input, output, session,
   }, ignoreInit = TRUE)
 
   observeEvent(input$change_plan, {
+    sub_info <- session$userData$stripe()
 
-    if (!is.null(sub_info()) && is.na(sub_info()$default_payment_method)) {
+    if (!is.null(sub_info) && is.na(sub_info$default_payment_method)) {
       open_credit_card(open_credit_card() + 1)
     } else {
       open_confirm(open_confirm() + 1)
@@ -171,8 +173,7 @@ plan_column_module <- function(input, output, session,
     "change_plan_modal",
     open_modal_trigger = open_credit_card,
     plan_to_enable = plan_id,
-    disclaimer_text = disclaimer_text,
-    sub_info = sub_info
+    disclaimer_text = disclaimer_text
   )
 
 
@@ -204,15 +205,15 @@ plan_column_module <- function(input, output, session,
 
   observeEvent(input$new_plan, {
 
-    billing <- session$userData$billing()
-    hold_sub_info <- sub_info()
+    billing <- session$userData$stripe()
+    hold_sub_info <- billing$subscription
     shiny::removeModal()
 
 
     # update the pricing plan for an existing subscription
     tryCatch({
       res <- httr::POST(
-        paste0("https://api.stripe.com/v1/subscriptions/", billing$stripe_subscription_id),
+        paste0("https://api.stripe.com/v1/subscriptions/", billing$subscription$stripe_subscription_id),
         body = list(
           cancel_at_period_end="false",
           proration_behavior="create_prorations",
@@ -234,7 +235,7 @@ plan_column_module <- function(input, output, session,
         stop("Error changing pricing plan", call. = FALSE)
       }
 
-      session$userData$sub_info_trigger(session$userData$sub_info_trigger() + 1)
+      session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
 
       shinyFeedback::showToast("success", "Pricing Successfully Changed")
 

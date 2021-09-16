@@ -46,7 +46,7 @@ plans_box_module_ui <- function(id) {
 #'
 #' @importFrom htmltools tags
 #'
-plans_box_module <- function(input, output, session, sub_info) {
+plans_box_module <- function(input, output, session) {
   ns <- session$ns
 
   sel_plan <- reactiveVal(NULL)
@@ -62,15 +62,12 @@ plans_box_module <- function(input, output, session, sub_info) {
 
   all_pricing_plans <- getOption("pp")$prices
 
-
-
   lapply(seq_along(all_pricing_plans), function(i) {
 
     callModule(
       plan_column_module,
       id = all_pricing_plans[i],
       plan_id = all_pricing_plans[i],
-      sub_info = sub_info,
       disclaimer_text = disclaimer_text,
       hide_waiter = if (i == length(all_pricing_plans)) TRUE else FALSE
     )

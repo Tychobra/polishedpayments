@@ -220,7 +220,7 @@ billing_module_ui <- function(id) {
 #' @importFrom htmltools tags HTML
 #' @importFrom httr DELETE PUT GET content status_code
 #'
-billing_module <- function(input, output, session, sub_info) {
+billing_module <- function(input, output, session) {
   ns <- session$ns
 
   ### SUBSCRIPTION ONLY LOGIC ###
@@ -228,8 +228,9 @@ billing_module <- function(input, output, session, sub_info) {
 
     ### CANCEL SUBSCRIPTION ###
     observeEvent(input$cancel_subscription, {
-      req(sub_info())
-      subscription_name <- sub_info()$nickname
+      req(session$userData$stripe())
+      sub_info <- session$userData$stripe()$subscription
+      subscription_name <- sub_info$nickname
 
       shiny::showModal(
         shiny::modalDialog(
@@ -251,7 +252,7 @@ billing_module <- function(input, output, session, sub_info) {
             tags$h3(
               style = "line-height: 1.5",
               htmltools::HTML(paste0(
-                'Are you sure you want to cancel the ', tags$b(subscription_name), 'subscription?'
+                'Are you sure you want to cancel the ', tags$b(subscription_name), ' subscription?'
               ))
             ),
             tags$br(), tags$br()
@@ -261,16 +262,16 @@ billing_module <- function(input, output, session, sub_info) {
     })
 
     shiny::observeEvent(input$submit_cancel, {
-      shiny::req(sub_info())
+      shiny::req(session$userData$stripe())
 
-      billing <- session$userData$billing()
-      subscription <- sub_info()
+      billing <- session$userData$stripe()
+      subscription <- billing$subscription
 
       tryCatch({
 
         ## Remove Subscription
         res <- httr::DELETE(
-          paste0("https://api.stripe.com/v1/subscriptions/", subscription$id),
+          paste0("https://api.stripe.com/v1/subscriptions/", subscription$stripe_subscription_id),
           encode = "form",
           httr::authenticate(
             user = getOption("pp")$keys$secret,
@@ -290,14 +291,13 @@ billing_module <- function(input, output, session, sub_info) {
         }
 
         # Remove Subscription ID from 'billing' table and update the free trial days
-        # remaining at cancel. The "free_trial_days_remaining_at_cancel" will be used
+        # remaining at cancel. The "trial_days_remaining" will be used
         # to set the proper amount of free trial days if the user restarts their subscription.
         res <- httr::PUT(
           url = paste0(getOption("polished")$api_url, "/subscriptions"),
           encode = "json",
           body = list(
-            subscription_uid = billing$uid,
-            stripe_subscription_id = NA,
+            subscription_uid = subscription$uid,
             free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
           ),
           httr::authenticate(
@@ -315,7 +315,7 @@ billing_module <- function(input, output, session, sub_info) {
           stop(res_content, call. = FALSE)
         }
 
-        session$userData$billing_trigger(session$userData$billing_trigger() + 1)
+        session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
         shinyFeedback::showToast("success", "Subscription Cancelled Successfully")
       }, error = function(err) {
 
@@ -326,10 +326,10 @@ billing_module <- function(input, output, session, sub_info) {
       shiny::removeModal()
     })
 
-    shiny::observeEvent(session$userData$billing(), {
-      billing <- session$userData$billing()
+    shiny::observeEvent(session$userData$stripe(), {
+      subscription <- session$userData$stripe()$subscription
 
-      if (is.na(billing$stripe_subscription_id)) {
+      if (is.na(subscription$stripe_subscription_id)) {
         shinyjs::hide("cancel_subscription")
         shinyjs::hide("billing_info_box")
       } else {
@@ -340,45 +340,40 @@ billing_module <- function(input, output, session, sub_info) {
 
 
     output$plan_name_out <- shiny::renderText({
-      req(session$userData$billing())
-      billing <- session$userData$billing()
+      req(session$userData$stripe())
+      subscription <- session$userData$stripe()$subscription
 
-      if (is.na(billing$stripe_subscription_id)) {
+      if (is.na(subscription$stripe_subscription_id)) {
         out <- "No Plan"
       } else {
-        shiny::req(sub_info())
-        out <- sub_info()$nickname
+        out <- subscription$nickname
       }
 
       out
     })
 
     output$plan_amount_out <- shiny::renderText({
-      req(session$userData$billing())
-      billing <- session$userData$billing()
+      req(session$userData$stripe())
+      subscription <- session$userData$stripe()$subscription
 
-      if (is.na(billing$stripe_subscription_id)) {
+      if (is.na(subscription$stripe_subscription_id)) {
         out <- "$0"
       } else {
-        req(sub_info())
-
-        hold <- sub_info()
-
         amount_out <- paste0(
           "$",
-          formatC(hold$amount / 100, format = "f", digits = 2, big.mark = ","),
+          formatC(subscription$amount / 100, format = "f", digits = 2, big.mark = ","),
           "/",
-          hold$interval
+          subscription$interval
         )
 
         # No trial or current time is after trial end
-        if (hold$trial_days_remaining <= 0) {
+        if (subscription$trial_days_remaining <= 0) {
 
           out <- amount_out
         } else {
 
           out <- paste0(
-            round(hold$trial_days_remaining, 0),
+            round(subscription$trial_days_remaining, 0),
             " Days Remaining in Free Trial then ",
             amount_out
           )
@@ -389,13 +384,13 @@ billing_module <- function(input, output, session, sub_info) {
     })
 
     output$account_created_out <- shiny::renderText({
-      billing <- session$userData$billing()
+      subscription <- session$userData$stripe()$subscription
 
-      as.character(as.Date(billing$created_at))
+      as.character(as.Date(subscription$created_at))
     })
 
     shiny::observe({
-      if (is.null(sub_info()$trial_end)) {
+      if (is.null(session$userData$stripe()$subscription$trial_end)) {
         shinyjs::hideElement("has_trial")
       } else {
         shinyjs::showElement("has_trial")
@@ -403,29 +398,38 @@ billing_module <- function(input, output, session, sub_info) {
     })
 
     output$trial_end_out <- renderText({
-      req(sub_info())
-      hold <- sub_info()
+      req(session$userData$stripe())
+      hold <- session$userData$stripe()$subscription
       as.character(Sys.Date() + hold$trial_days_remaining)
     })
 
 
     callModule(
       plans_box_module,
-      "my_plans",
-      sub_info = sub_info
+      "my_plans"
     )
+
+  # Subscription mode NOT enabled
   } else {
+
+    # Hide Billing Information (until Default Payment Method added for OTP)
+    shinyjs::hide("billing_info_box")
+
     waiter::waiter_hide()
   }
 
 
   # get payment method information for display to user
   payment_methods <- shiny::reactive({
-    req(sub_info())
-    billing <- session$userData$billing()
-    req(!is.na(billing$stripe_subscription_id))
+    req(session$userData$stripe())
 
-    default_payment_method <- sub_info()$default_payment_method
+    # Trigger after a subscription change
+    session$userData$stripe_trigger()
+
+    hold_stripe <- session$userData$stripe()
+    req(!is.na(hold_stripe$subscription))
+
+    default_payment_method <- hold_stripe$default_payment_method
 
     if (is.na(default_payment_method)) {
       out <- NULL
@@ -485,7 +489,6 @@ billing_module <- function(input, output, session, sub_info) {
   observeEvent(payment_methods(), {
 
     if (is.null(payment_methods())) {
-
       shinyjs::hideElement("billing_info")
       if (!is.null(getOption("pp")$prices)) {
         shinyjs::showElement("enable_billing_button")
@@ -538,9 +541,9 @@ billing_module <- function(input, output, session, sub_info) {
 
   invoices_table_prep <- shiny::reactive({
     # Trigger after a subscription change
-    session$userData$sub_info_trigger()
+    session$userData$stripe_trigger()
 
-    billing <- session$userData$billing()
+    billing <- session$userData$stripe()
 
     out <- NULL
     if (is.null(billing)) {
@@ -636,8 +639,7 @@ billing_module <- function(input, output, session, sub_info) {
       disclaimer_text = tags$p(
         class = "text-center",
         "Your subscription payments will be paid using the above credit card."
-      ),
-      sub_info = sub_info
+      )
     )
   }
 
@@ -648,8 +650,7 @@ billing_module <- function(input, output, session, sub_info) {
     disclaimer_text = tags$p(
       class = "text-center",
       "Future subscription payments will be paid using the above credit card."
-    ),
-    sub_info = sub_info
+    )
   )
 
 
