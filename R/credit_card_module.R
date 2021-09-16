@@ -20,13 +20,14 @@ credit_card_module_ui <- function(id) {
 #' @param session
 #' @param open_modal_trigger The trigger to open the Credit Card modal
 #' @param disclaimer_text the Disclaimer text
-#' @param plan_to_enable the subscription plan to enable (requires `subscription = TRUE`)
+#' @param plan_to_enable the subscription plan to enable
 #' @param sub_info the Customer's subscription info
 #' @param subscription whether the Credit Card is for a subscription payment (default) or one time payment
-#' @param payment_amount the amount of the one time payment (requires `subscription = FALSE`)
-#' @param currency the currency of the one time payment (requires `subscription = FALSE`)
+#' @param payment_amount the amount of the one time payment
+#' @param currency the currency of the one time payment
 #'
 #' @export
+#'
 credit_card_module <- function(
   input, output, session,
   open_modal_trigger = reactive(0),
@@ -173,8 +174,11 @@ credit_card_module <- function(
       }
 
     }, error = function(err) {
+
+      msg <- "Error in Setup Intent"
+      print(msg)
       print(err)
-      shinyFeedback::showToast("error", "Error in Setup Intent")
+      shinyFeedback::showToast("error", msg)
     })
 
   }, ignoreInit = TRUE)
@@ -192,6 +196,7 @@ credit_card_module <- function(
       type = 'error',
       message = hold_error$message
     )
+    shinyFeedback::resetLoadingButton("card_button")
   })
 
   # SUCCESS Payment Method (Setup Intent)
@@ -337,6 +342,7 @@ credit_card_module <- function(
       type = 'error',
       message = hold_error$message
     )
+    shinyFeedback::resetLoadingButton("card_button")
   })
 
   observeEvent(input$payment_intent_success, {
