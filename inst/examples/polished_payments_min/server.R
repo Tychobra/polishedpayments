@@ -39,31 +39,12 @@ server <- function(input, output, session) {
       )
     })
 
-    polished_subscription_prep <- reactive({
-      req(session$userData$stripe()$subscription)
-      hold_sub <- session$userData$stripe()$subscription
 
-      data.frame(
-        name = names(hold_sub),
-        value = unlist(hold_sub, use.names = FALSE)
-      )
+
+    output$polished_subscription <- renderPrint({
+      session$userData$stripe()
     })
 
-    output$polished_subscription <- DT::renderDT({
-      out <- polished_subscription_prep()
-
-      DT::datatable(
-        out,
-        rownames = FALSE,
-        selection = "none",
-        options = list(
-          dom = "t",
-          ordering = FALSE
-        )
-      )
-    })
-
-    waiter_hide()
 
     callModule(
       free_trial_banner_module,

@@ -1,7 +1,5 @@
 
 ui <- fluidPage(
-  waiter::use_waiter(),
-  waiter::waiter_show_on_load(),
   fluidRow(
     column(
       12,
@@ -37,7 +35,7 @@ ui <- fluidPage(
     column(
       width = 6,
       h2("Stripe Subscription"),
-      DT::DTOutput("polished_subscription")
+      verbatimTextOutput("polished_subscription")
     ),
     column(
       12,
