@@ -7,6 +7,7 @@ credit_card_module_ui <- function(id) {
   ns <- shiny::NS(id)
 
   tagList(
+    useShinyFeedback(),
     tags$script(src = "polishedpayments/js/credit_card_module.js"),
     tags$script(paste0("credit_card_module('", ns(''), "')"))
   )
