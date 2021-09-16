@@ -2,6 +2,8 @@
 
 export(app_module)
 export(app_module_ui)
+export(create_payment_module)
+export(create_payment_module_ui)
 export(create_stripe_customer)
 export(credit_card_module)
 export(credit_card_module_ui)

@@ -54,14 +54,13 @@ server <- function(input, output, session) {
   }, once = TRUE)
 
   shiny::callModule(
-    credit_card_module,
+    create_payment_module,
     "one_time_payment",
     open_modal_trigger = reactive({input$single_payment_test}),
     disclaimer_text = tags$p(
       class = "text-center",
       "You will be charged immediately for this one time payment."
     ),
-    subscription = FALSE,
     payment_amount = 20.00
   )
 

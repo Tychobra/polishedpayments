@@ -11,7 +11,6 @@ credit_card_module(
   open_modal_trigger = reactive(0),
   disclaimer_text = "Disclaimer",
   plan_to_enable = NULL,
-  sub_info = NULL,
   subscription = TRUE,
   payment_amount = NULL,
   currency = "usd"
@@ -22,15 +21,15 @@ credit_card_module(
 
 \item{disclaimer_text}{the Disclaimer text}
 
-\item{plan_to_enable}{the subscription plan to enable (requires `subscription = TRUE`)}
-
-\item{sub_info}{the Customer's subscription info}
+\item{plan_to_enable}{the subscription plan to enable}
 
 \item{subscription}{whether the Credit Card is for a subscription payment (default) or one time payment}
 
-\item{payment_amount}{the amount of the one time payment (requires `subscription = FALSE`)}
+\item{payment_amount}{the amount of the one time payment}
 
-\item{currency}{the currency of the one time payment (requires `subscription = FALSE`)}
+\item{currency}{the currency of the one time payment}
+
+\item{sub_info}{the Customer's subscription info}
 }
 \description{
 Server logic for Stripe Credit Card input

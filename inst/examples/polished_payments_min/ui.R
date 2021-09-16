@@ -47,7 +47,7 @@ ui <- fluidPage(
     )
   ),
 
-  credit_card_module_ui("one_time_payment"),
+  create_payment_module_ui("one_time_payment"),
 
   free_trial_banner_module_ui("trial_banner")
 )
