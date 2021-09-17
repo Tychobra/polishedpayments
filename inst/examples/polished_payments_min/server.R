@@ -53,16 +53,18 @@ server <- function(input, output, session) {
 
   }, once = TRUE)
 
-  shiny::callModule(
-    create_payment_module,
-    "one_time_payment",
-    open_modal_trigger = reactive({input$single_payment_test}),
-    disclaimer_text = tags$p(
-      class = "text-center",
-      "You will be charged immediately for this one time payment."
-    ),
-    payment_amount = 20.00
+  payment_1_return <- shiny::callModule(
+    credit_card_payment_module,
+    "payment_1",
+    trigger = reactive({input$submit_card_payment}),
+    amount = 1000
   )
+
+  observe({
+    print(list(
+      payment_result = payment_1_return$payment_result()
+    ))
+  })
 
 }
 

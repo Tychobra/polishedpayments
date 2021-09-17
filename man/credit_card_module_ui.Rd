@@ -4,10 +4,12 @@
 \alias{credit_card_module_ui}
 \title{UI element for Stripe Credit Card input}
 \usage{
-credit_card_module_ui(id)
+credit_card_module_ui(id, width = "100\%")
 }
 \arguments{
 \item{id}{The element's namespaced ID}
+
+\item{width}{valid css unit for width}
 }
 \description{
 UI element for Stripe Credit Card input

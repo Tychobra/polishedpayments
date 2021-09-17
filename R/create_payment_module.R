@@ -3,7 +3,8 @@
 #' @param id The element's namespaced ID
 #'
 #' @export
-create_payment_module_ui <- function(id) {
+#'
+pay_button_module_ui <- function(id) {
   ns <- shiny::NS(id)
 
   tagList(
@@ -25,10 +26,8 @@ create_payment_module_ui <- function(id) {
 #'
 #' @export
 #'
-create_payment_module <- function(
+pay_button_module <- function(
   input, output, session,
-  open_modal_trigger = reactive(0),
-  disclaimer_text = "Disclaimer",
   payment_amount = NULL,
   currency = "usd"
 ) {
@@ -41,7 +40,7 @@ create_payment_module <- function(
   # attach a (default) payment method to the customer
   # If Customer is making a one time payment, we create a
   # Payment Intent & include checkbox to save Payment Method
-  observeEvent(open_modal_trigger(), {
+  observeEvent(, {
 
     billing <- session$userData$stripe()
 

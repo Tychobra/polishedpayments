@@ -47,7 +47,17 @@ ui <- fluidPage(
     )
   ),
 
-  create_payment_module_ui("one_time_payment"),
+
+  column(
+    3,
+    credit_card_module_ui("payment_1"),
+    br(),
+    shinyFeedback::loadingButton(
+      "submit_card_payment",
+      "Submit",
+      loadingLabel = 'Confirming...'
+    )
+  ),
 
   free_trial_banner_module_ui("trial_banner")
 )
