@@ -53,16 +53,41 @@ server <- function(input, output, session) {
 
   }, once = TRUE)
 
-  payment_1_return <- shiny::callModule(
+  payment_return <- shiny::callModule(
     credit_card_payment_module,
-    "payment_1",
+    "payment",
     trigger = reactive({input$submit_card_payment}),
     amount = 1000
   )
 
+  observeEvent(payment_return$payment_result(), {
+    result <- payment_return$payment_result()
+
+    shinyFeedback::resetLoadingButton("submit_card_payment")
+    if (is.null(result$error)) {
+      showToast("success", "payment made")
+    } else {
+      showToast("error", result$error$message)
+    }
+
+    print(list(
+      payment_result = payment_return$payment_result()
+    ))
+  })
+
+
+
+
+  subscription_return <- shiny::callModule(
+    credit_card_subscription_module,
+    "subscription",
+    trigger = reactive({input$subscription_card_payment}),
+    price_id = "price_1HPGITCJv951GRc3Zuad1uoX"
+  )
+
   observe({
     print(list(
-      payment_result = payment_1_return$payment_result()
+      subscription_result = subscription_return$subscription_result()
     ))
   })
 

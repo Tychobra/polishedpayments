@@ -33,7 +33,7 @@ credit_card_module_ui <- function(
 #' @param session the Shiny server session
 #' @param trigger the reactive trigger to submit the payment to Stripe
 #' @param amount the amount of the payment
-#' @param the currency.  Defaults to "usd" (United States Dollar).
+#' @param currency The currency. Defaults to "usd" (United States Dollar).
 #'
 #' @export
 #'
@@ -124,11 +124,28 @@ credit_card_payment_module <- function(input, output, session,
   ))
 }
 
-credit_card_subscription_module <- function(input, output, session) {
+
+#' Server logic for Stripe Credit Card input
+#'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param trigger the reactive trigger to submit the payment to Stripe
+#' @param price_id The Stripe price_id for the subscription.  A subscription can have
+#' multiple prices in Stripe (e.g. monthly and yearly).
+#'
+#' @export
+#'
+credit_card_subscription_module <- function(input, output, session,
+  trigger = function() NULL,
+  price_id
+) {
+  ns <- session$ns
 
   intent_id <- reactiveVal(NULL)
 
   observeEvent(trigger(), {
+    billing <- session$userData$stripe()
 
     tryCatch({
       setup_res <- httr::POST(
@@ -154,13 +171,14 @@ credit_card_subscription_module <- function(input, output, session) {
       intent_id(setup_data$intent)
 
       session$sendCustomMessage(
-        ns("create_setup_intent"),
+        ns("create_subscription"),
         message = list(
           client_secret = setup_data$client_secret
         )
       )
 
-    }, function(err) {
+    }, error = function(err) {
+
       msg <- "Error in subscription setup"
       print(msg)
       print(err)
@@ -169,9 +187,9 @@ credit_card_subscription_module <- function(input, output, session) {
 
   })
 
-  observeEvent(input$setup_intent_success, {
+  observeEvent(input$setup_intent_result, {
 
-
+    browser()
     billing <- session$userData$stripe()
     setup_intent_id <- intent_id()
 
@@ -200,7 +218,7 @@ credit_card_subscription_module <- function(input, output, session) {
 
       post_body <- list(
         "customer" = billing$stripe_customer_id,
-        `items[0][plan]` = plan_to_enable,
+        `items[0][price]` = price_id,
         "default_payment_method" = default_payment_method
       )
 
@@ -264,7 +282,7 @@ credit_card_subscription_module <- function(input, output, session) {
 
 
 
-      session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
+      #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
 
       shinyFeedback::showToast(
         type = 'success',
@@ -277,6 +295,10 @@ credit_card_subscription_module <- function(input, output, session) {
 
     intent_id(NULL)
   })
+
+  return(list(
+    subscription_result = reactive({input$setup_intent_result})
+  ))
 }
 
 

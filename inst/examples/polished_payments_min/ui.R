@@ -50,10 +50,22 @@ ui <- fluidPage(
 
   column(
     3,
-    credit_card_module_ui("payment_1"),
+    credit_card_module_ui("payment"),
+    br(),
     br(),
     shinyFeedback::loadingButton(
       "submit_card_payment",
+      "Submit",
+      loadingLabel = 'Confirming...'
+    )
+  ),
+  column(
+    3,
+    credit_card_module_ui("subscription"),
+    br(),
+    br(),
+    shinyFeedback::loadingButton(
+      "subscription_card_payment",
       "Submit",
       loadingLabel = 'Confirming...'
     )
