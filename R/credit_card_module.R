@@ -1,21 +1,108 @@
 #' UI element for Stripe Credit Card input
 #'
-#' @param id The element's namespaced ID
-#' @param width valid css unit for width
+#' @param id the Shiny module id
 #'
 #' @export
 credit_card_module_ui <- function(
-  id,
-  width = "100%"
+  id
 ) {
   ns <- shiny::NS(id)
 
+  wrapper_id <- ns("wrapper")
+
   tagList(
+    tags$style(paste0("
+
+#", wrapper_id, "example-1 * {
+  font-family: Roboto, Open Sans, Segoe UI, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#", wrapper_id, " fieldset {
+  margin: 0 0 20px 0;
+  padding: 0;
+  border-style: none;
+  background-color: #FFF;/*#7795f8;*/
+  box-shadow: 0 6px 9px rgba(50, 50, 93, 0.06), 0 2px 5px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 #829fff;
+  border-radius: 4px;
+}
+
+#", wrapper_id, " .stripe-row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-left: 15px;
+}
+
+#", wrapper_id, " .stripe-row + .stripe-row {
+  border-top: 1px solid #819efc;
+}
+
+#", wrapper_id, " label {
+  width: 15%;
+  min-width: 70px;
+  padding: 11px 0;
+  color: #c4f0ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#", wrapper_id, " input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  border-style: none;
+}
+
+#", wrapper_id, " input:-webkit-autofill {
+  -webkit-text-fill-color: #fce883;
+  transition: background-color 100000000s;
+  -webkit-animation: 1ms void-animation-out;
+}
+
+#", wrapper_id, " .StripeElement--webkit-autofill {
+  background: transparent !important;
+}
+
+#", wrapper_id, " .StripeElement {
+  width: 100%;
+  padding: 11px 15px 11px 0;
+}
+
+#", wrapper_id, " input {
+  width: 100%;
+  padding: 11px 15px 11px 0;
+  color: #fff;
+  background-color: transparent;
+  -webkit-animation: 1ms void-animation-out;
+}
+
+#", wrapper_id, " input::-webkit-input-placeholder {
+  color: #87bbfd;
+}
+
+#", wrapper_id, " input::-moz-placeholder {
+  color: #87bbfd;
+}
+
+#", wrapper_id, " input:-ms-input-placeholder {
+  color: #87bbfd;
+}
+    ")),
     tags$div(
-      style = paste0("width: ", width),
+      id = wrapper_id,
+      #style = paste0("width: ", width),
       tags$fieldset(
         tags$div(
-          id = ns("credit_card")
+          class = "stripe-row",
+          div(
+            id = ns("credit_card")
+          )
         )
       )
     ),

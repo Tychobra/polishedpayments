@@ -1,6 +1,6 @@
 library(shiny)
-library(DT)
 library(magrittr)
+library(shinyFeedback)
 library(polished)
 library(polishedpayments)
 

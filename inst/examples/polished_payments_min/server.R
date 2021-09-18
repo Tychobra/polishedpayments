@@ -14,44 +14,23 @@ server <- function(input, output, session) {
   })
 
 
-  observeEvent(session$userData$stripe(), {
 
-    polished_user_prep <- reactive({
-      hold_user <- session$userData$user()
-
-      data.frame(
-        name = names(hold_user),
-        value = unlist(hold_user, use.names = FALSE)
-      )
-    })
-
-    output$polished_user <- DT::renderDT({
-      out <- polished_user_prep()
-
-      DT::datatable(
-        out,
-        rownames = FALSE,
-        selection = "none",
-        options = list(
-          dom = "t",
-          ordering = FALSE
-        )
-      )
-    })
+  output$polished_user <- renderPrint({
+    session$userData$user()
+  })
 
 
 
-    output$polished_subscription <- renderPrint({
-      session$userData$stripe()
-    })
+  output$polished_subscription <- renderPrint({
+    session$userData$stripe()
+  })
 
 
-    callModule(
-      free_trial_banner_module,
-      "trial_banner"
-    )
+  callModule(
+    free_trial_banner_module,
+    "trial_banner"
+  )
 
-  }, once = TRUE)
 
   payment_return <- shiny::callModule(
     credit_card_payment_module,

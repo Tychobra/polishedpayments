@@ -4,12 +4,10 @@
 \alias{credit_card_module_ui}
 \title{UI element for Stripe Credit Card input}
 \usage{
-credit_card_module_ui(id, width = "100\%")
+credit_card_module_ui(id)
 }
 \arguments{
-\item{id}{The element's namespaced ID}
-
-\item{width}{valid css unit for width}
+\item{id}{the Shiny module id}
 }
 \description{
 UI element for Stripe Credit Card input

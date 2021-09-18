@@ -1,5 +1,6 @@
 
 ui <- fluidPage(
+  useShinyFeedback(),
   fluidRow(
     column(
       12,
@@ -30,34 +31,37 @@ ui <- fluidPage(
     column(
       width = 6,
       h2("Polished User"),
-      DT::DTOutput("polished_user")
+      verbatimTextOutput("polished_user")
     ),
     column(
       width = 6,
       h2("Stripe Subscription"),
       verbatimTextOutput("polished_subscription")
-    ),
-    column(
-      12,
-      h2("Test One-time Payment"),
-      shiny::actionButton(
-        "single_payment_test",
-        "Make Payment"
-      )
     )
   ),
 
 
-  column(
-    3,
-    credit_card_module_ui("payment"),
-    br(),
-    br(),
-    shinyFeedback::loadingButton(
-      "submit_card_payment",
-      "Submit",
-      loadingLabel = 'Confirming...'
+  div(
+    style="width: 400px;",
+    wellPanel(
+      h2(
+        class = "text-center",
+        "Make one time $10 payment"
+      ),
+      br(),
+      br(),
+      credit_card_module_ui("payment"),
+      br(),
+      br(),
+      shinyFeedback::loadingButton(
+        "submit_card_payment",
+        "Submit $10 Payment",
+        loadingLabel = 'Confirming Payment...',
+        class = "btn-primary btn-lg",
+        style = "width: 100%"
+      )
     )
+
   ),
   column(
     3,
