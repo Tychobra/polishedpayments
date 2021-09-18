@@ -29,47 +29,72 @@ ui <- fluidPage(
   ),
   fluidRow(
     column(
-      width = 6,
-      h2("Polished User"),
-      verbatimTextOutput("polished_user")
+      6,
+      tabsetPanel(
+        tabPanel(
+          "Stripe Subscription",
+          br(),
+          verbatimTextOutput("polished_subscription")
+        ),
+        tabPanel(
+          "Polished User",
+          br(),
+          verbatimTextOutput("polished_user")
+        )
+      )
     ),
     column(
-      width = 6,
-      h2("Stripe Subscription"),
-      verbatimTextOutput("polished_subscription")
-    )
-  ),
-
-
-  div(
-    style="width: 400px;",
-    wellPanel(
-      h2(
-        class = "text-center",
-        "Make one time $10 payment"
-      ),
-      br(),
-      br(),
-      credit_card_module_ui("payment"),
-      shinyFeedback::loadingButton(
-        "submit_card_payment",
-        "Pay $10",
-        loadingLabel = 'Confirming Payment...',
-        class = "btn-primary btn-lg",
-        style = "width: 100%"
+      6,
+      tabsetPanel(
+        tabPanel(
+          "Single Payment",
+          br(),
+          div(
+            style="max-width: 400px; margin: 0 auto;",
+            wellPanel(
+              h2(
+                class = "text-center",
+                style = "line-height: 1.75;",
+                "Make one time $10 payment"
+              ),
+              br(),
+              br(),
+              credit_card_module_ui("payment"),
+              shinyFeedback::loadingButton(
+                "submit_card_payment",
+                "Pay $10",
+                loadingLabel = 'Confirming Payment...',
+                class = "btn-primary btn-lg",
+                style = "width: 100%"
+              )
+            )
+          )
+        ),
+        tabPanel(
+          "Subscription",
+          br(),
+          div(
+            style="max-width: 400px; margin: 0 auto;",
+            wellPanel(
+              h2(
+                class = "text-center",
+                style = "line-height: 1.75;",
+                "Subscribe to $10/month Subscription"
+              ),
+              br(),
+              br(),
+              credit_card_module_ui("subscription"),
+              shinyFeedback::loadingButton(
+                "subscription_card_payment",
+                "Submit",
+                loadingLabel = 'Confirming Payment...',
+                class = "btn-primary btn-lg",
+                style = "width: 100%"
+              )
+            )
+          )
+        )
       )
-    )
-
-  ),
-  column(
-    3,
-    credit_card_module_ui("subscription"),
-    br(),
-    br(),
-    shinyFeedback::loadingButton(
-      "subscription_card_payment",
-      "Submit",
-      loadingLabel = 'Confirming...'
     )
   ),
 
