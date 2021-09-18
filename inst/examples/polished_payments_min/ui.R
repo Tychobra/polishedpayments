@@ -51,11 +51,9 @@ ui <- fluidPage(
       br(),
       br(),
       credit_card_module_ui("payment"),
-      br(),
-      br(),
       shinyFeedback::loadingButton(
         "submit_card_payment",
-        "Submit $10 Payment",
+        "Pay $10",
         loadingLabel = 'Confirming Payment...',
         class = "btn-primary btn-lg",
         style = "width: 100%"
