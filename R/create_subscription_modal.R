@@ -10,11 +10,11 @@
 #'
 #' @export
 #'
-credit_card_subscription_modal_module <- function(input, output, session,
+create_subscription_modal <- function(input, output, session,
   price_id,
   # modalDialog inputs
   title = NULL,
-  size = c("m", "s", "l"),
+  size = c("s", "m", "l"),
   easyClose = FALSE,
   fade = TRUE
 ) {

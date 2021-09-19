@@ -65,7 +65,7 @@ plan_column_module <- function(input, output, session,
 
 
   plan_data <- reactive({
-
+    browser()
     out <- NULL
     tryCatch({
 
@@ -170,7 +170,7 @@ plan_column_module <- function(input, output, session,
 
   observeEvent(open_credit_card(), {
     callModule(
-      credit_card_subscription_modal_module,
+      create_subscription_modal,
       "change_plan_modal",
       price_id = plan_id
     )

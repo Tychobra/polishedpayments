@@ -185,6 +185,7 @@ app_module <- function(input, output, session) {
     hold_user_uid <- session$userData$user()$user_uid
     hold_user_email <- session$userData$user()$email
 
+    browser()
     sub_db <- list()
     err_out <- NULL
     tryCatch({
@@ -227,6 +228,8 @@ app_module <- function(input, output, session) {
     }
 
     if (identical(nrow(sub_db), 0L)) {
+
+
       # user does not yet have an entry in the "subscriptions" table, so this is the
       # first sign in, we will add the user to the "subscriptions" table, create a Stripe
       # account for the user, and add an entry for the user to the "subscriptions" table
@@ -283,15 +286,6 @@ app_module <- function(input, output, session) {
           stripe_customer_id = customer_id,
           stripe_subscription_id = stripe_subscription_id
         )
-
-        if (is.null(getOption("pp")$prices)) {
-          sub_db$stripe_subscription_id <- NA
-        }
-
-        sub_db$created_at <- Sys.time()
-        sub_db$trial_days_remaining <- NA
-
-        sub_db <- tibble::as_tibble(sub_db)
 
       }, error = function(err) {
 
@@ -367,42 +361,41 @@ app_module <- function(input, output, session) {
           })
         }
 
-      }
+      } else {
 
-    }
-
-
-    if (!identical(nrow(sub_db), 0L)) {
-
-      out <- list(
-        stripe_customer_id = sub_db$stripe_customer_id,
-        free_user = FALSE,
-        default_payment_method = NA,
-        subscription = NA
-      )
-
-      if (!is.na(sub_db$stripe_subscription_id) && !is.null(getOption("pp")$prices)) {
-        hold_sub <- get_stripe_subscription(sub_db$stripe_subscription_id)
-
-        out$default_payment_method <- hold_sub$default_payment_method
-
-        out$subscription <- list(
-          uid = sub_db$uid,
-          stripe_subscription_id = sub_db$stripe_subscription_id,
-          item_id = hold_sub$item_id,
-          plan_id = hold_sub$plan_id,
-          nickname = hold_sub$nickname,
-          amount = hold_sub$amount,
-          interval = hold_sub$interval,
-          trial_end = hold_sub$trial_end,
-          is_billing_enabled = if (is.na(hold_sub$default_payment_method)) FALSE else TRUE,
-          trial_days_remaining = hold_sub$trial_days_remaining,
-          created_at = sub_db$created_at
+        out <- list(
+          stripe_customer_id = sub_db$stripe_customer_id,
+          free_user = FALSE,
+          default_payment_method = NA,
+          subscription = NA
         )
+
+        if (!is.na(sub_db$stripe_subscription_id) && !is.null(getOption("pp")$prices)) {
+          hold_sub <- get_stripe_subscription(sub_db$stripe_subscription_id)
+
+          out$default_payment_method <- hold_sub$default_payment_method
+
+          out$subscription <- list(
+            uid = sub_db$uid,
+            stripe_subscription_id = sub_db$stripe_subscription_id,
+            item_id = hold_sub$item_id,
+            plan_id = hold_sub$plan_id,
+            nickname = hold_sub$nickname,
+            amount = hold_sub$amount,
+            interval = hold_sub$interval,
+            trial_end = hold_sub$trial_end,
+            is_billing_enabled = if (is.na(hold_sub$default_payment_method)) FALSE else TRUE,
+            trial_days_remaining = hold_sub$trial_days_remaining,
+            created_at = sub_db$created_at
+          )
+        }
       }
 
-      session$userData$stripe(out)
     }
+
+
+    session$userData$stripe(out)
+
   }, priority = 10)
 
   shiny::callModule(

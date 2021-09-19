@@ -114,6 +114,5 @@ payments_ui(ui) %>%
         h1("Demo", style = "margin-bottom: 15px; margin-top: 10px;")
       ),
       background_image = "background_image.png"
-    ),
-    account_module_ui = polishedpayments::app_module_ui("account")
+    )
   )

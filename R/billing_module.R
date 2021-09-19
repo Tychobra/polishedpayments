@@ -93,7 +93,7 @@ billing_module_ui <- function(id) {
       id = ns("billing_info_box"),
       shiny::fluidRow(
         shinydashboard::box(
-          title = "Billing Information",
+          title = "Payment Method",
           width = 12,
           tags$div(
             id = ns("billing_info"),
@@ -161,8 +161,8 @@ billing_module_ui <- function(id) {
               12,
               tags$br(),
               shiny::actionButton(
-                ns("update_billing_info"),
-                "Update Billing",
+                ns("change_payment_method"),
+                "Change",
                 class = "btn-primary pull-right",
                 style = "color: #FFF; width: 150px;"
               )
@@ -225,7 +225,7 @@ billing_module <- function(input, output, session) {
 
     ### CANCEL SUBSCRIPTION ###
     observeEvent(input$cancel_subscription, {
-      req(session$userData$stripe())
+      req(session$userData$stripe(), !is.na(session$userData$stripe()$subscription))
       sub_info <- session$userData$stripe()$subscription
       subscription_name <- sub_info$nickname
 
@@ -259,7 +259,7 @@ billing_module <- function(input, output, session) {
     })
 
     shiny::observeEvent(input$submit_cancel, {
-      shiny::req(session$userData$stripe())
+      shiny::req(session$userData$stripe(), !is.na(session$userData$stripe()$subscription))
 
       billing <- session$userData$stripe()
       subscription <- billing$subscription
@@ -326,7 +326,7 @@ billing_module <- function(input, output, session) {
     shiny::observeEvent(session$userData$stripe(), {
       subscription <- session$userData$stripe()$subscription
 
-      if (is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
         shinyjs::hide("cancel_subscription")
       } else {
         shinyjs::show("cancel_subscription")
@@ -379,7 +379,7 @@ billing_module <- function(input, output, session) {
     })
 
     output$account_created_out <- shiny::renderText({
-      req(session$userData$stripe()$subscription)
+      req(!is.na(session$userData$stripe()$subscription))
       subscription <- session$userData$stripe()$subscription
 
       as.character(as.Date(subscription$created_at))
@@ -431,7 +431,7 @@ billing_module <- function(input, output, session) {
 
     # Trigger after a subscription change
     session$userData$stripe_trigger()
-
+    browser()
     hold_stripe <- session$userData$stripe()
     #req(!is.na(hold_stripe$subscription))
     # TODO: find a way to get the default payment method for single payments as well
@@ -501,7 +501,7 @@ billing_module <- function(input, output, session) {
     })
 
 
-    browser()
+
     out
   })
 
@@ -691,11 +691,7 @@ billing_module <- function(input, output, session) {
   # shiny::callModule(
   #   credit_card_module,
   #   "change_credit_card",
-  #   open_modal_trigger = reactive({input$update_billing_info}),
-  #   disclaimer_text = tags$p(
-  #     class = "text-center",
-  #     "Future subscription payments will be paid using the above credit card."
-  #   )
+  #   _modal_trigger = reactive({input$change_payment_method})
   # )
 
 

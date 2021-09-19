@@ -73,4 +73,4 @@ server <- function(input, output, session) {
 }
 
 payments_server(server) %>%
-  secure_server(account_module = polishedpayments::app_module)
+  secure_server()
