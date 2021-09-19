@@ -195,12 +195,10 @@ billing_module_ui <- function(id) {
       )
     ),
     tags$br(), tags$br(), tags$br(),
-    credit_card_module_ui(
-      ns("enable_billing")
-    ),
-    credit_card_module_ui(
-      ns("change_credit_card")
-    )
+
+    #credit_card_module_ui(
+    #  ns("change_credit_card")
+    #)
   )
 }
 
@@ -211,7 +209,6 @@ billing_module_ui <- function(id) {
 #' @param input the Shiny server input
 #' @param output the Shiny server output
 #' @param session the Shiny server session
-#' @param sub_info the subscription information
 #'
 #' @importFrom dplyr %>% select mutate .data
 #' @importFrom DT renderDT datatable
@@ -331,10 +328,8 @@ billing_module <- function(input, output, session) {
 
       if (is.na(subscription$stripe_subscription_id)) {
         shinyjs::hide("cancel_subscription")
-        shinyjs::hide("billing_info_box")
       } else {
         shinyjs::show("cancel_subscription")
-        shinyjs::show("billing_info_box")
       }
     })
 
@@ -343,7 +338,7 @@ billing_module <- function(input, output, session) {
       req(session$userData$stripe())
       subscription <- session$userData$stripe()$subscription
 
-      if (is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
         out <- "No Plan"
       } else {
         out <- subscription$nickname
@@ -356,7 +351,7 @@ billing_module <- function(input, output, session) {
       req(session$userData$stripe())
       subscription <- session$userData$stripe()$subscription
 
-      if (is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
         out <- "$0"
       } else {
         amount_out <- paste0(
@@ -384,12 +379,15 @@ billing_module <- function(input, output, session) {
     })
 
     output$account_created_out <- shiny::renderText({
+      req(session$userData$stripe()$subscription)
       subscription <- session$userData$stripe()$subscription
 
       as.character(as.Date(subscription$created_at))
     })
 
     shiny::observe({
+      req(!is.na(session$userData$stripe()$subscription))
+
       if (is.null(session$userData$stripe()$subscription$trial_end)) {
         shinyjs::hideElement("has_trial")
       } else {
@@ -400,7 +398,14 @@ billing_module <- function(input, output, session) {
     output$trial_end_out <- renderText({
       req(session$userData$stripe())
       hold <- session$userData$stripe()$subscription
-      as.character(Sys.Date() + hold$trial_days_remaining)
+
+      if (is.na(hold)) {
+        out <- "No Trial"
+      } else {
+        out <- as.character(Sys.Date() + hold$trial_days_remaining)
+      }
+
+      out
     })
 
 
@@ -409,11 +414,12 @@ billing_module <- function(input, output, session) {
       "my_plans"
     )
 
-  # Subscription mode NOT enabled
+
   } else {
+    # Subscription mode NOT enabled
 
     # Hide Billing Information (until Default Payment Method added for OTP)
-    shinyjs::hide("billing_info_box")
+    #shinyjs::hide("billing_info_box")
 
     waiter::waiter_hide()
   }
@@ -427,60 +433,94 @@ billing_module <- function(input, output, session) {
     session$userData$stripe_trigger()
 
     hold_stripe <- session$userData$stripe()
-    req(!is.na(hold_stripe$subscription))
+    #req(!is.na(hold_stripe$subscription))
+    # TODO: find a way to get the default payment method for single payments as well
+    #if (is.na(hold_stripe$default_payment_method)) {
+    #  out <- NULL
+    #} else {
 
-    default_payment_method <- hold_stripe$default_payment_method
+    out <- NULL
 
-    if (is.na(default_payment_method)) {
-      out <- NULL
-    } else {
+    tryCatch({
 
-      out <- NULL
-      tryCatch({
-        res <- httr::GET(
-          paste0("https://api.stripe.com/v1/payment_methods/", default_payment_method),
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
+      res <- httr::GET(
+        paste0("https://api.stripe.com/v1/payment_methods"),
+        encode = "form",
+        query = list(
+          customer = hold_stripe$stripe_customer_id,
+          type = "card"
+        ),
+        httr::authenticate(
+          user = getOption("pp")$keys$secret,
+          password = ""
         )
+      )
 
-        dat <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
+      dat <- jsonlite::fromJSON(
+        httr::content(res, "text", encoding = "UTF-8")
+      )
 
-        if (!identical(httr::status_code(res), 200L)) {
-          print("error getting payment information")
-          print(dat)
-          return(NULL)
-        }
+      if (!identical(httr::status_code(res), 200L)) {
+        print("error getting payment information")
+        print(dat)
+        return(NULL)
+      }
 
 
-        out <- list(
-          "name" = dat$billing_details$name,
+      get_cc_details <- function(res_dat) {
+        list(
+          "payment_method_id" = res_dat$id,
+          "name" = res_dat$billing_details$name,
           "address" = list(
-            "city" = dat$billing_details$address$city,
-            "line1" = dat$billing_details$address$line1,
-            "line2" = dat$billing_details$address$line2,
-            "postal_code" = dat$billing_details$address$postal_code,
-            "state" = dat$billing_details$address$state
+            "city" = res_dat$billing_details$address$city,
+            "line1" = res_dat$billing_details$address$line1,
+            "line2" = res_dat$billing_details$address$line2,
+            "postal_code" = res_dat$billing_details$address$postal_code,
+            "state" = res_dat$billing_details$address$state
           ),
-          "card_brand" = dat$card$brand,
-          "card_last4" = dat$card$last4,
-          "exp_month" = dat$card$exp_month,
-          "exp_year" = dat$card$exp_year
+          "card_brand" = res_dat$card$brand,
+          "card_last4" = res_dat$card$last4,
+          "exp_month" = res_dat$card$exp_month,
+          "exp_year" = res_dat$card$exp_year
         )
-      }, error = function(err) {
+      }
 
-        msg <- "unable to get payment method"
-        print(msg)
-        print(err)
-        showToast("error", msg)
+      out <- vector("list", length = nrow(dat$data))
+      for (i in seq_len(nrow(dat$data))) {
+        the_row <- dat$data[i, ]
+          out[[i]] <- get_cc_details(the_row)
+      }
+    }, error = function(err) {
 
-        invisible()
-      })
+      msg <- "unable to get payment method"
+      print(msg)
+      print(err)
+      showToast("error", msg)
 
+      invisible(NULL)
+    })
+
+
+    browser()
+    out
+  })
+
+  default_payment_method_info <- reactive({
+    if (is.null(payment_methods())) return(NULL)
+    hold_stripe <- session$userData$stripe()
+    browser()
+    hold <- payment_methods()
+    out <- NULL
+    for (pm in hold) {
+
+      if (identical(pm$id, hold_stripe$default_payment_method)) {
+        out <- pm
+      }
+
+    }
+
+    if (is.null(out)) {
+      out <- hold[[1]]
     }
 
     out
@@ -488,16 +528,13 @@ billing_module <- function(input, output, session) {
 
   observeEvent(payment_methods(), {
 
-    if (is.null(payment_methods())) {
+    browser()
+    if (is.null(default_payment_method_info())) {
       shinyjs::hideElement("billing_info")
-      if (!is.null(getOption("pp")$prices)) {
-        shinyjs::showElement("enable_billing_button")
-      }
+      shinyjs::showElement("enable_billing_button")
     } else {
       shinyjs::showElement("billing_info")
-      if (!is.null(getOption("pp")$prices)) {
-        shinyjs::hideElement("enable_billing_button")
-      }
+      shinyjs::hideElement("enable_billing_button")
     }
 
   }, ignoreNULL = FALSE)
@@ -505,30 +542,32 @@ billing_module <- function(input, output, session) {
 
   # billing information outputs -----------
   output$name_out <- shiny::renderText({
-    req(payment_methods())
+    req(default_payment_method_info())
 
-    payment_methods()$name
+    default_payment_method_info()$name
   })
 
+
+
   output$postal_code <- shiny::renderText({
-    req(payment_methods())
-    payment_methods()$address$postal_code
+    req(default_payment_method_info())
+    default_payment_method_info()$address$postal_code
   })
 
   # credit card output --------------------
   output$card_brand_out <- shiny::renderText({
-    req(payment_methods())
-    payment_methods()$card_brand
+    req(default_payment_method_info())
+    default_payment_method_info()$card_brand
   })
 
   output$last_4_out <- shiny::renderText({
-    req(payment_methods())
-    paste0("XXXX-XXXX-XXXX-", payment_methods()$card_last4)
+    req(default_payment_method_info())
+    paste0("XXXX-XXXX-XXXX-", default_payment_method_info()$card_last4)
   })
 
   output$card_exp_out <- shiny::renderText({
-    req(payment_methods())
-    paste0(payment_methods()$exp_month, "/", payment_methods()$exp_year)
+    req(default_payment_method_info())
+    paste0(default_payment_method_info()$exp_month, "/", default_payment_method_info()$exp_year)
   })
 
   empty_invoices_table <- tibble::tibble(
@@ -632,26 +671,32 @@ billing_module <- function(input, output, session) {
   })
 
   if (!is.null(getOption("pp")$prices)) {
-    shiny::callModule(
-      credit_card_module,
-      "enable_billing",
-      open_modal_trigger = reactive({input$enable_billing}),
-      disclaimer_text = tags$p(
-        class = "text-center",
-        "Your subscription payments will be paid using the above credit card."
+
+    observeEvent(input$enable_billing_button, {
+
+
+      credit_card_module_ui(
+        ns("enable_billing")
       )
-    )
+    })
+
+    # TODO: enable this for the payment method only
+    # shiny::callModule(
+    #   credit_card_payment_method_module,
+    #   "enable_billing",
+    #   trigger = reactive({input$enable_billing_button})
+    # )
   }
 
-  shiny::callModule(
-    credit_card_module,
-    "change_credit_card",
-    open_modal_trigger = reactive({input$update_billing_info}),
-    disclaimer_text = tags$p(
-      class = "text-center",
-      "Future subscription payments will be paid using the above credit card."
-    )
-  )
+  # shiny::callModule(
+  #   credit_card_module,
+  #   "change_credit_card",
+  #   open_modal_trigger = reactive({input$update_billing_info}),
+  #   disclaimer_text = tags$p(
+  #     class = "text-center",
+  #     "Future subscription payments will be paid using the above credit card."
+  #   )
+  # )
 
 
 

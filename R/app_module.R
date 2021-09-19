@@ -95,8 +95,8 @@ app_module_ui <- function(
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
-    waiter::use_waiter(),
-    waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
+    #waiter::use_waiter(),
+    #waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
 
     tab_items
   )

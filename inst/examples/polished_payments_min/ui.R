@@ -86,7 +86,7 @@ ui <- fluidPage(
               credit_card_module_ui("subscription"),
               shinyFeedback::loadingButton(
                 "subscription_card_payment",
-                "Submit",
+                "Subscribe",
                 loadingLabel = 'Confirming Payment...',
                 class = "btn-primary btn-lg",
                 style = "width: 100%"

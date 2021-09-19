@@ -51,8 +51,7 @@ plan_column_module_ui <- function(id, width) {
           "
         )
       )
-    ),
-    credit_card_module_ui(ns("change_plan_modal"))
+    )
   )
 }
 
@@ -82,6 +81,7 @@ plan_column_module <- function(input, output, session,
         httr::content(res, "text", encoding = "UTF-8")
       )
       if (!identical(httr::status_code(res), 200L)) {
+        print(res_content)
         stop(paste0("unable to find Stripe plan ", plan_id), call. = FALSE)
       }
 
@@ -121,7 +121,7 @@ plan_column_module <- function(input, output, session,
   observeEvent(session$userData$stripe(), {
     sub_info <- session$userData$stripe()$subscription
 
-    if (is.null(sub_info)) {
+    if (is.na(sub_info)) {
       shinyjs::showElement("sign_up_div")
       shinyjs::hideElement("your_plan")
       shinyjs::hideElement("change_plan_div")
@@ -144,7 +144,7 @@ plan_column_module <- function(input, output, session,
 
     plan_to_sign_up <- input$sign_up
 
-    if (is.null(sub_info) || is.na(sub_info$default_payment_method)) {
+    if (is.na(sub_info) || is.na(sub_info$default_payment_method)) {
 
       open_credit_card(open_credit_card() + 1)
 
@@ -160,7 +160,7 @@ plan_column_module <- function(input, output, session,
   observeEvent(input$change_plan, {
     sub_info <- session$userData$stripe()
 
-    if (!is.null(sub_info) && is.na(sub_info$default_payment_method)) {
+    if (is.na(sub_info$default_payment_method)) {
       open_credit_card(open_credit_card() + 1)
     } else {
       open_confirm(open_confirm() + 1)
@@ -168,13 +168,14 @@ plan_column_module <- function(input, output, session,
 
   }, ignoreInit = TRUE)
 
-  callModule(
-    credit_card_module,
-    "change_plan_modal",
-    open_modal_trigger = open_credit_card,
-    plan_to_enable = plan_id,
-    disclaimer_text = disclaimer_text
-  )
+  observeEvent(open_credit_card(), {
+    callModule(
+      credit_card_subscription_modal_module,
+      "change_plan_modal",
+      price_id = plan_id
+    )
+  })
+
 
 
 

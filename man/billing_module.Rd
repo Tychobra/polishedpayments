@@ -12,8 +12,6 @@ billing_module(input, output, session)
 \item{output}{the Shiny server output}
 
 \item{session}{the Shiny server session}
-
-\item{sub_info}{the subscription information}
 }
 \description{
 billing module

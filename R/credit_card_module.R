@@ -182,6 +182,8 @@ credit_card_payment_module <- function(input, output, session,
     hold <- input$payment_intent_result
     billing <- session$userData$stripe()
 
+    browser()
+
     if (is.null(hold$error)) {
 
       # if (isTRUE(input$attach_payment_method)) {
