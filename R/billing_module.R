@@ -324,6 +324,7 @@ billing_module <- function(input, output, session) {
     })
 
     shiny::observeEvent(session$userData$stripe(), {
+
       subscription <- session$userData$stripe()$subscription
 
       if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
@@ -429,9 +430,7 @@ billing_module <- function(input, output, session) {
   payment_methods <- shiny::reactive({
     req(session$userData$stripe())
 
-    # Trigger after a subscription change
-    session$userData$stripe_trigger()
-    browser()
+
     hold_stripe <- session$userData$stripe()
     #req(!is.na(hold_stripe$subscription))
     # TODO: find a way to get the default payment method for single payments as well
@@ -508,7 +507,7 @@ billing_module <- function(input, output, session) {
   default_payment_method_info <- reactive({
     if (is.null(payment_methods())) return(NULL)
     hold_stripe <- session$userData$stripe()
-    browser()
+
     hold <- payment_methods()
     out <- NULL
     for (pm in hold) {
@@ -528,7 +527,7 @@ billing_module <- function(input, output, session) {
 
   observeEvent(payment_methods(), {
 
-    browser()
+
     if (is.null(default_payment_method_info())) {
       shinyjs::hideElement("billing_info")
       shinyjs::showElement("enable_billing_button")
@@ -579,8 +578,6 @@ billing_module <- function(input, output, session) {
   )
 
   invoices_table_prep <- shiny::reactive({
-    # Trigger after a subscription change
-    session$userData$stripe_trigger()
 
     billing <- session$userData$stripe()
 

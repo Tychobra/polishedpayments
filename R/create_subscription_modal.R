@@ -14,7 +14,7 @@ create_subscription_modal <- function(input, output, session,
   price_id,
   # modalDialog inputs
   title = NULL,
-  size = c("s", "m", "l"),
+  size = "s",
   easyClose = FALSE,
   fade = TRUE
 ) {

@@ -13,48 +13,35 @@ payments_ui <- function(
     }
     ui <- force(ui)
 
-
-    print(list(
-      ui_user = request$user
-    ))
-    # TODO: look up the user's subscription here. movae as much logic from payments_server to
-    # here as possible.
     user <- request$polished_user
 
-    # get any existing subscriptions from Polished API
-    res <- httr::GET(
-      paste0(getOption("polished")$api_url, "/subscriptions"),
-      httr::authenticate(
-        user = getOption("polished")$api_key,
-        password = ""
-      ),
-      query = list(
-        app_uid = getOption("polished")$app_uid,
-        user_uid = user$user_uid,
-        is_live = getOption("pp")$is_live
-      )
+    query <- shiny::parseQueryString(request$QUERY_STRING)
+    payments_query <- query$payments
+
+    # get existing subscriptions from Polished API
+    customer_res <- get_customers(
+      app_uid = getOption("polished")$app_uid,
+      user_uid = user$user_uid
     )
 
-    sub_db <- jsonlite::fromJSON(
-      httr::content(res, "text", encoding = "UTF-8")
-    )
+    customer <- customer_res$content
 
-    if (!identical(httr::status_code(res), 200L)) {
-      print(sub_db)
-      stop("error getting subscription from Polished API", call. = FALSE)
-    }
+    if (identical(nrow(customer), 0L)) {
 
-    if (identical(nrow(sub_db), 0L)) {
-
+      # This is the first time the user is accessing the app using polishedpayments, so
       # set the user up with the default subscription
+
       # Step 1: create Stripe customer
-      customer_id <- create_stripe_customer(
+      stripe_customer_id <- create_stripe_customer(
         email = user$email,
         user_uid = user$user_uid
       )
 
-      if (getOption("pp")$trial_period_days > 0 && !is.null(getOption("pp")$prices)) {
-        # Step 2: Create the Stripe subscription on Stripe
+
+      if (is.null(!is.null(getOption("pp")$prices)) && getOption("pp")$trial_period_days > 0) {
+        # Step 2: If the app is using polishedpayments subscriptions, create the Stripe subscription on Stripe.
+        # If the subscription does not have a trial period, then we can't create the subscription until a payment
+        # method is enabled, so also do not create the subscription if no trial period.
         stripe_subscription_id <- create_stripe_subscription(
           customer_id,
           plan_to_enable = getOption("pp")$prices[1],
@@ -64,55 +51,66 @@ payments_ui <- function(
         stripe_subscription_id <- NULL
       }
 
-      # Step 3: add the newly created Stripe customer + subscription to the "subscriptions" table
-      post_sub_res <- httr::POST(
-        paste0(getOption("polished")$api_url, "/subscriptions"),
-        body = list(
-          "app_uid" = getOption("polished")$app_uid,
-          "user_uid" = user$user_uid,
-          "stripe_customer_id" = customer_id,
-          "stripe_subscription_id" = stripe_subscription_id,
-          "is_live" = getOption("pp")$is_live
-        ),
-        encode = "json",
-        httr::authenticate(
-          user = getOption("polished")$api_key,
-          password = ""
+      # Step 3: add the newly created Stripe customer + possible subscription to the "customers" table
+      add_customer_res <- add_customer(
+        app_uid = getOption("polished")$app_uid,
+        user_uid = user$user_uid,
+        stripe_customer_id = stripe_customer_id,
+        stripe_subscription_id = stripe_subscription_id
+      )
+
+      if (!identical(httr::status_code(add_customer_res), 200L)) {
+        print(add_customer_res$content)
+        stop("Polished API error creating customer", call. = FALSE)
+      }
+
+      customer_res <- get_customers(
+        app_uid = getOption("polished")$app_uid,
+        user_uid = user$user_uid
+      )
+
+      customer <- customer_res$content
+
+    }
+
+    if (identical(payments_query, "TRUE")) {
+
+      out <- app_module_ui("payments")
+
+    } else {
+
+      if (is.null(getOption("pp")$prices) || length(intersect(user$roles, getOption("pp")$free_roles)) > 0) {
+        # No subscription required, so Go to app
+        out <- shiny::tagList(
+          shiny::tags$head(
+            tags$script(src = "https://js.stripe.com/v3"),
+            tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');"))
+          ),
+          ui
         )
-      )
+      }  else {
 
-      post_sub_res_content <- jsonlite::fromJSON(
-        httr::content(post_sub_res, "text", encoding = "UTF-8")
-      )
 
-      if (!identical(httr::status_code(post_sub_res), 200L)) {
-        print(post_sub_res_content)
-        stop("Error saving subsciption to db", call. = FALSE)
+        if (!is.na(customer$stripe_subscription_id) && (customer$free_trial_days_remaining_at_cancel > 0
+            #|| !is.na(customer$default_payment_method)
+          )) {
+          # Go to payments page
+          out <- shiny::tagList(
+            shiny::tags$head(
+              tags$script(src = "https://js.stripe.com/v3"),
+              tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');"))
+            ),
+            ui
+          )
+
+        } else {
+          out <- h1("Not Authorized - No subscription found")
+        }
+
       }
 
     }
 
-    # if (is.na(sub_db$stripe_subscription_id) && !is.null(getOption("pp")$prices)) {
-    #   shiny::updateQueryString(
-    #     queryString = "?page=account",
-    #     session = session,
-    #     mode = "replace"
-    #   )
-    #   session$reload()
-    # }
-
-
-    if (TRUE) {
-      out <- app_module_ui("payments")
-    } else {
-      out <- shiny::tagList(
-        shiny::tags$head(
-          tags$script(src = "https://js.stripe.com/v3"),
-          tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');"))
-        ),
-        ui
-      )
-    }
 
     out
   }

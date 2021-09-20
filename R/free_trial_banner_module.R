@@ -79,6 +79,7 @@ free_trial_banner_module_ui <- function(id) {
 free_trial_banner_module <- function(input, output, session) {
 
   shiny::observeEvent(session$userData$stripe(), {
+
     hold_sub <- session$userData$stripe()
     hold_user <- session$userData$user()
 
@@ -113,7 +114,7 @@ free_trial_banner_module <- function(input, output, session) {
   shiny::observeEvent(input$enable_billing, {
 
     shiny::updateQueryString(
-      queryString = "?page=account",
+      queryString = "?payments=TRUE",
       session = session,
       mode = "replace"
     )

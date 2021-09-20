@@ -10,7 +10,7 @@ create_subscription_modal(
   session,
   price_id,
   title = NULL,
-  size = c("s", "m", "l"),
+  size = "s",
   easyClose = FALSE,
   fade = TRUE
 )

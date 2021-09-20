@@ -182,7 +182,7 @@ credit_card_payment_module <- function(input, output, session,
     hold <- input$payment_intent_result
     billing <- session$userData$stripe()
 
-    browser()
+
 
     if (is.null(hold$error)) {
 
@@ -278,7 +278,7 @@ credit_card_subscription_module <- function(input, output, session,
 
   observeEvent(input$setup_intent_result, {
 
-    browser()
+
     billing <- session$userData$stripe()
     setup_intent_id <- intent_id()
 

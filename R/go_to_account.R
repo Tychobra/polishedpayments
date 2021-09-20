@@ -16,7 +16,7 @@ go_to_account <- function(
 ) {
 
   shiny::updateQueryString(
-    queryString = "?page=account",
+    queryString = "?payments=TRUE",
     session = session,
     mode = "push"
   )

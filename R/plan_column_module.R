@@ -65,7 +65,7 @@ plan_column_module <- function(input, output, session,
 
 
   plan_data <- reactive({
-    browser()
+
     out <- NULL
     tryCatch({
 
@@ -172,9 +172,10 @@ plan_column_module <- function(input, output, session,
     callModule(
       create_subscription_modal,
       "change_plan_modal",
-      price_id = plan_id
+      price_id = plan_id,
+      title = "Change Plan"
     )
-  })
+  }, ignoreInit = TRUE)
 
 
 
@@ -236,7 +237,7 @@ plan_column_module <- function(input, output, session,
         stop("Error changing pricing plan", call. = FALSE)
       }
 
-      session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
+      #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
 
       shinyFeedback::showToast("success", "Pricing Successfully Changed")
 
