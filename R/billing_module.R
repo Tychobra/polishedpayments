@@ -290,29 +290,17 @@ billing_module <- function(input, output, session) {
         # Remove Subscription ID from 'billing' table and update the free trial days
         # remaining at cancel. The "trial_days_remaining" will be used
         # to set the proper amount of free trial days if the user restarts their subscription.
-        res <- httr::PUT(
-          url = paste0(getOption("polished")$api_url, "/subscriptions"),
-          encode = "json",
-          body = list(
-            subscription_uid = subscription$uid,
-            free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
-          ),
-          httr::authenticate(
-            user = getOption("polished")$api_key,
-            password = ""
-          )
+        update_res <- update_customer(
+          subscription_uid = subscription$polished_customer_uid,
+          free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
         )
 
-        if (!identical(httr::status_code(res), 200L)) {
+        if (!identical(httr::status_code(update_res$response), 200L)) {
 
-          res_content <- jsonlite::fromJSON(
-            httr::content(res, "text", encoding = "UTF-8")
-          )
-
-          stop(res_content, call. = FALSE)
+          stop(update_res$content$error, call. = FALSE)
         }
 
-        session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
+        #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
         shinyFeedback::showToast("success", "Subscription Cancelled Successfully")
       }, error = function(err) {
 
@@ -399,7 +387,7 @@ billing_module <- function(input, output, session) {
     output$trial_end_out <- renderText({
       req(session$userData$stripe())
       hold <- session$userData$stripe()$subscription
-
+      browser()
       if (is.na(hold)) {
         out <- "No Trial"
       } else {

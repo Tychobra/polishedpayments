@@ -26,7 +26,7 @@ ua <- httr::user_agent("http://github.com/tychobra/polishedpayments")
 #'
 #' @export
 #'
-#' @seealso [add_customer()] [update_customer()] [delete_customer()]
+#' @seealso [add_customer()] [update_customer()]
 #'
 #' @importFrom httr GET authenticate
 #' @importFrom polished polished_api_res api_list_to_df
@@ -73,7 +73,7 @@ get_customers <- function(
 #'
 #' @export
 #'
-#' @seealso [get_customers()] [update_customer()] [delete_customer()]
+#' @seealso [get_customers()] [update_customer()]
 #'
 #' @importFrom httr POST authenticate
 #' @importFrom polished polished_api_res api_list_to_df
@@ -113,46 +113,51 @@ add_customer <- function(
 
 
 
-#' #' Polished Payments API - Update a Customer
-#' #'
-#' #' @param app_uid the app uid of the app to update.
-#' #' @param app_name an optional app name to replace the existing app name.
-#' #' @param app_url an optional app url to replace the existing app url.
-#' #'
-#' #' @inheritParams get_apps
-#' #'
-#' #' @export
-#' #'
-#' #' @seealso [get_()] [add_app()] [delete_app()]
-#' #'
-#' #' @importFrom httr PUT authenticate
-#' #'
-#' update_customer <- function(app_uid, app_name = NULL, app_url = NULL, api_key = getOption("polished")$api_key) {
+#' Polished Payments API - Update a Customer
 #'
-#'   body_out <- list(
-#'     app_uid = app_uid
-#'   )
+#' @param customer_uid The polished payments customer UID.
+#' @param stripe_subscription_id the Stripe subscription ID.
+#' @param free_trial_days_remaining_at_cancel The number of days remaining in the customer's
+#' free subscription trial at time of cancelation.
 #'
-#'   if (is.null(app_name) && is.null(app_url)) {
-#'     stop("one of either `app_name` or `app_url` must not be NULL", call. = FALSE)
-#'   } else {
-#'     body_out$app_name <- app_name
-#'     body_out$app_url <- app_url
-#'   }
+#' @inheritParams get_customers
 #'
-#'   resp <- httr::PUT(
-#'     url = paste0(getOption("polished")$api_url, "/apps"),
-#'     ua,
-#'     httr::authenticate(
-#'       user = api_key,
-#'       password = ""
-#'     ),
-#'     body = body_out,
-#'     encode = "json"
-#'   )
+#' @export
 #'
-#'   polished_api_res(resp)
-#' }
+#' @seealso [get_customers()] [add_customer()]
+#'
+#' @importFrom httr PUT authenticate
+#'
+update_customer <- function(
+  customer_uid,
+  stripe_subscription_id = NULL,
+  free_trial_days_remaining_at_cancel = NULL,
+  stripe_is_live = getOption("pp")$is_live,
+  api_key = getOption("polished")$api_key
+) {
+
+  body_out <- list(
+    customer_uid = customer_uid
+  )
+
+
+  body_out$stripe_subscription_id <- stripe_subscription_id
+  body_out$free_trial_days_remaining_at_cancel <- free_trial_days_remaining_at_cancel
+
+
+  resp <- httr::PUT(
+    url = paste0(getOption("polished")$api_url, "/customers"),
+    ua,
+    httr::authenticate(
+      user = api_key,
+      password = ""
+    ),
+    body = body_out,
+    encode = "json"
+  )
+
+  polished_api_res(resp)
+}
 
 
 #' #' Polished Payments API - Delete an App

@@ -31,5 +31,5 @@ so that you do not need to supply this argument with each function call.}
 Polished Payments API - Add a Customer
 }
 \seealso{
-[get_customers()] [update_customer()] [delete_customer()]
+[get_customers()] [update_customer()]
 }

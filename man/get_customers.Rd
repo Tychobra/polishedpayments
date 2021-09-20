@@ -43,5 +43,5 @@ one customer will be returned (assuming that customer exists). If the customer d
 exists, a zero row tibble will be returned.
 }
 \seealso{
-[add_customer()] [update_customer()] [delete_customer()]
+[add_customer()] [update_customer()]
 }

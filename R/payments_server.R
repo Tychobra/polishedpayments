@@ -57,6 +57,7 @@ payments_server <- function(
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
             default_payment_method = customer$defualt_payment_method,
+            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
 
@@ -70,6 +71,7 @@ payments_server <- function(
             stripe_customer_id = customer$stripe_customer_id,
             free_user = TRUE,
             default_payment_method = customer$defualt_payment_method,
+            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
 
@@ -81,6 +83,7 @@ payments_server <- function(
             polished_customer_uid = customer$uid,
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
+            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
             default_payment_method = NA
           )
 
