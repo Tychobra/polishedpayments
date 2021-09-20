@@ -12,6 +12,7 @@
 #'
 create_subscription_modal <- function(input, output, session,
   price_id,
+  default_payment_method = NA,
   # modalDialog inputs
   title = NULL,
   size = "s",

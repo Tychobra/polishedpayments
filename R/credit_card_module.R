@@ -186,22 +186,22 @@ credit_card_payment_module <- function(input, output, session,
 
     if (is.null(hold$error)) {
 
-      # if (isTRUE(input$attach_payment_method)) {
-      #   tryCatch({
-      #
-      #     set_default_payment_method(
-      #       customer_id = billing$stripe_customer_id,
-      #       payment_method_id = hold_payment_method_id
-      #     )
-      #
-      #   }, error = function(err) {
-      #     print(err)
-      #     shinyFeedback::showToast(
-      #       "error",
-      #       "Error saving Credit Card for future usage"
-      #     )
-      #   })
-      # }
+      if (isTRUE(input$attach_payment_method)) {
+        tryCatch({
+
+          set_default_payment_method(
+            customer_id = billing$stripe_customer_id,
+            payment_method_id = hold_payment_method_id
+          )
+
+        }, error = function(err) {
+          print(err)
+          shinyFeedback::showToast(
+            "error",
+            "Error saving Credit Card for future usage"
+          )
+        })
+      }
 
     } else {
       intent_id(NULL)

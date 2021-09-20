@@ -9,6 +9,7 @@ create_subscription_modal(
   output,
   session,
   price_id,
+  default_payment_method = NA,
   title = NULL,
   size = "s",
   easyClose = FALSE,
