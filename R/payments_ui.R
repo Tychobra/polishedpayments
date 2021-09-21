@@ -75,7 +75,7 @@ payments_ui <- function(
 
     if (identical(payments_query, "TRUE")) {
 
-      out <- app_module_ui("payments")
+      out <- payments_app_ui()
 
     } else {
 

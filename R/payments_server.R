@@ -174,10 +174,9 @@ payments_server <- function(
       payments_query <- query_list$payments
 
       if (identical(payments_query, "TRUE")) {
-        callModule(
-          app_module,
-          "payments"
-        )
+
+        payments_app_server(input, output, session)
+
       } else if (
         is.null(getOption("pp")$prices) ||
         length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 ||

@@ -4,14 +4,11 @@
 #' The Shiny module UI for the Stripe payments Shiny app.  This app can be easily added
 #' to your Shiny apps that use polished.
 #'
-#' @param id the Shiny module id
-#' @param custom_ui Either \code{NULL}, the default, or a list of 2 elements containing custom
-#' UI to add additional 'shinydashboard' tabs to the 'polished' "Admin Panel".
 #' @param app_name the app name to display to users.
 #'
 #' @export
 #'
-#' @importFrom shiny NS icon
+#' @importFrom shiny icon
 #' @importFrom shinydashboard dashboardSidebar dashboardBody sidebarMenu menuItem tabItems dashboardHeader dashboardPage
 #' @importFrom htmltools HTML tags tagList
 #' @importFrom shinyjs useShinyjs
@@ -20,14 +17,9 @@
 #'
 #' @return the UI for the "Admin Panel"
 #'
-app_module_ui <- function(
-  id,
-  custom_ui = NULL,
+payments_app_ui <- function(
   app_name = getOption("polished")$app_name_display
 ) {
-  ns <- shiny::NS(id)
-
-  stopifnot(is.null(custom_ui) || names(custom_ui) == c("menu_items", "tab_items"))
 
   stripe_key_public <- getOption("pp")$keys$public
 
@@ -36,55 +28,25 @@ app_module_ui <- function(
     left_menu = tags$li(
       class = "dropdown",
       shiny::actionLink(
-        ns("go_to_shiny_app"),
+        "go_to_shiny_app",
         paste0("Go to ", app_name),
         style = "margin-left: -15px; color: #1a8dc7; font-size: 18px;"
       )
     ),
-    polished::profile_module_ui(ns("profile"))
+    polished::profile_module_ui("profile")
   )
 
-  if (is.null(custom_ui$menu_items)) {
-    sidebar <- shinydashboard::dashboardSidebar(
-      shinydashboard::sidebarMenu(
-        id = ns("sidebar_menu"),
-        shinydashboard::menuItem("Billing", tabName = ns("billing"), icon = icon("credit-card"))
+
+  sidebar <- shinydashboard::dashboardSidebar(
+    shinydashboard::sidebarMenu(
+      id = "sidebar_menu",
+      shinydashboard::menuItem(
+        "Billing",
+        tabName = "billing",
+        icon = icon("credit-card")
       )
     )
-  } else {
-    sidebar <- shinydashboard::dashboardSidebar(
-      shinydashboard::sidebarMenu(
-        id = ns("sidebar_menu"),
-        shinydashboard::menuItem(
-          text = "User Access",
-          tabName = "user_access",
-          icon = shiny::icon("users")
-        ),
-
-        custom_ui$menu_items
-      )
-    )
-  }
-
-
-  if (is.null(custom_ui$tab_items)) {
-    tab_items <- shinydashboard::tabItems(
-      shinydashboard::tabItem(
-        tabName = ns("billing"),
-        billing_module_ui(ns("billing"))
-      )
-    )
-  } else {
-    tab_items <- shinydashboard::tabItems(
-      shinydashboard::tabItem(
-        tabName = ns("billing"),
-        billing_module_ui(ns("billing"))
-      ),
-      custom_ui$tab_items
-    )
-  }
-
-
+  )
 
 
   body <- shinydashboard::dashboardBody(
@@ -98,7 +60,12 @@ app_module_ui <- function(
     #waiter::use_waiter(),
     #waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
 
-    tab_items
+    shinydashboard::tabItems(
+      shinydashboard::tabItem(
+        tabName = "billing",
+        billing_module_ui("billing")
+      )
+    )
   )
 
   shinydashboard::dashboardPage(
@@ -127,8 +94,7 @@ app_module_ui <- function(
 #' @importFrom tibble as_tibble
 #'
 #'
-app_module <- function(input, output, session) {
-  ns <- session$ns
+payments_app_server <- function(input, output, session) {
 
   shiny::callModule(
     polished::profile_module,
