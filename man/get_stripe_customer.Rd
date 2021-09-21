@@ -2,15 +2,13 @@
 % Please edit documentation in R/api_stripe_customer.R
 \name{get_stripe_customer}
 \alias{get_stripe_customer}
-\title{Create a new Stripe customer}
+\title{Collect information for a Stripe customer}
 \usage{
 get_stripe_customer(customer_id)
 }
 \arguments{
-\item{email}{The new Stripe customer's email address.}
-
-\item{user_uid}{the new Stripe customer's polished user uid.}
+\item{stripe_customer_id}{The Stripe customer's ID.}
 }
 \description{
-Create a new Stripe customer
+Collect information for a Stripe customer
 }
