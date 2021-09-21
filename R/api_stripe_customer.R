@@ -43,10 +43,9 @@ add_stripe_customer <- function(email, user_uid) {
 
 
 
-#' Create a new Stripe customer
+#' Collect information for a Stripe customer
 #'
-#' @param email The new Stripe customer's email address.
-#' @param user_uid the new Stripe customer's polished user uid.
+#' @param stripe_customer_id The Stripe customer's ID.
 #'
 #' @export
 #'
