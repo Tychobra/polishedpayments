@@ -71,7 +71,7 @@ payments_server <- function(
             stripe_customer_id = customer$stripe_customer_id,
             free_user = TRUE,
             default_payment_method = customer$defualt_payment_method,
-            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
+            trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
 
@@ -83,7 +83,7 @@ payments_server <- function(
             polished_customer_uid = customer$uid,
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
-            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
+            trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             default_payment_method = NA
           )
 
@@ -116,6 +116,9 @@ payments_server <- function(
               )
               session$reload()
             } else {
+
+              stripe_out$trial_days_remaining <- stripe_sub$trial_days_remaining
+
               stripe_out$subscription = list(
                 uid = customer$uid,
                 stripe_subscription_id = customer$stripe_subscription_id,
@@ -125,8 +128,6 @@ payments_server <- function(
                 amount = stripe_sub$amount,
                 interval = stripe_sub$interval,
                 trial_end = stripe_sub$trial_end,
-                is_billing_enabled = if (is.na(stripe_sub$default_payment_method)) FALSE else TRUE,
-                trial_days_remaining = stripe_sub$trial_days_remaining,
                 created_at = customer$created_at
               )
             }
@@ -166,6 +167,8 @@ payments_server <- function(
 
 
     observeEvent(session$userData$stripe(), {
+      hold_user <- session$userData$user()
+      hold_stripe <- session$userData$stripe()
 
       query_list <- shiny::getQueryString()
       payments_query <- query_list$payments
@@ -175,7 +178,11 @@ payments_server <- function(
           app_module,
           "payments"
         )
-      } else {
+      } else if (
+        is.null(getOption("pp")$prices) ||
+        length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 ||
+        !is.na(hold_stripe$default_payment_method)
+      ) {
         server(input, output, session)
       }
 
