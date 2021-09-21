@@ -80,14 +80,14 @@ free_trial_banner_module <- function(input, output, session) {
 
   shiny::observeEvent(session$userData$stripe(), {
 
-    hold_sub <- session$userData$stripe()
+    hold_sub <- session$userData$stripe()$subscription
     hold_user <- session$userData$user()
 
 
     if (
-      isFALSE(hold_sub$free_user) &&
+      !is.na(hold_sub) &&
       # show the billing banner if the user is in their free trial and they have not enebaled billing
-      (isFALSE(hold_sub$subscription$is_billing_enabled) && hold_sub$subscription$trial_days_remaining > 0)
+      (isFALSE(hold_sub$is_billing_enabled) && hold_sub$trial_days_remaining > 0)
       ) {
 
       shinyjs::delay(3000, shinyjs::showElement("banner", anim = TRUE))
@@ -98,11 +98,11 @@ free_trial_banner_module <- function(input, output, session) {
 
   trial_days_remaining <- shiny::reactive({
     hold_user <- session$userData$user()
-    hold_sub <- session$userData$stripe()
-    req(isFALSE(hold_sub$free_user))
+    hold_sub <- session$userData$stripe()$subscription
+    req(!is.na(hold_sub))
 
 
-    ceiling(hold_sub$subscription$trial_days_remaining)
+    ceiling(hold_subtrial_days_remaining)
   })
 
   output$trial_days_remaining_out <- shiny::renderText({
