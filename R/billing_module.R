@@ -476,8 +476,6 @@ billing_module <- function(input, output, session) {
       invisible(NULL)
     })
 
-    browser()
-
     out
   })
 
