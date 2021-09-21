@@ -222,27 +222,47 @@ credit_card_payment_module <- function(input, output, session,
 #' @param trigger the reactive trigger to submit the payment to Stripe
 #' @param price_id The Stripe price_id for the subscription.  A subscription can have
 #' multiple prices in Stripe (e.g. monthly and yearly).
+#' @param reactive returning a named list of billing details. Valid list element names
+#' are:
+#' - "name",
+#' - "email"
+#' - "phone"
+#'
+#'
 #'
 #' @export
 #'
 credit_card_subscription_module <- function(input, output, session,
   trigger = function() NULL,
-  price_id
+  price_id,
+  billing_detail = function() list()
 ) {
   ns <- session$ns
 
   intent_id <- reactiveVal(NULL)
 
+  # TODO:  We probably do not need to send anything to the client if we already
+  # have the payment method (i.e. they are not using the credit card inout.)
+
+
   observeEvent(trigger(), {
     billing <- session$userData$stripe()
+
+
+    body_out <- list(
+      "customer" = billing$stripe_customer_id,
+      `payment_method_types[0]` = "card"
+    )
+
+    out$payment_method <- payment_method
+    body_out[[`biliing_details[name]`]] <- billing_detail$name
+    body_out[[`billing_details[email]`]] <- billing_details$email
+    body_out[[`billing_details[phone]`]] <- billing_details$phone
 
     tryCatch({
       setup_res <- httr::POST(
         "https://api.stripe.com/v1/setup_intents",
-        body = list(
-          "customer" = billing$stripe_customer_id,
-          `payment_method_types[0]` = "card"
-        ),
+        body = ,
         encode = "form",
         httr::authenticate(
           user = getOption("pp")$keys$secret,
@@ -345,26 +365,15 @@ credit_card_subscription_module <- function(input, output, session,
         # update the Stripe subscription id saved to the database
         new_subscription_id <- res_content$id
 
-        res <- httr::PUT(
-          url = paste0(getOption("polished")$api_url, "/subscriptions"),
-          encode = "json",
-          body = list(
-            subscription_uid = billing$subscription$uid,
-            stripe_subscription_id = new_subscription_id
-          ),
-          httr::authenticate(
-            user = getOption("polished")$api_key,
-            password = ""
-          )
+        update_customer_res <- update_customer(
+          customer_uid = billing$polished_customer_uid,
+          stripe_subscription_id = new_subscription_id,
+          default_payment_method = default_payment_method
         )
 
-        if (!identical(httr::status_code(res), 200L)) {
+        if (!identical(httr::status_code(update_customer_res$response), 200L)) {
 
-          res_content <- jsonlite::fromJSON(
-            httr::content(res, "text", encoding = "UTF-8")
-          )
-
-          stop(res_content, call. = FALSE)
+          stop(update_customer_res$content, call. = FALSE)
         }
 
       }
@@ -378,8 +387,11 @@ credit_card_subscription_module <- function(input, output, session,
         message = 'Your payment method and subscription have been updated'
       )
     }, error = function(err) {
+
+      msg <-  "Payment method authenticated, but there was an error saving your Payment Method"
+      print(msg)
       print(err)
-      shinyFeedback::showToast("error", "Payment method authenticated, but there was an error saving your Payment Method")
+      shinyFeedback::showToast("error", msg)
     })
 
     intent_id(NULL)

@@ -8,6 +8,7 @@ update_customer(
   customer_uid,
   stripe_subscription_id = NULL,
   free_trial_days_remaining_at_cancel = NULL,
+  default_payment_method = NULL,
   stripe_is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 )

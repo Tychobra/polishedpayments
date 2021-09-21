@@ -9,7 +9,6 @@ create_subscription_modal(
   output,
   session,
   price_id,
-  default_payment_method = NA,
   title = NULL,
   size = "s",
   easyClose = FALSE,
@@ -23,7 +22,9 @@ create_subscription_modal(
 
 \item{size}{the size to pas to \code{shiny::modalDialog}}
 
-\item{easyClose}{the fade to pass to \code{shiny::modalDialog}}
+\item{easyClose}{the easyClose to pass to \code{shiny::modalDialog}}
+
+\item{fade}{the fade to pass to \code{shiny::modalDialog}}
 }
 \description{
 Credit Card Modal to create a subscription

@@ -132,6 +132,7 @@ update_customer <- function(
   customer_uid,
   stripe_subscription_id = NULL,
   free_trial_days_remaining_at_cancel = NULL,
+  default_payment_method = NULL,
   stripe_is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 ) {
@@ -143,6 +144,7 @@ update_customer <- function(
 
   body_out$stripe_subscription_id <- stripe_subscription_id
   body_out$free_trial_days_remaining_at_cancel <- free_trial_days_remaining_at_cancel
+  hody_out$default_payment_method <- default_payment_method
 
 
   resp <- httr::PUT(

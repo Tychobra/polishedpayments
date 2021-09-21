@@ -9,7 +9,8 @@ credit_card_subscription_module(
   output,
   session,
   trigger = function() NULL,
-  price_id
+  price_id,
+  billing_detail = function() list()
 )
 }
 \arguments{
@@ -23,6 +24,12 @@ credit_card_subscription_module(
 
 \item{price_id}{The Stripe price_id for the subscription.  A subscription can have
 multiple prices in Stripe (e.g. monthly and yearly).}
+
+\item{reactive}{returning a named list of billing details. Valid list element names
+are:
+- "name",
+- "email"
+- "phone"}
 }
 \description{
 Server logic for Stripe Credit Card input
