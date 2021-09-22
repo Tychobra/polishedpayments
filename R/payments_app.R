@@ -54,6 +54,7 @@ payments_app_ui <- function(
       tags$link(rel = "shortcut icon", href = "polishedpayments/images/polished_logo_transparent.png"),
       tags$script(src = "https://js.stripe.com/v3"),
       tags$script(paste0("var stripe = Stripe('", stripe_key_public, "');")),
+      tags$script(src = "polishedpayments/js/polishedpayments.js?version=1"),
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
@@ -103,7 +104,7 @@ payments_app_server <- function(input, output, session) {
 
   shiny::observeEvent(input$go_to_shiny_app, {
 
-    hold_sub <- session$userData$stripe()$subscription
+    hold_stripe <- session$userData$stripe()
     hold_user <- session$userData$user()
 
     if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
@@ -111,7 +112,7 @@ payments_app_server <- function(input, output, session) {
       polished::remove_query_string()
       session$reload()
 
-    } else if (is.na(hold_sub)) {
+    } else if (is.na(hold_stripe$subscription)) {
 
       shinyWidgets::sendSweetAlert(
         session = session,
@@ -120,7 +121,7 @@ payments_app_server <- function(input, output, session) {
         type = "error"
       )
 
-    } else if (hold_sub$trial_days_remaining > 0 || !is.na(hold_sub$default_payment_method)) {
+    } else if (hold_stripe$trial_days_remaining > 0 || !is.na(hold_stripe$default_payment_method)) {
       # to to the Shiny app
       polished::remove_query_string()
       session$reload()

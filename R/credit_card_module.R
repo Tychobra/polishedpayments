@@ -106,8 +106,7 @@ credit_card_module_ui <- function(
         )
       )
     ),
-    tags$script(src = "polishedpayments/js/credit_card_module.js?version=1"),
-    tags$script(paste0("credit_card_module('", ns(''), "')"))
+    tags$script(paste0("payments.mount_card_element('", ns('credit_card'), "')"))
   )
 }
 
@@ -267,8 +266,9 @@ credit_card_module <- function(input, output, session,
       )
 
       session$sendCustomMessage(
-        ns("create_setup_intent"),
+        "create_setup_intent",
         message = list(
+          ns_prefix = ns(""),
           client_secret = setup_data$client_secret,
           billing_details = hold_details
         )

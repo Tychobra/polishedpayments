@@ -79,7 +79,9 @@ payments_ui <- function(
 
       }
 
-      stripe_sub <- get_stripe_subscription(customer$stripe_subscription_id)
+      if (!is.na(customer$stripe_subscription_id)) {
+        stripe_sub <- get_stripe_subscription(customer$stripe_subscription_id)
+      }
 
     }, error = function(err) {
 
@@ -128,7 +130,7 @@ payments_ui <- function(
           )
 
         } else {
-          out <- h1("Not Authorized - No subscription found")
+          out <- h1("Not Authorized - No subscription found - Redirecting to Payments")
         }
 
       }

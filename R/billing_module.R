@@ -11,7 +11,7 @@ billing_module_ui <- function(id) {
       tagList(
         shiny::fluidRow(
           shinydashboard::box(
-            title = "Account Information",
+            title = "Subscription Plan",
             width = 12,
             shiny::column(
               12,
@@ -331,7 +331,12 @@ billing_module <- function(input, output, session) {
 
 
       if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
-        out <- "$0"
+
+        if (hold_stripe$trial_days_remaining > 0) {
+          out <- paste0("You have ", ceiling(hold_stripe$trial_days_remaining), " days left in your trial.  Enable a plan below to resume your free trial.")
+        } else {
+          out <- "Enable a subscription below"
+        }
       } else {
         amount_out <- paste0(
           "$",
@@ -405,7 +410,6 @@ billing_module <- function(input, output, session) {
     out <- NULL
 
     tryCatch({
-      stripe_customer <- get_stripe_customer(hold_stripe$stripe_customer_id)
 
       res <- httr::GET(
         paste0("https://api.stripe.com/v1/payment_methods/", hold_stripe$default_payment_method),

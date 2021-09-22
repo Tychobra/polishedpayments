@@ -160,6 +160,7 @@ plan_column_module <- function(input, output, session,
   observeEvent(input$change_plan, {
     sub_info <- session$userData$stripe()
 
+    browser()
     if (is.na(sub_info$default_payment_method)) {
       open_credit_card(open_credit_card() + 1)
     } else {

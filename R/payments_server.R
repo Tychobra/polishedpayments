@@ -29,7 +29,7 @@ payments_server <- function(
       payments_query <- query_list$payments
 
       hold_user <- session$userData$user()
-
+      browser()
       tryCatch({
         # get any existing subscriptions from Polished API
         customer_res <- get_customers(
@@ -56,7 +56,7 @@ payments_server <- function(
             polished_customer_uid = customer$uid,
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
-            default_payment_method = customer$defualt_payment_method,
+            default_payment_method = customer$default_payment_method,
             trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
@@ -69,7 +69,7 @@ payments_server <- function(
             polished_customer_uid = customer$uid,
             stripe_customer_id = customer$stripe_customer_id,
             free_user = TRUE,
-            default_payment_method = customer$defualt_payment_method,
+            default_payment_method = customer$default_payment_method,
             trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
@@ -81,8 +81,8 @@ payments_server <- function(
             polished_customer_uid = customer$uid,
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
-            trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
-            default_payment_method = NA
+            default_payment_method = customer$default_payment_method,
+            trial_days_remaining = customer$free_trial_days_remaining_at_cancel
           )
 
           if (is.na(customer$stripe_subscription_id)) {
