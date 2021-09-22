@@ -109,7 +109,8 @@ payments_ui <- function(
         out <- shiny::tagList(
           shiny::tags$head(
             tags$script(src = "https://js.stripe.com/v3"),
-            tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');"))
+            tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
+            tags$script(src = "polishedpayments/js/polishedpayments.js?version=1")
           ),
           ui
         )
@@ -124,7 +125,8 @@ payments_ui <- function(
           out <- shiny::tagList(
             shiny::tags$head(
               tags$script(src = "https://js.stripe.com/v3"),
-              tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');"))
+              tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
+              tags$script(src = "polishedpayments/js/polishedpayments.js?version=1")
             ),
             ui
           )

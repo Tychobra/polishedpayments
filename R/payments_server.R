@@ -29,7 +29,7 @@ payments_server <- function(
       payments_query <- query_list$payments
 
       hold_user <- session$userData$user()
-      browser()
+
       tryCatch({
         # get any existing subscriptions from Polished API
         customer_res <- get_customers(
