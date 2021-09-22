@@ -11,7 +11,7 @@ ui <- fluidPage(
       actionLink(
         "sign_out",
         "Sign Out",
-        icon = icon("sign-out"),
+        icon = icon("sign-out-alt"),
         style = "display: inline-block; margin-top: 25px; margin-left: 20px;",
         class = "pull-right"
       ),
