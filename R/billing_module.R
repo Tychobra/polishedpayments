@@ -339,7 +339,9 @@ billing_module <- function(input, output, session) {
 
     output$plan_amount_out <- shiny::renderText({
       req(session$userData$stripe())
-      subscription <- session$userData$stripe()$subscription
+      hold_stripe <- session$userData$stripe()
+      subscription <- hold_stripe$subscription
+
 
       if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
         out <- "$0"
@@ -352,13 +354,13 @@ billing_module <- function(input, output, session) {
         )
 
         # No trial or current time is after trial end
-        if (subscription$trial_days_remaining <= 0) {
+        if (hold_stripe$trial_days_remaining <= 0) {
 
           out <- amount_out
         } else {
 
           out <- paste0(
-            round(subscription$trial_days_remaining, 0),
+            round(hold_stripe$trial_days_remaining, 0),
             " Days Remaining in Free Trial then ",
             amount_out
           )
