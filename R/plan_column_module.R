@@ -121,7 +121,7 @@ plan_column_module <- function(input, output, session,
   observeEvent(session$userData$stripe(), {
     sub_info <- session$userData$stripe()$subscription
 
-    if (is.na(sub_info)) {
+    if (is.na(sub_info[1])) {
       shinyjs::showElement("sign_up_div")
       shinyjs::hideElement("your_plan")
       shinyjs::hideElement("change_plan_div")
@@ -144,7 +144,7 @@ plan_column_module <- function(input, output, session,
 
     plan_to_sign_up <- input$sign_up
 
-    if (is.na(sub_info) || is.na(sub_info$default_payment_method)) {
+    if (is.na(sub_info[1]) || is.na(sub_info$default_payment_method)) {
 
       open_credit_card(open_credit_card() + 1)
 
