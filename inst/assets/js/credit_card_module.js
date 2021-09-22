@@ -59,9 +59,7 @@ function credit_card_module(ns_prefix) {
         {
           payment_method: {
             card: card_element,
-            billing_details: {
-              name: "Andy" //cardholderName.value,
-            },
+            billing_details: message.billing_details,
           },
           //setup_future_usage: hold_future_usage
         }
@@ -81,17 +79,15 @@ function credit_card_module(ns_prefix) {
 
 
   Shiny.addCustomMessageHandler(
-    ns_prefix + "create_subscription",
+    ns_prefix + "create_setup_intent",
     function(message) {
-
+      debugger
       stripe.confirmCardSetup(
         message.client_secret,
         {
           payment_method: {
             card: card_element,
-            billing_details: {
-              name: "Andy Sub" // cardholderName.value,
-            }
+            billing_details: message.billing_details
           }
         }
       ).then(function(result) {

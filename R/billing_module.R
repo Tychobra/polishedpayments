@@ -291,7 +291,8 @@ billing_module <- function(input, output, session) {
         # remaining at cancel. The "trial_days_remaining" will be used
         # to set the proper amount of free trial days if the user restarts their subscription.
         update_res <- update_customer(
-          subscription_uid = subscription$polished_customer_uid,
+          customer_uid = subscription$polished_customer_uid,
+          stripe_subscription_id = NULL,
           free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
         )
 

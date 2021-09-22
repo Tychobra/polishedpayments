@@ -99,8 +99,6 @@ free_trial_banner_module <- function(input, output, session) {
   trial_days_remaining <- shiny::reactive({
     hold_user <- session$userData$user()
     hold_stripe <- session$userData$stripe()
-    req(!is.na(hold_sub))
-
 
     ceiling(hold_stripe$trial_days_remaining)
   })

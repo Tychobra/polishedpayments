@@ -106,7 +106,7 @@ credit_card_module_ui <- function(
         )
       )
     ),
-    tags$script(src = "polishedpayments/js/credit_card_module.js"),
+    tags$script(src = "polishedpayments/js/credit_card_module.js?version=1"),
     tags$script(paste0("credit_card_module('", ns(''), "')"))
   )
 }
@@ -219,12 +219,9 @@ credit_card_payment_module <- function(input, output, session,
 #' @param input the Shiny server input
 #' @param output the Shiny server output
 #' @param session the Shiny server session
-#' @param trigger the reactive trigger to submit the payment to Stripe
-#' @param price_id The Stripe price_id for the subscription.  A subscription can have
-#' multiple prices in Stripe (e.g. monthly and yearly).
-#' @param reactive returning a named list of billing details. Valid list element names
+#' @param billing_details reactive returning a named list of billing details. Valid list element names
 #' are:
-#' - "name",
+#' - "name"
 #' - "email"
 #' - "phone"
 #'
@@ -232,21 +229,17 @@ credit_card_payment_module <- function(input, output, session,
 #'
 #' @export
 #'
-credit_card_subscription_module <- function(input, output, session,
+credit_card_module <- function(input, output, session,
   trigger = function() NULL,
-  price_id,
-  billing_detail = function() list()
+  billing_details = function() list()
 ) {
   ns <- session$ns
 
-  intent_id <- reactiveVal(NULL)
-
-  # TODO:  We probably do not need to send anything to the client if we already
-  # have the payment method (i.e. they are not using the credit card inout.)
-
 
   observeEvent(trigger(), {
+    browser()
     billing <- session$userData$stripe()
+    hold_details <- billing_details()
 
 
     body_out <- list(
@@ -254,15 +247,11 @@ credit_card_subscription_module <- function(input, output, session,
       `payment_method_types[0]` = "card"
     )
 
-    out$payment_method <- payment_method
-    body_out[[`biliing_details[name]`]] <- billing_detail$name
-    body_out[[`billing_details[email]`]] <- billing_details$email
-    body_out[[`billing_details[phone]`]] <- billing_details$phone
 
     tryCatch({
       setup_res <- httr::POST(
         "https://api.stripe.com/v1/setup_intents",
-        body = ,
+        body = body_out,
         encode = "form",
         httr::authenticate(
           user = getOption("pp")$keys$secret,
@@ -277,12 +266,11 @@ credit_card_subscription_module <- function(input, output, session,
         httr::content(setup_res, "text", encoding = "UTF-8")
       )
 
-      intent_id(setup_data$intent)
-
       session$sendCustomMessage(
-        ns("create_subscription"),
+        ns("create_setup_intent"),
         message = list(
-          client_secret = setup_data$client_secret
+          client_secret = setup_data$client_secret,
+          billing_details = hold_details
         )
       )
 
@@ -296,109 +284,8 @@ credit_card_subscription_module <- function(input, output, session,
 
   })
 
-  observeEvent(input$setup_intent_result, {
-
-
-    billing <- session$userData$stripe()
-    setup_intent_id <- intent_id()
-
-    tryCatch({
-
-      # GET payment method ID for this Setup Intent
-      si_payment_method <- httr::GET(
-        paste0("https://api.stripe.com/v1/setup_intents/", setup_intent_id),
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
-        )
-      )
-
-      #httr::stop_for_status(si_payment_method)
-
-      si_payment_method_out <- jsonlite::fromJSON(
-        httr::content(si_payment_method, "text", encoding = "UTF-8")
-      )
-
-
-      default_payment_method <- si_payment_method_out$payment_method
-
-
-
-      post_body <- list(
-        "customer" = billing$stripe_customer_id,
-        `items[0][price]` = price_id,
-        "default_payment_method" = default_payment_method
-      )
-
-      # if user has already created a free trial, and then canceled their free trial part way through,
-      # we keep track of their free trial days used and send them with the create subscription request
-      # so that the user does not get to completely restart their free trial.
-      if (is.na(billing$subscription$trial_days_remaining)) {
-        post_body$trial_period_days <- getOption("pp")$trial_period_days
-      } else {
-        post_body$trial_period_days <- floor(as.numeric(billing$subscription$trial_days_remaining))
-      }
-
-      # Create the subscription and attach Customer & payment method to newly created subscription
-      res <- httr::POST(
-        "https://api.stripe.com/v1/subscriptions",
-        body = post_body,
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
-        )
-      )
-
-      res_content <- jsonlite::fromJSON(
-        httr::content(res, "text", encoding = "UTF-8")
-      )
-
-      if (!identical(httr::status_code(res), 200L)) {
-
-        print(res_content)
-        stop("unable to create subscription", call. = FALSE)
-
-      } else {
-
-        # update the Stripe subscription id saved to the database
-        new_subscription_id <- res_content$id
-
-        update_customer_res <- update_customer(
-          customer_uid = billing$polished_customer_uid,
-          stripe_subscription_id = new_subscription_id,
-          default_payment_method = default_payment_method
-        )
-
-        if (!identical(httr::status_code(update_customer_res$response), 200L)) {
-
-          stop(update_customer_res$content, call. = FALSE)
-        }
-
-      }
-
-
-
-      #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
-
-      shinyFeedback::showToast(
-        type = 'success',
-        message = 'Your payment method and subscription have been updated'
-      )
-    }, error = function(err) {
-
-      msg <-  "Payment method authenticated, but there was an error saving your Payment Method"
-      print(msg)
-      print(err)
-      shinyFeedback::showToast("error", msg)
-    })
-
-    intent_id(NULL)
-  })
-
   return(list(
-    subscription_result = reactive({input$setup_intent_result})
+    setup_intent_result = reactive({input$setup_intent_result})
   ))
 }
 

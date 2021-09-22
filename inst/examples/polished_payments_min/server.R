@@ -54,22 +54,6 @@ server <- function(input, output, session) {
     ))
   })
 
-
-
-
-  subscription_return <- shiny::callModule(
-    credit_card_subscription_module,
-    "subscription",
-    trigger = reactive({input$subscription_card_payment}),
-    price_id = "price_1HPGITCJv951GRc3Zuad1uoX"
-  )
-
-  observe({
-    print(list(
-      subscription_result = subscription_return$subscription_result()
-    ))
-  })
-
 }
 
 payments_server(server) %>%

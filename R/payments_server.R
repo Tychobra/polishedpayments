@@ -57,10 +57,9 @@ payments_server <- function(
             stripe_customer_id = customer$stripe_customer_id,
             free_user = FALSE,
             default_payment_method = customer$defualt_payment_method,
-            free_trial_days_remainingat_cancel = customer$free_trial_days_remaining_at_cancel,
+            trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
-
           return()
 
         } else if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0) {
@@ -74,7 +73,6 @@ payments_server <- function(
             trial_days_remaining = customer$free_trial_days_remaining_at_cancel,
             subscription = NA
           ))
-
           return()
 
         } else {
@@ -96,6 +94,7 @@ payments_server <- function(
                 mode = "replace"
               )
               session$reload()
+              return()
             } else {
               stripe_out$subscription <- NA
             }
@@ -108,7 +107,7 @@ payments_server <- function(
             # account page for them to restart their subscription
             # user is either in trial period or they already have a subscription with
             # billing enabled, so let them access the app.
-            if ((customer$free_trial_days_remaining_at_cancel <= 0 && is.na(stripe_sub$default_payment_method)) && !identical(payments_query, "TRUE")) {
+            if ((stripe_sub$trial_days_remaining <= 0 && is.na(customer$default_payment_method)) && !identical(payments_query, "TRUE")) {
               shiny::updateQueryString(
                 queryString = "?payments=TRUE",
                 session = session,
@@ -136,7 +135,6 @@ payments_server <- function(
 
 
           session$userData$stripe(stripe_out)
-
         }
 
       }, error = function(err) {
@@ -167,9 +165,6 @@ payments_server <- function(
 
 
     observeEvent(session$userData$stripe(), {
-      hold_user <- session$userData$user()
-      hold_stripe <- session$userData$stripe()
-
       query_list <- shiny::getQueryString()
       payments_query <- query_list$payments
 
@@ -177,11 +172,8 @@ payments_server <- function(
 
         payments_app_server(input, output, session)
 
-      } else if (
-        is.null(getOption("pp")$prices) ||
-        length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 ||
-        !is.na(hold_stripe$default_payment_method)
-      ) {
+      } else {
+
         server(input, output, session)
       }
 
