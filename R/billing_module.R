@@ -51,19 +51,6 @@ billing_module_ui <- function(id) {
             ),
             shiny::column(
               12,
-              id = ns("has_trial"),
-              tags$div(
-                style = "width: 150px; display: inline-block;",
-                tags$h4(tags$strong("Trial End"))
-              ),
-              tags$div(
-                style = "display: inline-block",
-                tags$h4(shiny::textOutput(ns("trial_end_out")))
-              ),
-              tags$hr(style = "margin: 0;")
-            ),
-            shiny::column(
-              12,
               tags$br(),
               shinyjs::hidden(shiny::actionButton(
                 ns("cancel_subscription"),
@@ -385,19 +372,6 @@ billing_module <- function(input, output, session) {
       } else {
         shinyjs::showElement("has_trial")
       }
-    })
-
-    output$trial_end_out <- renderText({
-      req(session$userData$stripe())
-      hold <- session$userData$stripe()$subscription
-
-      if (is.na(hold)) {
-        out <- "No Trial"
-      } else {
-        out <- as.character(Sys.Date() + hold$trial_days_remaining)
-      }
-
-      out
     })
 
 
