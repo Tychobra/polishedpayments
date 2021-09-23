@@ -32,27 +32,26 @@ server <- function(input, output, session) {
   )
 
 
-  payment_return <- shiny::callModule(
-    credit_card_payment_module,
-    "payment",
-    trigger = reactive({input$submit_card_payment}),
+  shiny::callModule(
+    create_payment_module,
+    "pay_10",
     amount = 1000
   )
 
-  observeEvent(payment_return$payment_result(), {
-    result <- payment_return$payment_result()
-
-    shinyFeedback::resetLoadingButton("submit_card_payment")
-    if (is.null(result$error)) {
-      showToast("success", "payment made")
-    } else {
-      showToast("error", result$error$message)
-    }
-
-    print(list(
-      payment_result = payment_return$payment_result()
-    ))
-  })
+  # observeEvent(payment_return$payment_result(), {
+  #   result <- payment_return$payment_result()
+  #
+  #   shinyFeedback::resetLoadingButton("submit_card_payment")
+  #   if (is.null(result$error)) {
+  #     showToast("success", "payment made")
+  #   } else {
+  #     showToast("error", result$error$message)
+  #   }
+  #
+  #   print(list(
+  #     payment_result = payment_return$payment_result()
+  #   ))
+  # })
 
 }
 

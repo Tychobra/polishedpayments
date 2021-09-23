@@ -1,23 +1,31 @@
-
-
-#' Credit Card Modal to create a subscription
+#' Shiny module ui for creating a one time payment
 #'
-#' @param price_id the Stripe price id
+#' @param id the module id
+#'
+#' @export
+#'
+create_payment_module_ui <- function(id) {
+  ns <- NS(id)
+  uiOutput(ns("ui_out"))
+}
+
+#' Shiny module server for creating a one time payment
+#'
+#' @param open_modal_trigger reactive trigger to open the modal
+#' @param amount the amount of the one time payment
 #' @param title the title to pass to \code{shiny::modalDialog}
 #' @param size the size to pas to \code{shiny::modalDialog}
 #' @param easyClose the easyClose to pass to \code{shiny::modalDialog}
 #' @param fade the fade to pass to \code{shiny::modalDialog}
 #'
-#' @importFrom shiny showModal modalDialog tagList actionButton textInput callModule
+#' @importFrom shiny showModal modalDialog tagList textInput callModule
+#' @importFrom shinyFeedback loadingButton
 #'
+#' @export
 #'
-create_subscription_modal <- function(input, output, session,
-  open_modal_trigger,
-  price_id,
-  ui = p(
-    style = "text-align: center",
-    "You are signing up for a subscription"
-  ),
+create_payment_module <- function(input, output, session,
+  amount,
+  ui = NULL,
   # modalDialog inputs
   title = NULL,
   size = "s",
@@ -26,44 +34,85 @@ create_subscription_modal <- function(input, output, session,
 ) {
   ns <- session$ns
 
-  observeEvent(open_modal_trigger(), {
-    shiny::showModal(
-      shiny::modalDialog(
-        title = title,
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(
-            ns("submit"),
-            "Submit",
-            class = "btn-primary",
-            style = "color: #FFF"
-          )
-        ),
-        size = size,
-        easyClose = easyClose,
-        fade = fade,
+
+  ui_prep <- reactive({
+    hold_stripe <- session$userData$stripe()
+
+    browser()
+
+    if (is.na(hold_stripe$default_payment_method)) {
+
+      out <- div(
         shiny::textInput(
           ns("cc_name"),
           "Cardholder Name",
           width = "100%"
         ),
         credit_card_module_ui(ns("cc_input")),
-        br(),
-        ui
+        checkboxInput(
+          ns("save_cc"),
+          "Save Credit Card for Future Payments"
+        ),
+        ui,
+        shinyFeedback::loadingButton(
+          ns("submit_cc"),
+          "Pay",
+          loadingLabel = "Confirming...",
+          class = "btn btn-lg btn-primary",
+          style = "color: #FFF; width: 100%"
+        )
       )
-    )
-  }, ignoreInit = TRUE)
 
 
+
+    } else {
+      pm <- NULL
+      tryCatch({
+
+        pm <- get_stripe_payment_method(hold_stripe$default_payment_method)
+
+
+      }, error = function(err) {
+
+      })
+
+
+
+
+      out <- div(
+        hr(),
+        h4(paste0("Pay with ", tools::toTitleCase(pm$card_brand), " ending in ", pm$card_last4)),
+        h5(paste0("expires ", pm$exp_month, "/", pm$exp_year)),
+        hr(),
+        br(),
+        ui,
+        shinyFeedback::loadingButton(
+          ns("submit_no_cc"),
+          "Pay",
+          loadingLabel = "Confirming...",
+          class = "btn btn-lg btn-primary",
+          style = "color: #FFF; width: 100%"
+        )
+      )
+
+    }
+
+    out
+  })
+
+  output$ui_out <- renderUI({
+    ui_prep()
+  })
 
   credit_card_module_return <- shiny::callModule(
     credit_card_module,
     ns("cc_input"),
-    trigger = reactive({input$submit}),
+    trigger = reactive({input$submit_cc}),
     billing_detail = reactive(list(
       name = input$cc_name
     ))
   )
+
 
   observeEvent(credit_card_module_return$setup_intent_result(), {
 
@@ -169,6 +218,12 @@ create_subscription_modal <- function(input, output, session,
       print(setup_intent_res)
       showToast("error", setup_intent_res$error$message)
     }
+
+  })
+
+  observeEvent(input$submit_no_cc, {
+
+    browser()
 
   })
 

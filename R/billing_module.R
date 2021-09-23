@@ -421,41 +421,7 @@ billing_module <- function(input, output, session) {
 
     tryCatch({
 
-      res <- httr::GET(
-        paste0("https://api.stripe.com/v1/payment_methods/", hold_stripe$default_payment_method),
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
-        )
-      )
-
-      res_dat <- jsonlite::fromJSON(
-        httr::content(res, "text", encoding = "UTF-8")
-      )
-
-      if (!identical(httr::status_code(res), 200L)) {
-        print("error getting payment information")
-        print(dat)
-        return(NULL)
-      }
-
-
-      out <- list(
-        "payment_method_id" = res_dat$id,
-        "name" = res_dat$billing_details$name,
-        "address" = list(
-          "city" = res_dat$billing_details$address$city,
-          "line1" = res_dat$billing_details$address$line1,
-          "line2" = res_dat$billing_details$address$line2,
-          "postal_code" = res_dat$billing_details$address$postal_code,
-          "state" = res_dat$billing_details$address$state
-        ),
-        "card_brand" = res_dat$card$brand,
-        "card_last4" = res_dat$card$last4,
-        "exp_month" = res_dat$card$exp_month,
-        "exp_year" = res_dat$card$exp_year
-      )
+      out <- get_stripe_payment_method(hold_stripe$default_payment_method)
 
     }, error = function(err) {
 
