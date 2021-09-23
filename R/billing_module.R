@@ -604,90 +604,21 @@ billing_module <- function(input, output, session) {
 
 
 
-  observeEvent(input$enable_billing, {
-
-    shiny::showModal(
-      shiny::modalDialog(
-        title = "Enable Billing",
-        footer = shiny::tagList(
-          shiny::modalButton("Cancel"),
-          shiny::actionButton(
-            ns("enable_billing_submit"),
-            "Submit",
-            class = "btn-primary",
-            style = "color: #FFF"
-          )
-        ),
-        size = "s",
-        shiny::textInput(
-          ns("enable_billing_cc_name"),
-          "Cardholder Name",
-          width = "100%"
-        ),
-        credit_card_module_ui(ns("enable_billing_cc_input")),
-        br(),
-        h5(
-          style = "text-align: center",
-          "This card will be used for future payments"
-        )
-      )
-    )
-  })
-
-
-  enable_billing_module_return <- shiny::callModule(
-    credit_card_module,
-    ns("enable_billing_cc_input"),
-    trigger = reactive({input$enable_billing_submit}),
-    billing_detail = reactive(list(
-      name = input$enable_billing_cc_name
-    ))
+  # enable billing by setting the default payment method without choosing a subscription
+  shiny::callModule(
+    set_payment_method_modal,
+    ns("enable_billing_modal"),
+    open_modal_trigger = reactive({input$enable_billing}),
+    title = "Enable Billing"
   )
 
-  observeEvent(enable_billing_module_return$setup_intent_result(), {
-    hold_stripe <- session$userData$stripe()
-    setup_intent_res <- enable_billing_module_return$setup_intent_result()
-
-    browser()
-    if (is.null(setup_intent_res$error)) {
-
-      setup_intent <- setup_intent_res$setupIntent
-      tryCatch({
-
-        # update customer via polished API to have the default_payment_method and
-        update_res <- update_customer(
-          customer_uid = hold_stripe$polished_customer_uid,
-          default_payment_method = setup_intent$payment_method
-        )
-
-        if (!identical(httr::status_code(update_res$response), 200L)) {
-          stop("unable to enable payment method", call. = FALSE)
-        }
-
-        removeModal()
-
-      }, error = function(err) {
-
-        print(err)
-        msg <- "unable to enable billing"
-        print(msg)
-        showToast("error", msg)
-
-        invisible(NULL)
-      })
-    } else {
-
-      msg <- "error getting enable billing setup intent"
-      print(msg)
-      print(setup_intent_res)
-      showToast("error", setup_intent_res$error$message)
-
-    }
-
-
-  })
-
-
+  # change default payment method
+  shiny::callModule(
+    set_payment_method_modal,
+    ns("change_pm_modal"),
+    open_modal_trigger = reactive({input$change_payment_method}),
+    title = "Change Card"
+  )
   # TODO: enable this for the payment method only
   # shiny::callModule(
   #   credit_card_payment_method_module,

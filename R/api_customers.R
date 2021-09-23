@@ -152,7 +152,7 @@ update_customer <- function(
   body_out$default_payment_method <- default_payment_method
   body_out$cancel_subscription <- cancel_subscription
 
-  browser()
+
   resp <- httr::PUT(
     url = paste0(getOption("polished")$api_url, "/customers"),
     ua,

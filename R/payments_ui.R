@@ -15,6 +15,10 @@ payments_ui <- function(
 
     user <- request$polished_user
 
+    if (is.null(user)) {
+      return()
+    }
+
     query <- shiny::parseQueryString(request$QUERY_STRING)
     payments_query <- query$payments
 
