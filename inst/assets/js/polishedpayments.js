@@ -16,6 +16,14 @@ const payments = (() => {
 
 
   const mount_card_element = (el_id) => {
+
+    // destroy and existing card elements
+    const existing_card_element = elements.getElement("card")
+    if (existing_card_element !== null) {
+      existing_card_element.destroy()
+    }
+
+
     const card_element = elements.create('card', {
       iconStyle: 'solid',
       style: {
@@ -111,7 +119,6 @@ const payments = (() => {
 
           // The setup has succeeded. Display a success message.
           Shiny.setInputValue(message.ns_prefix + "setup_intent_result", result, { priority: "event"});
-
         })
 
       }
