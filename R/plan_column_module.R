@@ -160,7 +160,6 @@ plan_column_module <- function(input, output, session,
   observeEvent(input$change_plan, {
     sub_info <- session$userData$stripe()
 
-    browser()
     if (is.na(sub_info$default_payment_method)) {
       open_credit_card(open_credit_card() + 1)
     } else {
@@ -169,14 +168,14 @@ plan_column_module <- function(input, output, session,
 
   }, ignoreInit = TRUE)
 
-  observeEvent(open_credit_card(), {
-    callModule(
-      create_subscription_modal,
-      "change_plan_modal",
-      price_id = plan_id,
-      title = "Change Plan"
-    )
-  }, ignoreInit = TRUE)
+
+  callModule(
+    create_subscription_modal,
+    "change_plan_modal",
+    open_modal_trigger = open_credit_card,
+    price_id = plan_id,
+    title = "Change Plan"
+  )
 
 
 

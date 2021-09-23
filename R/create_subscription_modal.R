@@ -13,6 +13,7 @@
 #' @export
 #'
 create_subscription_modal <- function(input, output, session,
+  open_modal_trigger,
   price_id,
   ui = p(
     style = "text-align: center",
@@ -26,31 +27,34 @@ create_subscription_modal <- function(input, output, session,
 ) {
   ns <- session$ns
 
-  shiny::showModal(
-    shiny::modalDialog(
-      title = title,
-      footer = shiny::tagList(
-        shiny::modalButton("Cancel"),
-        shiny::actionButton(
-          ns("submit"),
-          "Submit",
-          class = "btn-primary",
-          style = "color: #FFF"
-        )
-      ),
-      size = size,
-      easyClose = easyClose,
-      fade = fade,
-      shiny::textInput(
-        ns("cc_name"),
-        "Cardholder Name",
-        width = "100%"
-      ),
-      credit_card_module_ui(ns("cc_input")),
-      br(),
-      ui
+  observeEvent(open_modal_trigger(), {
+    shiny::showModal(
+      shiny::modalDialog(
+        title = title,
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(
+            ns("submit"),
+            "Submit",
+            class = "btn-primary",
+            style = "color: #FFF"
+          )
+        ),
+        size = size,
+        easyClose = easyClose,
+        fade = fade,
+        shiny::textInput(
+          ns("cc_name"),
+          "Cardholder Name",
+          width = "100%"
+        ),
+        credit_card_module_ui(ns("cc_input")),
+        br(),
+        ui
+      )
     )
-  )
+  }, ignoreInit = TRUE)
+
 
 
   credit_card_module_return <- shiny::callModule(
@@ -63,8 +67,6 @@ create_subscription_modal <- function(input, output, session,
   )
 
   observeEvent(credit_card_module_return$setup_intent_result(), {
-
-    browser()
 
     billing <- session$userData$stripe()
     setup_intent_res <- credit_card_module_return$setup_intent_result()
@@ -146,12 +148,13 @@ create_subscription_modal <- function(input, output, session,
 
         }
 
-        # session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
-
         shinyFeedback::showToast(
           type = 'success',
           message = 'Your payment method and subscription have been updated'
         )
+
+        removeModal()
+
       }, error = function(err) {
 
         msg <-  "Payment method authenticated, but there was an error saving your Payment Method"

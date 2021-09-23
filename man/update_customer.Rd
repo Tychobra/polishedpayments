@@ -6,7 +6,7 @@
 \usage{
 update_customer(
   customer_uid,
-  stripe_subscription_id = NULL,
+  stripe_subscription_id,
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
   stripe_is_live = getOption("pp")$is_live,
@@ -20,6 +20,9 @@ update_customer(
 
 \item{free_trial_days_remaining_at_cancel}{The number of days remaining in the customer's
 free subscription trial at time of cancelation.}
+
+\item{default_payment_method}{the Stripe payment method ID for the customer's
+default payment method.}
 
 \item{api_key}{your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
 so that you do not need to supply this argument with each function call.}

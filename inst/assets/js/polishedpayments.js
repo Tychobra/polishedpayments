@@ -51,7 +51,7 @@ const payments = (() => {
 
   $(document).on("shiny:sessioninitialized", () => {
     Shiny.addCustomMessageHandler(
-      "create_payment",
+      "confirm_card_payment",
       function(message) {
 
         // TODO: Allow saved cards (after removing `is.na(default_payment_method)`) checks in R
@@ -89,7 +89,7 @@ const payments = (() => {
 
 
     Shiny.addCustomMessageHandler(
-      "create_setup_intent",
+      "confirm_card_setup",
       function(message) {
 
         const card_element = elements.getElement("card")

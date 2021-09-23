@@ -18,6 +18,7 @@ payments_ui <- function(
     query <- shiny::parseQueryString(request$QUERY_STRING)
     payments_query <- query$payments
 
+
     err_out <- NULL
     tryCatch({
       # get existing subscriptions from Polished API
@@ -110,7 +111,7 @@ payments_ui <- function(
           shiny::tags$head(
             tags$script(src = "https://js.stripe.com/v3"),
             tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
-            tags$script(src = "polishedpayments/js/polishedpayments.js?version=1")
+            tags$script(src = "polishedpayments/js/polishedpayments.js?version=2")
           ),
           ui
         )
@@ -126,7 +127,7 @@ payments_ui <- function(
             shiny::tags$head(
               tags$script(src = "https://js.stripe.com/v3"),
               tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
-              tags$script(src = "polishedpayments/js/polishedpayments.js?version=1")
+              tags$script(src = "polishedpayments/js/polishedpayments.js?version=2")
             ),
             ui
           )

@@ -279,7 +279,7 @@ billing_module <- function(input, output, session) {
         # to set the proper amount of free trial days if the user restarts their subscription.
         update_res <- update_customer(
           customer_uid = subscription$polished_customer_uid,
-          stripe_subscription_id = NULL,
+          cancel_subscription = TRUE,
           free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
         )
 
@@ -602,30 +602,103 @@ billing_module <- function(input, output, session) {
       DT::formatCurrency(3:5)
   })
 
-  if (!is.null(getOption("pp")$prices)) {
-
-    observeEvent(input$enable_billing_button, {
 
 
-      credit_card_module_ui(
-        ns("enable_billing")
+  observeEvent(input$enable_billing, {
+
+    shiny::showModal(
+      shiny::modalDialog(
+        title = "Enable Billing",
+        footer = shiny::tagList(
+          shiny::modalButton("Cancel"),
+          shiny::actionButton(
+            ns("enable_billing_submit"),
+            "Submit",
+            class = "btn-primary",
+            style = "color: #FFF"
+          )
+        ),
+        size = "s",
+        shiny::textInput(
+          ns("enable_billing_cc_name"),
+          "Cardholder Name",
+          width = "100%"
+        ),
+        credit_card_module_ui(ns("enable_billing_cc_input")),
+        br(),
+        h5(
+          style = "text-align: center",
+          "This card will be used for future payments"
+        )
       )
-    })
+    )
+  })
 
-    # TODO: enable this for the payment method only
-    # shiny::callModule(
-    #   credit_card_payment_method_module,
-    #   "enable_billing",
-    #   trigger = reactive({input$enable_billing_button})
-    # )
-  }
+
+  enable_billing_module_return <- shiny::callModule(
+    credit_card_module,
+    ns("enable_billing_cc_input"),
+    trigger = reactive({input$enable_billing_submit}),
+    billing_detail = reactive(list(
+      name = input$enable_billing_cc_name
+    ))
+  )
+
+  observeEvent(enable_billing_module_return$setup_intent_result(), {
+    hold_stripe <- session$userData$stripe()
+    setup_intent_res <- enable_billing_module_return$setup_intent_result()
+
+    browser()
+    if (is.null(setup_intent_res$error)) {
+
+      setup_intent <- setup_intent_res$setupIntent
+      tryCatch({
+
+        # update customer via polished API to have the default_payment_method and
+        update_res <- update_customer(
+          customer_uid = hold_stripe$polished_customer_uid,
+          default_payment_method = setup_intent$payment_method
+        )
+
+        if (!identical(httr::status_code(update_res$response), 200L)) {
+          stop("unable to enable payment method", call. = FALSE)
+        }
+
+        removeModal()
+
+      }, error = function(err) {
+
+        print(err)
+        msg <- "unable to enable billing"
+        print(msg)
+        showToast("error", msg)
+
+        invisible(NULL)
+      })
+    } else {
+
+      msg <- "error getting enable billing setup intent"
+      print(msg)
+      print(setup_intent_res)
+      showToast("error", setup_intent_res$error$message)
+
+    }
+
+
+  })
+
+
+  # TODO: enable this for the payment method only
+  # shiny::callModule(
+  #   credit_card_payment_method_module,
+  #   "enable_billing",
+  #   trigger = reactive({input$enable_billing_button})
+  # )
 
   # shiny::callModule(
   #   credit_card_module,
   #   "change_credit_card",
   #   _modal_trigger = reactive({input$change_payment_method})
   # )
-
-
 
 }

@@ -119,6 +119,9 @@ add_customer <- function(
 #' @param stripe_subscription_id the Stripe subscription ID.
 #' @param free_trial_days_remaining_at_cancel The number of days remaining in the customer's
 #' free subscription trial at time of cancelation.
+#' @param default_payment_method the Stripe payment method ID for the customer's
+#' default payment method.
+#' @param cancel_subscription boolean - whether or not to cancel the existing subscription.
 #'
 #' @inheritParams get_customers
 #'
@@ -133,20 +136,23 @@ update_customer <- function(
   stripe_subscription_id = NULL,
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
+  cancel_subscription = FALSE,
   stripe_is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 ) {
 
+  # required parameters
   body_out <- list(
     customer_uid = customer_uid
   )
 
-
+  # optional parameters
   body_out$stripe_subscription_id <- stripe_subscription_id
   body_out$free_trial_days_remaining_at_cancel <- free_trial_days_remaining_at_cancel
   body_out$default_payment_method <- default_payment_method
+  body_out$cancel_subscription <- cancel_subscription
 
-
+  browser()
   resp <- httr::PUT(
     url = paste0(getOption("polished")$api_url, "/customers"),
     ua,

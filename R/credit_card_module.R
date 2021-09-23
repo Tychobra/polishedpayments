@@ -181,8 +181,6 @@ credit_card_payment_module <- function(input, output, session,
     hold <- input$payment_intent_result
     billing <- session$userData$stripe()
 
-
-
     if (is.null(hold$error)) {
 
       if (isTRUE(input$attach_payment_method)) {
@@ -202,8 +200,6 @@ credit_card_payment_module <- function(input, output, session,
         })
       }
 
-    } else {
-      intent_id(NULL)
     }
   })
 
@@ -236,7 +232,7 @@ credit_card_module <- function(input, output, session,
 
 
   observeEvent(trigger(), {
-    browser()
+
     billing <- session$userData$stripe()
     hold_details <- billing_details()
 
@@ -266,7 +262,7 @@ credit_card_module <- function(input, output, session,
       )
 
       session$sendCustomMessage(
-        "create_setup_intent",
+        "confirm_card_setup",
         message = list(
           ns_prefix = ns(""),
           client_secret = setup_data$client_secret,
@@ -287,80 +283,5 @@ credit_card_module <- function(input, output, session,
   return(list(
     setup_intent_result = reactive({input$setup_intent_result})
   ))
-}
-
-
-
-
-
-credit_card_change_module <- function(input, output, session) {
-  # observeEvent(trigger(), {
-  #   hold_intent_id <- intent_id()
-  #
-  #   tryCatch({
-  #
-  #     # GET payment method ID for this Setup Intent
-  #
-  #
-  #
-  #     si_payment_method <- httr::GET(
-  #       paste0("https://api.stripe.com/v1/setup_intents/", hold_intent_id),
-  #       encode = "form",
-  #       httr::authenticate(
-  #         user = getOption("pp")$keys$secret,
-  #         password = ""
-  #       )
-  #     )
-  #
-  #
-  #
-  #     #httr::stop_for_status(si_payment_method)
-  #
-  #     si_payment_method_out <- jsonlite::fromJSON(
-  #       httr::content(si_payment_method, "text", encoding = "UTF-8")
-  #     )
-  #
-  #
-  #     si_default_payment_method <- si_payment_method_out$payment_method
-  #
-  #
-  #     # user is changing their default payment method.  No need to mess with subscription
-  #     # UPDATE the default payment method
-  #     res <- httr::POST(
-  #       paste0("https://api.stripe.com/v1/subscriptions/", billing$stripe_subscription_id),
-  #       body = list(
-  #         default_payment_method = default_payment_method,
-  #         trial_from_plan = "true"
-  #       ),
-  #       encode = "form",
-  #       httr::authenticate(
-  #         user = getOption("pp")$keys$secret,
-  #         password = ""
-  #       )
-  #     )
-  #
-  #     # handle possible errors
-  #     if (!identical(httr::status_code(res), 200L)) {
-  #       res_content <- jsonlite::fromJSON(
-  #         httr::content(res, "text", encoding = "UTF-8")
-  #       )
-  #       # print full Stripe error returned from API
-  #       print(res_content)
-  #       stop("unable to update credit card", call. = FALSE)
-  #     }
-  #
-  #     # TODO: do the same as above except for payments rather than subscriptions
-  #
-  #   }, error = function(err) {
-  #
-  #     msg <- "unable to update default payment method"
-  #     print(msg)
-  #     print(err)
-  #     showToast("error", msg)
-  #
-  #   })
-  #
-  #
-  # })
 }
 
