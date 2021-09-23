@@ -187,7 +187,9 @@ plan_column_module <- function(input, output, session,
         tags$div(
           class = "text-center",
           style = "padding: 30px; line-height: 1.7",
-          h3(paste0("Confirm purchase of the ", hold_plan$nickname, " plan."))
+          h3(htmltools::HTML(
+            paste0("Confirm purchase of the ", tags$b(hold_plan$nickname), " plan.")
+          ))
         ),
         title = "Plan Change",
         footer = tags$span(
@@ -276,7 +278,7 @@ plan_column_module <- function(input, output, session,
         get_stripe(
           user_uid = hold_user$user_uid,
           user_roles = hold_user$roles,
-          is_on_payments = FALSE
+          is_on_payments = TRUE
         )
       )
 

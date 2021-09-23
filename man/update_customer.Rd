@@ -6,9 +6,10 @@
 \usage{
 update_customer(
   customer_uid,
-  stripe_subscription_id,
+  stripe_subscription_id = NULL,
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
+  cancel_subscription = FALSE,
   stripe_is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 )
@@ -23,6 +24,8 @@ free subscription trial at time of cancelation.}
 
 \item{default_payment_method}{the Stripe payment method ID for the customer's
 default payment method.}
+
+\item{cancel_subscription}{boolean - whether or not to cancel the existing subscription.}
 
 \item{api_key}{your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
 so that you do not need to supply this argument with each function call.}

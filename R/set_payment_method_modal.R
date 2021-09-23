@@ -52,6 +52,7 @@ set_payment_method_modal <- function(input, output, session,
     hold_stripe <- session$userData$stripe()
     setup_intent_res <- cc_module_return$setup_intent_result()
 
+
     if (is.null(setup_intent_res$error)) {
 
       setup_intent <- setup_intent_res$setupIntent
@@ -73,7 +74,7 @@ set_payment_method_modal <- function(input, output, session,
           get_stripe(
             user_uid = hold_user$user_uid,
             user_roles = hold_user$roles,
-            is_on_payments = FALSE
+            is_on_payments = TRUE
           )
         )
 

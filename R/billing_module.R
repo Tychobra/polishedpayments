@@ -248,8 +248,10 @@ billing_module <- function(input, output, session) {
     shiny::observeEvent(input$submit_cancel, {
       shiny::req(session$userData$stripe(), !is.na(session$userData$stripe()$subscription))
 
-      billing <- session$userData$stripe()
-      subscription <- billing$subscription
+      hold_user <- session$userData$user()
+      hold_stripe <- session$userData$stripe()
+      subscription <- hold_stripe$subscription
+
 
       tryCatch({
 
@@ -278,15 +280,23 @@ billing_module <- function(input, output, session) {
         # remaining at cancel. The "trial_days_remaining" will be used
         # to set the proper amount of free trial days if the user restarts their subscription.
         update_res <- update_customer(
-          customer_uid = subscription$polished_customer_uid,
+          customer_uid = hold_stripe$polished_customer_uid,
           cancel_subscription = TRUE,
-          free_trial_days_remaining_at_cancel = subscription$trial_days_remaining
+          free_trial_days_remaining_at_cancel = hold_stripe$trial_days_remaining
         )
 
         if (!identical(httr::status_code(update_res$response), 200L)) {
 
           stop(update_res$content$error, call. = FALSE)
         }
+
+        session$userData$stripe(
+          get_stripe(
+            user_uid = hold_user$user_uid,
+            user_roles = hold_user$roles,
+            is_on_payments = TRUE
+          )
+        )
 
         #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
         shinyFeedback::showToast("success", "Subscription Cancelled Successfully")

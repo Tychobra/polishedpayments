@@ -66,7 +66,7 @@ get_stripe <- function(
         out <- NULL
 
       } else {
-        stripe_out$subscription <- NA
+        out$subscription <- NA
       }
 
 
@@ -85,7 +85,6 @@ get_stripe <- function(
         out$trial_days_remaining <- stripe_sub$trial_days_remaining
 
         out$subscription = list(
-          uid = customer$uid,
           stripe_subscription_id = customer$stripe_subscription_id,
           item_id = stripe_sub$item_id,
           plan_id = stripe_sub$plan_id,

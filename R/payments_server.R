@@ -56,7 +56,7 @@ payments_server <- function(
 
         print(err)
 
-        if (identical(err$message, "unable to create subscription") || identical(err$message, "subscription canceled")) {
+        if (identical(err$message, "subscription canceled")) {
           # you can't create a Stripe subscription until after the Stripe user
           # has entered their payment info.  If the stripe user needs to create
           # a subscription (i.e. )
