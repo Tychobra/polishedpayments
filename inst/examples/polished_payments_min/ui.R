@@ -45,59 +45,32 @@ ui <- fluidPage(
     ),
     column(
       6,
-      tabsetPanel(
-        tabPanel(
-          "Single Payment",
+      br(),
+      br(),
+      br(),
+      br(),
+      div(
+        style="max-width: 400px; margin: 0 auto;",
+        wellPanel(
+          h2(
+            class = "text-center",
+            style = "line-height: 1.75;",
+            "Make one time $10 payment"
+          ),
           br(),
-          div(
-            style="max-width: 400px; margin: 0 auto;",
-            wellPanel(
-              h2(
-                class = "text-center",
-                style = "line-height: 1.75;",
-                "Make one time $10 payment"
-              ),
-              br(),
-              br(),
-              credit_card_module_ui("payment"),
-              shinyFeedback::loadingButton(
-                "submit_card_payment",
-                "Pay $10",
-                loadingLabel = 'Confirming Payment...',
-                class = "btn-primary btn-lg",
-                style = "width: 100%"
-              )
-            )
-          )
-        ),
-        tabPanel(
-          "Subscription",
           br(),
-          div(
-            style="max-width: 400px; margin: 0 auto;",
-            wellPanel(
-              h2(
-                class = "text-center",
-                style = "line-height: 1.75;",
-                "Subscribe to $10/month Subscription"
-              ),
-              br(),
-              br(),
-              credit_card_module_ui("subscription"),
-              shinyFeedback::loadingButton(
-                "subscription_card_payment",
-                "Subscribe",
-                loadingLabel = 'Confirming Payment...',
-                class = "btn-primary btn-lg",
-                style = "width: 100%"
-              )
-            )
+          credit_card_module_ui("payment"),
+          shinyFeedback::loadingButton(
+            "submit_card_payment",
+            "Pay $10",
+            loadingLabel = 'Confirming Payment...',
+            class = "btn-primary btn-lg",
+            style = "width: 100%"
           )
         )
       )
     )
   ),
-
   free_trial_banner_module_ui("trial_banner")
 )
 
