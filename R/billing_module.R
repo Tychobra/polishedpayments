@@ -619,17 +619,5 @@ billing_module <- function(input, output, session) {
     open_modal_trigger = reactive({input$change_payment_method}),
     title = "Change Card"
   )
-  # TODO: enable this for the payment method only
-  # shiny::callModule(
-  #   credit_card_payment_method_module,
-  #   "enable_billing",
-  #   trigger = reactive({input$enable_billing_button})
-  # )
-
-  # shiny::callModule(
-  #   credit_card_module,
-  #   "change_credit_card",
-  #   _modal_trigger = reactive({input$change_payment_method})
-  # )
 
 }
