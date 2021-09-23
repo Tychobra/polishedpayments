@@ -48,6 +48,7 @@ set_payment_method_modal <- function(input, output, session,
   )
 
   observeEvent(cc_module_return$setup_intent_result(), {
+    hold_user <- session$userData$user()
     hold_stripe <- session$userData$stripe()
     setup_intent_res <- cc_module_return$setup_intent_result()
 
@@ -67,6 +68,14 @@ set_payment_method_modal <- function(input, output, session,
         }
 
         removeModal()
+
+        session$userData$stripe(
+          get_stripe(
+            user_uid = hold_user$user_uid,
+            user_roles = hold_user$roles,
+            is_on_payments = FALSE
+          )
+        )
 
       }, error = function(err) {
 

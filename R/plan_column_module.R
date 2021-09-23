@@ -205,7 +205,7 @@ plan_column_module <- function(input, output, session,
   })
 
   observeEvent(input$new_plan, {
-
+    hold_user <- session$userData$user()
     hold_stripe <- session$userData$stripe()
     hold_sub_info <- hold_stripe$subscription
     shiny::removeModal()
@@ -272,8 +272,13 @@ plan_column_module <- function(input, output, session,
         }
       }
 
-
-      #session$userData$stripe_trigger(session$userData$stripe_trigger() + 1)
+      session$userData$stripe(
+        get_stripe(
+          user_uid = hold_user$user_uid,
+          user_roles = hold_user$roles,
+          is_on_payments = FALSE
+        )
+      )
 
       shinyFeedback::showToast("success", "Subscription Successfully Updated")
 
