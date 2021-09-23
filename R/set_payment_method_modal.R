@@ -14,11 +14,12 @@ set_payment_method_modal <- function(input, output, session,
         title = title,
         footer = shiny::tagList(
           shiny::modalButton("Cancel"),
-          shiny::actionButton(
+          shinyFeedback::loadingButton(
             ns("submit"),
             "Submit",
-            class = "btn-primary",
-            style = "color: #FFF"
+            loadingLabel = "Confirming...",
+            class = "btn btn-primary",
+            style = "color: #FFF; width: 150px;"
           )
         ),
         size = "s",
@@ -78,7 +79,12 @@ set_payment_method_modal <- function(input, output, session,
           )
         )
 
+        showToast("success", "Payment Method Updated")
+
       }, error = function(err) {
+
+        showToast("error", "error updating payment method")
+        shinyFeedback::resetLoadingButton("submit")
 
         print(err)
         msg <- "unable to enable billing"
@@ -89,6 +95,7 @@ set_payment_method_modal <- function(input, output, session,
       })
     } else {
 
+      xshinyFeedback::resetLoadingButton("submit")
       msg <- "error getting enable billing setup intent"
       print(msg)
       print(setup_intent_res)
