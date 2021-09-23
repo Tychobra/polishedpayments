@@ -166,36 +166,3 @@ update_customer <- function(
 
   polished_api_res(resp)
 }
-
-
-#' #' Polished Payments API - Delete an App
-#' #'
-#' #' @param app_uid the app uid.
-#' #'
-#' #' @inheritParams get_apps
-#' #'
-#' #' @export
-#' #'
-#' #' @seealso [get_apps()] [add_app()] [update_app()]
-#' #'
-#' #' @importFrom httr DELETE authenticate
-#' #'
-#' delete_app <- function(app_uid, api_key = getOption("polished")$api_key) {
-#'
-#'   query_out <- list(
-#'     app_uid = app_uid
-#'   )
-#'
-#'   resp <- httr::DELETE(
-#'     url = paste0(getOption("polished")$api_url, "/apps"),
-#'     ua,
-#'     httr::authenticate(
-#'       user = api_key,
-#'       password = ""
-#'     ),
-#'     query = query_out
-#'   )
-#'
-#'   polished_api_res(resp)
-#' }
-
