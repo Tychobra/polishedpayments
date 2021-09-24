@@ -49,7 +49,7 @@ payments_ui <- function(
         )
 
 
-        if (is.null(!is.null(getOption("pp")$prices)) && getOption("pp")$trial_period_days > 0) {
+        if (!is.null(getOption("pp")$prices) && getOption("pp")$trial_period_days > 0) {
           # Step 2: If the app is using polishedpayments subscriptions, create the Stripe subscription on Stripe.
           # If the subscription does not have a trial period, then we can't create the subscription until a payment
           # method is enabled, so also do not create the subscription if no trial period.
