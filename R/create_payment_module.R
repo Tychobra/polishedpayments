@@ -25,6 +25,9 @@ create_payment_module_ui <- function(id) {
 #'
 create_payment_module <- function(input, output, session,
   amount,
+  currency = "usd",
+  send_receipt_email = TRUE,
+  description = NULL,
   ui = NULL,
   # modalDialog inputs
   title = NULL,
@@ -38,7 +41,6 @@ create_payment_module <- function(input, output, session,
   ui_prep <- reactive({
     hold_stripe <- session$userData$stripe()
 
-    browser()
 
     if (is.na(hold_stripe$default_payment_method)) {
 
@@ -66,16 +68,27 @@ create_payment_module <- function(input, output, session,
 
 
     } else {
+
       pm <- NULL
+      err_msg <- NULL
       tryCatch({
 
         pm <- get_stripe_payment_method(hold_stripe$default_payment_method)
 
-
       }, error = function(err) {
 
+        msg <- "unable to get payment method info"
+        print(msg)
+        print(err)
+        err_msg <<- err$message
+        showToast("error", msg)
+
+        invisible(NULL)
       })
 
+      if (!is.null(err_msg)) {
+        return()
+      }
 
 
 
@@ -158,20 +171,21 @@ create_payment_module <- function(input, output, session,
           post_body$trial_period_days <- floor(as.numeric(billing$trial_days_remaining))
         }
 
+        # TODO: update theis to a POST to payment_intnent with confirm = true
         # Create the subscription and attach Customer & payment method to newly created subscription
-        res <- httr::POST(
-          "https://api.stripe.com/v1/subscriptions",
-          body = post_body,
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
-        )
-
-        res_content <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
+        # res <- httr::POST(
+        #   "https://api.stripe.com/v1/subscriptions",
+        #   body = post_body,
+        #   encode = "form",
+        #   httr::authenticate(
+        #     user = getOption("pp")$keys$secret,
+        #     password = ""
+        #   )
+        # )
+        #
+        # res_content <- jsonlite::fromJSON(
+        #   httr::content(res, "text", encoding = "UTF-8")
+        # )
 
         if (!identical(httr::status_code(res), 200L)) {
 
@@ -222,8 +236,40 @@ create_payment_module <- function(input, output, session,
   })
 
   observeEvent(input$submit_no_cc, {
+    hold_stripe <- session$userData$stripe()
+    hold_user <- session$userData$user()
 
+
+    if (isTRUE(send_receipt_email)) {
+      receipt_email <- hold_user$email
+    } else {
+      receipt_email <- NULL
+    }
     browser()
+
+    tryCatch({
+
+      payment_res <- create_payment(
+        customer_id = hold_stripe$stripe_customer_id,
+        payment_method_id = hold_stripe$default_payment_method,
+        amount = amount,
+        currency = currency,
+        receipt_email = receipt_email,
+        description = description
+      )
+
+      showToast("success", "Payment Processed")
+
+    }, error = function(err) {
+
+      msg <- "unable to process payment"
+      print(msg)
+      print(err)
+      showToast("error", err$message)
+
+    })
+
+    resetLoadingButton("submit_no_cc")
 
   })
 

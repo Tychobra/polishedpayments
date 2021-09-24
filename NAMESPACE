@@ -2,6 +2,7 @@
 
 export(add_customer)
 export(add_stripe_customer)
+export(create_payment)
 export(create_payment_module)
 export(create_payment_module_ui)
 export(credit_card_module)
