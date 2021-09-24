@@ -18,6 +18,9 @@ create_payment_module_ui <- function(id) {
 #' @param easyClose the easyClose to pass to \code{shiny::modalDialog}
 #' @param fade the fade to pass to \code{shiny::modalDialog}
 #'
+#' @return a list with 1 reactiveVal
+#' - payment_response - returns the response to the payment attempt
+#'
 #' @importFrom shiny showModal modalDialog tagList textInput callModule
 #' @importFrom shinyFeedback loadingButton
 #'
@@ -127,9 +130,11 @@ create_payment_module <- function(input, output, session,
   )
 
 
-  observeEvent(credit_card_module_return$setup_intent_result(), {
+  payment_out <- reactiveVal(NULL)
 
-    billing <- session$userData$stripe()
+  observeEvent(credit_card_module_return$setup_intent_result(), {
+    hold_user <- session$userData$user()
+    hold_stripe <- session$userData$stripe()
     setup_intent_res <- credit_card_module_return$setup_intent_result()
     if (is.null(setup_intent_res$error)) {
       setup_intent <- setup_intent_res$setupIntent
@@ -146,80 +151,59 @@ create_payment_module <- function(input, output, session,
           )
         )
 
-        #httr::stop_for_status(si_payment_method)
-
         si_payment_method_out <- jsonlite::fromJSON(
           httr::content(si_payment_method, "text", encoding = "UTF-8")
         )
 
+        if (!identical(httr::status_code(si_payment_method), 200L)) {
+          print(si_payment_method_out)
+          stop(si_payment_method_out$error$message, call. = FALSE)
+        }
 
         default_payment_method <- si_payment_method_out$payment_method
 
 
-        post_body <- list(
-          "customer" = billing$stripe_customer_id,
-          `items[0][price]` = price_id,
-          "default_payment_method" = default_payment_method
-        )
-
-        # if user has already created a free trial, and then canceled their free trial part way through,
-        # we keep track of their free trial days used and send them with the create subscription request
-        # so that the user does not get to completely restart their free trial.
-        if (is.na(billing$trial_days_remaining)) {
-          post_body$trial_period_days <- getOption("pp")$trial_period_days
+        if (isTRUE(send_receipt_email)) {
+          receipt_email <- hold_user$email
         } else {
-          post_body$trial_period_days <- floor(as.numeric(billing$trial_days_remaining))
+          receipt_email <- NULL
         }
 
-        # TODO: update theis to a POST to payment_intnent with confirm = true
-        # Create the subscription and attach Customer & payment method to newly created subscription
-        # res <- httr::POST(
-        #   "https://api.stripe.com/v1/subscriptions",
-        #   body = post_body,
-        #   encode = "form",
-        #   httr::authenticate(
-        #     user = getOption("pp")$keys$secret,
-        #     password = ""
-        #   )
-        # )
-        #
-        # res_content <- jsonlite::fromJSON(
-        #   httr::content(res, "text", encoding = "UTF-8")
-        # )
+        payment_res <- create_payment(
+          customer_id = hold_stripe$stripe_customer_id,
+          payment_method_id = default_payment_method,
+          amount = amount,
+          currency = currency,
+          receipt_email = receipt_email,
+          description = description
+        )
 
-        if (!identical(httr::status_code(res), 200L)) {
 
-          print(res_content)
-          stop("unable to create subscription", call. = FALSE)
-
-        } else {
-
-          # update the Stripe subscription id saved to the database
-          new_subscription_id <- res_content$id
-
+        if (isTRUE(input$save_cc)) {
           update_customer_res <- update_customer(
-            customer_uid = billing$polished_customer_uid,
-            stripe_subscription_id = new_subscription_id,
+            customer_uid = hold_stripe$polished_customer_uid,
             default_payment_method = default_payment_method
           )
 
-          if (!identical(httr::status_code(update_customer_res$response), 200L)) {
-
-            stop(update_customer_res$content, call. = FALSE)
-          }
-
+          session$userData$stripe(get_stripe(
+            user_uid = hold_user$user_uid,
+            user_roles = hold_user$roles,
+          ))
         }
 
         shinyFeedback::showToast(
-          type = 'success',
-          message = 'Your payment method and subscription have been updated'
+          type = "success",
+          message = "Payment Processed"
         )
 
-        removeModal()
+        payment_out(payment_res)
 
       }, error = function(err) {
 
-        msg <-  "Payment method authenticated, but there was an error saving your Payment Method"
+        payment_out(list(
+          error = err$message
+        ))
+        msg <-  "unable to process payment"
         print(msg)
         print(err)
         shinyFeedback::showToast("error", msg)
@@ -230,8 +214,11 @@ create_payment_module <- function(input, output, session,
       msg <- "error getting setup intent"
       print(msg)
       print(setup_intent_res)
+      payment_out(setup_intent_res)
       showToast("error", setup_intent_res$error$message)
     }
+
+    resetLoadingButton("submit_cc")
 
   })
 
@@ -245,7 +232,6 @@ create_payment_module <- function(input, output, session,
     } else {
       receipt_email <- NULL
     }
-    browser()
 
     tryCatch({
 
@@ -259,12 +245,16 @@ create_payment_module <- function(input, output, session,
       )
 
       showToast("success", "Payment Processed")
+      payment_out(payment_res)
 
     }, error = function(err) {
 
       msg <- "unable to process payment"
       print(msg)
       print(err)
+      payment_out(list(
+        error = err$message
+      ))
       showToast("error", err$message)
 
     })
@@ -274,5 +264,7 @@ create_payment_module <- function(input, output, session,
   })
 
 
-  invisible(NULL)
+  return(list(
+    payment_response = payment_out
+  ))
 }

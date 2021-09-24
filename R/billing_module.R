@@ -342,11 +342,14 @@ billing_module <- function(input, output, session) {
 
       if (is.na(subscription) || is.na(subscription$stripe_subscription_id)) {
 
-        if (hold_stripe$trial_days_remaining > 0) {
+        if (is.na(hold_stripe$trial_days_remaining)) {
+          out <- ""
+        } else if (hold_stripe$trial_days_remaining > 0) {
           out <- paste0("You have ", ceiling(hold_stripe$trial_days_remaining), " days left in your trial.  Enable a plan below to resume your free trial.")
         } else {
           out <- "Enable a subscription below"
         }
+
       } else {
         amount_out <- paste0(
           "$",
