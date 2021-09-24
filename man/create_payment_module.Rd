@@ -32,6 +32,10 @@ create_payment_module(
 
 \item{open_modal_trigger}{reactive trigger to open the modal}
 }
+\value{
+a list with 1 reactiveVal
+- payment_response - returns the response to the payment attempt
+}
 \description{
 Shiny module server for creating a one time payment
 }

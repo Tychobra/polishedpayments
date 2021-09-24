@@ -111,7 +111,7 @@ get_stripe <- function(
 #' @export
 #'
 #'
-add_stripe_customer <- function(email, user_uid) {
+create_stripe_customer <- function(email, user_uid) {
 
   res <- httr::POST(
     "https://api.stripe.com/v1/customers",
