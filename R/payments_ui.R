@@ -90,6 +90,15 @@ payments_ui <- function(
 
     }, error = function(err) {
 
+      if (identical(err$message, "subscription canceled")) {
+        update_customer(
+          customer_uid = customer$uid,
+          cancel_subscription = TRUE,
+          free_trial_days_remaining_at_cancel = 0
+        )
+        customer$stripe_subscription_id <- NA
+      }
+
       msg <- "unable to load UI"
       print(msg)
       print(err)
@@ -137,7 +146,8 @@ payments_ui <- function(
           )
 
         } else {
-          out <- h1("Not Authorized - No subscription found - Redirecting to Payments")
+          # Not Authorized - No subscription found - Redirecting to Payments
+          out <- NULL
         }
 
       }
