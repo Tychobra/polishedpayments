@@ -17,7 +17,7 @@ const payments = (() => {
 
   const mount_card_element = (el_id) => {
 
-    // destroy and existing card elements
+    // destroy any existing card elements
     const existing_card_element = elements.getElement("card")
     if (existing_card_element !== null) {
       existing_card_element.destroy()
