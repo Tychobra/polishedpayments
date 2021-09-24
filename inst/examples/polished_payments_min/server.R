@@ -35,7 +35,9 @@ server <- function(input, output, session) {
   payment_return <- shiny::callModule(
     create_payment_module,
     "pay_10",
-    amount = 1000
+    amount = 1000,
+    send_receipt_email = FALSE,
+    description = "a $10 one time payment"
   )
 
   observeEvent(payment_return$payment_response(), {

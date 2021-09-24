@@ -117,7 +117,7 @@ create_payment <- function(
   }
 
   if (!is.null(description)) {
-    body_out$description <- body_out$description
+    body_out$description <- description
   }
 
   payment_confirmation_res <- httr::POST(

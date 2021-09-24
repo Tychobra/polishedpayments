@@ -197,7 +197,7 @@ billing_module_ui <- function(id) {
 #' @param output the Shiny server output
 #' @param session the Shiny server session
 #'
-#' @importFrom dplyr %>% select mutate .data
+#' @importFrom dplyr %>% select mutate .data arrange bind_rows desc
 #' @importFrom DT renderDT datatable
 #' @importFrom jsonlite fromJSON
 #' @importFrom shiny callModule req showModal modalDialog modalButton removeModal observeEvent renderPrint renderText observe reactive
@@ -402,9 +402,6 @@ billing_module <- function(input, output, session) {
   } else {
     # Subscription mode NOT enabled
 
-    # Hide Billing Information (until Default Payment Method added for OTP)
-    #shinyjs::hide("billing_info_box")
-
     waiter::waiter_hide()
   }
 
@@ -484,11 +481,12 @@ billing_module <- function(input, output, session) {
   })
 
   empty_invoices_table <- tibble::tibble(
-    period_start = as.Date(character(0)),
-    period_end = as.Date(character(0)),
-    amount_due = double(0),
+    created = as.Date(character(0)),
+    description = character(0),
+    amount = double(0),
     amount_paid = double(0),
-    amount_remaining = double(0)
+    seller_message = character(0),
+    paid_with = character(0)
   )
 
   invoices_table_prep <- shiny::reactive({
@@ -501,7 +499,7 @@ billing_module <- function(input, output, session) {
     } else {
       tryCatch({
         res <- httr::GET(
-          "https://api.stripe.com/v1/invoices",
+          "https://api.stripe.com/v1/charges",
           query = list(
             customer = billing$stripe_customer_id
           ),
@@ -526,14 +524,26 @@ billing_module <- function(input, output, session) {
           out <- empty_invoices_table
         } else {
           out <- dat$data %>%
-            dplyr::select(.data$period_start, .data$period_end, .data$amount_due, .data$amount_paid, .data$amount_remaining) %>%
+            dplyr::select(.data$id, .data$receipt_url, .data$created, .data$description, .data$amount, .data$status) %>%
             dplyr::mutate(
-              amount_due = .data$amount_due / 100,
-              amount_paid = .data$amount_paid / 100,
-              amount_remaining = .data$amount_remaining / 100,
-              period_end = as.Date(as.POSIXct(.data$period_end, origin = "1970-01-01")),
-              period_start = as.Date(as.POSIXct(.data$period_start, origin = "1970-01-01"))
-            )
+              amount = .data$amount / 100,
+              receipt_url = paste0("<a href='", receipt_url, "' target = 'blank_'>", id, "</a>")
+              #amount_paid = .data$amount_captured / 100#,
+              #created = as.Date(as.POSIXct(.data$created, origin = "1970-01-01"))
+            ) %>%
+            select(-id)
+
+          pm <- dat$data$payment_method_details$card %>%
+            dplyr::select(network, last4) %>%
+            dplyr::mutate(paid_with = paste0(tools::toTitleCase(network), " ending in ", last4)) %>%
+            dplyr::select(paid_with)
+
+          out <- dplyr::bind_cols(
+            out,
+            pm
+          ) %>%
+            dplyr::arrange(dplyr::desc(created)) %>%
+            dplyr::mutate(created = as.Date(as.POSIXct(.data$created, origin = "1970-01-01")))
         }
 
       }, error = function(err) {
@@ -565,12 +575,14 @@ billing_module <- function(input, output, session) {
       out,
       rownames = FALSE,
       class = "compact cell-border stripe",
+      escape = -1,
       colnames = c(
-        "Period Start",
-        "Period End",
-        "Amount Due",
-        "Amount Paid",
-        "Unpaid Balance"
+        "Invoice",
+        "Date",
+        "Description",
+        "Amount",
+        "Status",
+        "Paid With"
       ),
       callback = DT::JS("$( table.table().container() ).addClass( 'table-responsive' ); return table;"),
       selection = "none",
@@ -578,7 +590,7 @@ billing_module <- function(input, output, session) {
         dom = dom_
       )
     ) %>%
-      DT::formatCurrency(3:5)
+      DT::formatCurrency(4)
   })
 
 
