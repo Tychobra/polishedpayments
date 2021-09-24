@@ -70,7 +70,7 @@ payments_ui <- function(
           stripe_subscription_id = stripe_subscription_id
         )
 
-        if (!identical(httr::status_code(add_customer_res), 200L)) {
+        if (!identical(httr::status_code(add_customer_res$response), 200L)) {
           print(add_customer_res$content)
           stop("Polished API error creating customer", call. = FALSE)
         }
