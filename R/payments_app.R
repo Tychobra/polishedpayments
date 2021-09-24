@@ -58,8 +58,8 @@ payments_app_ui <- function(
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),
-    #waiter::use_waiter(),
-    #waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
+    waiter::use_waiter(),
+    waiter::waiter_show_on_load(html = waiter::spin_fading_circles()),
 
     shinydashboard::tabItems(
       shinydashboard::tabItem(
@@ -112,7 +112,7 @@ payments_app_server <- function(input, output, session) {
       polished::remove_query_string()
       session$reload()
 
-    } else if (is.na(hold_stripe$subscription)) {
+    } else if (is.na(hold_stripe$subscription[1])) {
 
       shinyWidgets::sendSweetAlert(
         session = session,

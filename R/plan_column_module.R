@@ -215,7 +215,7 @@ plan_column_module <- function(input, output, session,
     # update the pricing plan for an existing subscription
     tryCatch({
 
-      if (is.na(hold_sub_info)) {
+      if (is.na(hold_sub_info[1])) {
         # user does not have a subscription, so create a new subscription
         res <- httr::POST(
           "https://api.stripe.com/v1/subscriptions",

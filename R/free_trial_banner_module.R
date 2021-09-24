@@ -85,7 +85,7 @@ free_trial_banner_module <- function(input, output, session) {
 
 
     if (
-      !is.na(hold_stripe$subscription) &&
+      !is.na(hold_stripe$subscription[1]) &&
       # show the billing banner if the user is in their free trial and they have not enabled billing
       (is.na(hold_stripe$default_payment_method) && hold_stripe$trial_days_remaining > 0)
       ) {
