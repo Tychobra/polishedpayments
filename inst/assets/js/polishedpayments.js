@@ -115,6 +115,12 @@ const payments = (() => {
             // Display error.message in your UI.
 
             console.log(result.error);
+          } else {
+            // If no error, clear name & CC inputs
+            const cc_name_element = message.ns_prefix + "cc_name"
+            $(cc_name_element).val('')
+
+            card_element.clear()
           }
 
           // The setup has succeeded. Display a success message.
