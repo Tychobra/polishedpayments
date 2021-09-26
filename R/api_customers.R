@@ -83,7 +83,7 @@ add_customer <- function(
   user_uid,
   stripe_customer_id,
   stripe_subscription_id = NULL,
-  stripe_is_live = getOption("pp")$is_live,
+  is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 ) {
 
@@ -91,7 +91,7 @@ add_customer <- function(
     app_uid = app_uid,
     user_uid = user_uid,
     stripe_customer_id = stripe_customer_id,
-    stripe_is_live = stripe_is_live
+    is_live = is_live
   )
 
   body_out$stripe_subscription_id <- stripe_subscription_id
@@ -137,20 +137,21 @@ update_customer <- function(
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
   cancel_subscription = FALSE,
-  stripe_is_live = getOption("pp")$is_live,
+  is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 ) {
 
   # required parameters
   body_out <- list(
-    customer_uid = customer_uid
+    customer_uid = customer_uid,
+    is_live = is_live,
+    cancel_subscription = cancel_subscription
   )
 
   # optional parameters
   body_out$stripe_subscription_id <- stripe_subscription_id
   body_out$free_trial_days_remaining_at_cancel <- free_trial_days_remaining_at_cancel
   body_out$default_payment_method <- default_payment_method
-  body_out$cancel_subscription <- cancel_subscription
 
 
   resp <- httr::PUT(

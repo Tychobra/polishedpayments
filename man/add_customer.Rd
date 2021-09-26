@@ -9,7 +9,7 @@ add_customer(
   user_uid,
   stripe_customer_id,
   stripe_subscription_id = NULL,
-  stripe_is_live = getOption("pp")$is_live,
+  is_live = getOption("pp")$is_live,
   api_key = getOption("polished")$api_key
 )
 }
@@ -22,10 +22,12 @@ add_customer(
 
 \item{stripe_subscription_id}{the stripe subscription id.}
 
-\item{stripe_is_live}{whether or not the Stripe key is live or test.}
+\item{is_live}{whether or not the Stripe key is live or test.}
 
 \item{api_key}{your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
 so that you do not need to supply this argument with each function call.}
+
+\item{stripe_is_live}{whether or not the Stripe key is live or test.}
 }
 \description{
 Polished Payments API - Add a Customer
