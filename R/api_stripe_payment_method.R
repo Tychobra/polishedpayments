@@ -1,5 +1,11 @@
 #' Set the Default Payment Method for a Customer
 #'
+#' @param customer_id the Stripe customer id
+#' @param payment_method_id the Stripe payment method id
+#'
+#' @importFrom httr POST authenticate content status_code
+#' @importFrom jsonlite fromJSON
+#'
 #' @export
 set_stripe_payment_method <- function(customer_id, payment_method_id) {
   res <- httr::POST(
@@ -26,13 +32,11 @@ set_stripe_payment_method <- function(customer_id, payment_method_id) {
   res_content
 }
 
-#' get default payment method from Stripe
+#' get payment method information from Stripe for a particular Payment Method ID
 #'
-#' Retrieved a list of information about the polishedpayments customer's default
-#' payment method.
+#' Retrieves a list of information about the `polishedpayment` customer's payment method.
 #'
 #' @param payment_method_id the Stripe payment method id.
-#'
 #'
 #' @importFrom httr GET authenticate content status_code
 #' @importFrom jsonlite fromJSON
@@ -79,7 +83,8 @@ get_stripe_payment_method <- function(payment_method_id) {
 
 #' create a Stripe payment
 #'
-#' @param amount the amount of the payment
+#' @param amount a positive integer representing how much to charge
+#' in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100, a zero-decimal currency)
 #' @param customer_id the Stripe customer ID
 #' @param payment_method_id the Stripe payment method ID
 #' @param currency the currency
@@ -108,8 +113,8 @@ create_payment <- function(
     "payment_method" = payment_method_id,
     "amount" = amount,
     "currency" = currency,
-    "payment_method_types[]"="card",
-    "confirm"="true"
+    "payment_method_types[]" = "card",
+    "confirm" = "true"
   )
 
   if (!is.null(receipt_email)) {

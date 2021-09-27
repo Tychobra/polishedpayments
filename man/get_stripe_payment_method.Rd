@@ -2,7 +2,7 @@
 % Please edit documentation in R/api_stripe_payment_method.R
 \name{get_stripe_payment_method}
 \alias{get_stripe_payment_method}
-\title{get default payment method from Stripe}
+\title{get payment method information from Stripe for a particular Payment Method ID}
 \usage{
 get_stripe_payment_method(payment_method_id)
 }
@@ -10,6 +10,5 @@ get_stripe_payment_method(payment_method_id)
 \item{payment_method_id}{the Stripe payment method id.}
 }
 \description{
-Retrieved a list of information about the polishedpayments customer's default
-payment method.
+Retrieves a list of information about the `polishedpayment` customer's payment method.
 }

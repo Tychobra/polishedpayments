@@ -18,16 +18,14 @@ add_customer(
 
 \item{user_uid}{the user uid.}
 
-\item{stripe_customer_id}{the stripe customer id.}
+\item{stripe_customer_id}{the Stripe customer id.}
 
-\item{stripe_subscription_id}{the stripe subscription id.}
+\item{stripe_subscription_id}{the Stripe subscription id.}
 
-\item{is_live}{whether or not the Stripe key is live or test.}
+\item{is_live}{whether or not the Stripe key is live or test mode.}
 
-\item{api_key}{your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
+\item{api_key}{your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
 so that you do not need to supply this argument with each function call.}
-
-\item{stripe_is_live}{whether or not the Stripe key is live or test.}
 }
 \description{
 Polished Payments API - Add a Customer

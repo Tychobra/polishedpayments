@@ -16,9 +16,9 @@ get_customers(
 
 \item{user_uid}{an optional user uid.}
 
-\item{is_live}{whether or not the Stripe key is live or test.}
+\item{is_live}{whether or not the Stripe key is live or test mode.}
 
-\item{api_key}{your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
+\item{api_key}{your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
 so that you do not need to supply this argument with each function call.}
 }
 \value{
