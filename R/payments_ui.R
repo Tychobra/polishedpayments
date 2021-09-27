@@ -1,9 +1,12 @@
 #' adds polished payments to your Shiny UI
 #'
+#' @param ui the Shiny app UI
+#' @param app_name the app name to display to the user in the return to app link.
 #'
 #' @export
 payments_ui <- function(
-  ui
+  ui,
+  app_name = getOption("polished")$app_name_display
 ) {
 
   function(request) {
@@ -114,7 +117,9 @@ payments_ui <- function(
 
     if (identical(payments_query, "TRUE")) {
 
-      out <- payments_app_ui()
+      out <- payments_app_ui(
+        app_name = app_name
+      )
 
     } else {
 
