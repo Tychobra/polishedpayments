@@ -6,6 +6,11 @@
 \usage{
 set_stripe_payment_method(customer_id, payment_method_id)
 }
+\arguments{
+\item{customer_id}{the Stripe customer id}
+
+\item{payment_method_id}{the Stripe payment method id}
+}
 \description{
 Set the Default Payment Method for a Customer
 }

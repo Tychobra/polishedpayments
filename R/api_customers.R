@@ -4,8 +4,8 @@ ua <- httr::user_agent("http://github.com/tychobra/polishedpayments")
 #'
 #' @param app_uid an optional app uid.
 #' @param user_uid an optional user uid.
-#' @param is_live whether or not the Stripe key is live or test.
-#' @param api_key your Polished API key.  Set your polished api key using \code{\link{set_api_key}()}
+#' @param is_live whether or not the Stripe key is live or test mode.
+#' @param api_key your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
 #' so that you do not need to supply this argument with each function call.
 #'
 #' @details If both the \code{app_uid} and \code{user_uid} are \code{NULL}, then all the
@@ -65,9 +65,11 @@ get_customers <- function(
 #'
 #' @param app_uid the app uid.
 #' @param user_uid the user uid.
-#' @param stripe_customer_id the stripe customer id.
-#' @param stripe_subscription_id the stripe subscription id.
-#' @param stripe_is_live whether or not the Stripe key is live or test.
+#' @param stripe_customer_id the Stripe customer id.
+#' @param stripe_subscription_id the Stripe subscription id.
+#' @param is_live whether or not the Stripe key is live or test mode.
+#' @param api_key your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
+#' so that you do not need to supply this argument with each function call.
 #'
 #' @inheritParams get_customers
 #'
@@ -76,7 +78,7 @@ get_customers <- function(
 #' @seealso [get_customers()] [update_customer()]
 #'
 #' @importFrom httr POST authenticate
-#' @importFrom polished polished_api_res api_list_to_df
+#' @importFrom polished polished_api_res
 #'
 add_customer <- function(
   app_uid,
@@ -122,6 +124,9 @@ add_customer <- function(
 #' @param default_payment_method the Stripe payment method ID for the customer's
 #' default payment method.
 #' @param cancel_subscription boolean - whether or not to cancel the existing subscription.
+#' @param is_live whether or not the Stripe key is live or test mode
+#' @param api_key your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
+#' so that you do not need to supply this argument with each function call.
 #'
 #' @inheritParams get_customers
 #'
@@ -130,6 +135,7 @@ add_customer <- function(
 #' @seealso [get_customers()] [add_customer()]
 #'
 #' @importFrom httr PUT authenticate
+#' @importFrom polished polished_api_res
 #'
 update_customer <- function(
   customer_uid,
