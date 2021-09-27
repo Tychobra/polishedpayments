@@ -41,7 +41,7 @@ get_customers <- function(
   query_out <- list()
   query_out$app_uid <- app_uid
   query_out$user_uid <- user_uid
-  query_out$stripe_is_live <- is_live
+  query_out$is_live <- is_live
 
   resp <- httr::GET(
     url = paste0(getOption("polished")$api_url, "/customers"),
