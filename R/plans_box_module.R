@@ -46,23 +46,10 @@ plans_box_module_ui <- function(id) {
 #'
 #' @importFrom htmltools tags
 #'
-plans_box_module <- function(input, output, session, sub_info) {
+plans_box_module <- function(input, output, session) {
   ns <- session$ns
 
-  sel_plan <- reactiveVal(NULL)
-
-  # highlight the user's subscription if the user is signed up for a subscription
-
-  disclaimer_text = tags$p(
-    class = "text-center",
-    "This plan grants you full access to the ", getOption('polished')$app_name_display, " app",
-    tags$br(),
-    "By clicking Submit, you agree to authorize collection of payments in accordance with the terms of this plan."
-  )
-
   all_pricing_plans <- getOption("pp")$prices
-
-
 
   lapply(seq_along(all_pricing_plans), function(i) {
 
@@ -70,8 +57,6 @@ plans_box_module <- function(input, output, session, sub_info) {
       plan_column_module,
       id = all_pricing_plans[i],
       plan_id = all_pricing_plans[i],
-      sub_info = sub_info,
-      disclaimer_text = disclaimer_text,
       hide_waiter = if (i == length(all_pricing_plans)) TRUE else FALSE
     )
   })

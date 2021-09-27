@@ -23,9 +23,9 @@ plan_column_module_ui <- function(id, width) {
       tags$br(),
       tags$br(),
       tags$div(
-        id = ns("sign_up_div"),
+        id = ns("choose_plan_div"),
         shiny::actionButton(
-          ns("sign_up"),
+          ns("choose_plan"),
           "Choose Plan",
           class = "btn-primary btn-lg",
           style = "color: #FFF; width: 100%;",
@@ -51,15 +51,12 @@ plan_column_module_ui <- function(id, width) {
           "
         )
       )
-    ),
-    credit_card_module_ui(ns("change_plan_modal"))
+    )
   )
 }
 
 plan_column_module <- function(input, output, session,
   plan_id,
-  sub_info,
-  disclaimer_text = "I am a disclaimer",
   hide_waiter = FALSE
 ) {
   ns <- session$ns
@@ -83,6 +80,7 @@ plan_column_module <- function(input, output, session,
         httr::content(res, "text", encoding = "UTF-8")
       )
       if (!identical(httr::status_code(res), 200L)) {
+        print(res_content)
         stop(paste0("unable to find Stripe plan ", plan_id), call. = FALSE)
       }
 
@@ -119,18 +117,19 @@ plan_column_module <- function(input, output, session,
 
   # if plan is selected, show the selected plan banner and hide the button to sign up
   # for the plan
-  observeEvent(sub_info(), {
+  observeEvent(session$userData$stripe(), {
+    sub_info <- session$userData$stripe()$subscription
 
-    if (is.null(sub_info())) {
-      shinyjs::showElement("sign_up_div")
+    if (is.na(sub_info[1])) {
+      shinyjs::showElement("choose_plan_div")
       shinyjs::hideElement("your_plan")
       shinyjs::hideElement("change_plan_div")
-    } else if (sub_info()$plan_id == plan_id) {
-      shinyjs::hideElement("sign_up_div")
+    } else if (sub_info$plan_id == plan_id) {
+      shinyjs::hideElement("choose_plan_div")
       shinyjs::showElement("your_plan")
       shinyjs::hideElement("change_plan_div")
     } else {
-      shinyjs::hideElement("sign_up_div")
+      shinyjs::hideElement("choose_plan_div")
       shinyjs::hideElement("your_plan")
       shinyjs::showElement("change_plan_div")
     }
@@ -139,26 +138,26 @@ plan_column_module <- function(input, output, session,
   open_credit_card <- reactiveVal(0)
   open_confirm <- reactiveVal(0)
 
-  observeEvent(input$sign_up, {
+  observeEvent(input$choose_plan, {
+    hold_stripe <- session$userData$stripe()
 
-    plan_to_sign_up <- input$sign_up
 
-    if (is.null(sub_info()) || is.na(sub_info()$default_payment_method)) {
+    if (is.na(hold_stripe$default_payment_method)) {
 
       open_credit_card(open_credit_card() + 1)
 
     } else {
 
-      # this should not happen
-      showToast("error", "You already have a plan")
+      open_confirm(open_confirm() + 1)
 
     }
 
   }, ignoreInit = TRUE)
 
   observeEvent(input$change_plan, {
+    sub_info <- session$userData$stripe()
 
-    if (!is.null(sub_info()) && is.na(sub_info()$default_payment_method)) {
+    if (is.na(sub_info$default_payment_method)) {
       open_credit_card(open_credit_card() + 1)
     } else {
       open_confirm(open_confirm() + 1)
@@ -166,77 +165,124 @@ plan_column_module <- function(input, output, session,
 
   }, ignoreInit = TRUE)
 
+
   callModule(
-    credit_card_module,
+    create_subscription_modal,
     "change_plan_modal",
     open_modal_trigger = open_credit_card,
-    plan_to_enable = plan_id,
-    disclaimer_text = disclaimer_text,
-    sub_info = sub_info
+    price_id = plan_id,
+    title = "Change Plan"
   )
+
 
 
 
   observeEvent(open_confirm(), {
     req(open_confirm() > 0)
+    hold_plan <- plan_data()
+
 
     showModal(
       modalDialog(
-        disclaimer_text,
-        title = "Plan Change Confirmation",
+        tags$div(
+          class = "text-center",
+          style = "padding: 30px; line-height: 1.7",
+          h3(htmltools::HTML(
+            paste0("Confirm purchase of the ", tags$b(hold_plan$nickname), " plan.")
+          ))
+        ),
+        title = "Plan Change",
         footer = tags$span(
-          tags$button(
-            type = "button", class = "btn btn-default pull-left",
-            `data-dismiss` = "modal",
-            "Cancel"
-          ),
+          shiny::modalButton("Cancel"),
           shinyFeedback::loadingButton(
             ns('new_plan'),
-            'Submit',
+            'Yes, Confirm',
             loadingLabel = 'Confirming...'
           )
         ),
-        size = 's'
+        size = "m"
       )
     )
 
   })
 
   observeEvent(input$new_plan, {
-
-    billing <- session$userData$billing()
-    hold_sub_info <- sub_info()
+    hold_user <- session$userData$user()
+    hold_stripe <- session$userData$stripe()
+    hold_sub_info <- hold_stripe$subscription
     shiny::removeModal()
-
 
     # update the pricing plan for an existing subscription
     tryCatch({
-      res <- httr::POST(
-        paste0("https://api.stripe.com/v1/subscriptions/", billing$stripe_subscription_id),
-        body = list(
-          cancel_at_period_end="false",
-          proration_behavior="create_prorations",
-          `items[0][id]`= hold_sub_info$item_id,
-          `items[0][price]`= plan_id
-        ),
-        encode = "form",
-        httr::authenticate(
-          user = getOption("pp")$keys$secret,
-          password = ""
+
+      if (is.na(hold_sub_info[1])) {
+        # user does not have a subscription, so create a new subscription
+        res <- httr::POST(
+          "https://api.stripe.com/v1/subscriptions",
+          body = list(
+            customer = hold_stripe$stripe_customer_id,
+            cancel_at_period_end = "false",
+            default_payment_method = hold_stripe$default_payment_method,
+            trial_period_days = max(c(floor(hold_stripe$trial_days_remaining), 0), na.rm = TRUE),
+            `items[0][price]`= plan_id
+          ),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
+        )
+
+        res_content <- jsonlite::fromJSON(
+          httr::content(res, "text", encoding = "UTF-8")
+        )
+
+        if (!identical(httr::status_code(res), 200L)) {
+          print(res_content)
+          stop("Error changing pricing plan", call. = FALSE)
+        }
+
+        update_customer(
+          customer_uid = hold_stripe$polished_customer_uid,
+          stripe_subscription_id = res_content$id
+        )
+
+
+      } else {
+        # user has an existing subscription, so switch the user to the new subscription
+        res <- httr::POST(
+          paste0("https://api.stripe.com/v1/subscriptions/", hold_sub_info$stripe_subscription_id),
+          body = list(
+            cancel_at_period_end="false",
+            proration_behavior="create_prorations",
+            `items[0][id]`= hold_sub_info$item_id,
+            `items[0][price]`= plan_id
+          ),
+          encode = "form",
+          httr::authenticate(
+            user = getOption("pp")$keys$secret,
+            password = ""
+          )
+        )
+
+        if (!identical(httr::status_code(res), 200L)) {
+          res_error <- jsonlite::fromJSON(
+            httr::content(res, "text", encoding = "UTF-8")
+          )
+          print(res_error)
+          stop("Error changing pricing plan", call. = FALSE)
+        }
+      }
+
+      session$userData$stripe(
+        get_stripe(
+          user_uid = hold_user$user_uid,
+          user_roles = hold_user$roles,
+          is_on_payments = TRUE
         )
       )
 
-      if (!identical(httr::status_code(res), 200L)) {
-        res_error <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
-        print(res_error)
-        stop("Error changing pricing plan", call. = FALSE)
-      }
-
-      session$userData$sub_info_trigger(session$userData$sub_info_trigger() + 1)
-
-      shinyFeedback::showToast("success", "Pricing Successfully Changed")
+      shinyFeedback::showToast("success", "Subscription Successfully Updated")
 
     }, error = function(err) {
 

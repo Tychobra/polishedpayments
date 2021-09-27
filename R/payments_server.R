@@ -10,9 +10,7 @@
 #' @param server the Shiny server function
 #'
 #' @importFrom shiny getDefaultReactiveDomain observeEvent
-#' @importFrom httr GET authenticate content status_code
-#' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble
+#' @importFrom httr status_code
 #'
 #' @export
 #'
@@ -22,155 +20,48 @@ payments_server <- function(
 
   function(input, output, session) {
 
-
-    session$userData$subscription <- reactiveVal(NULL)
+    session$userData$stripe <- reactiveVal(NULL)
+    session$userData$stripe_trigger <- reactiveVal(0)
 
     shiny::observeEvent(session$userData$user(), {
 
+      query_list <- shiny::getQueryString()
+      payments_query <- query_list$payments
+
       hold_user <- session$userData$user()
 
-
-      # if the user has a role that allows them free access to the Shiny app, then
-      # let them access the app.
-      if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0) {
-        session$userData$subscription(list(
-          free_user = TRUE
-        ))
-
-        return()
-      }
-
-
       tryCatch({
-        # otherwise start checking their subscription
-
         # get any existing subscriptions from Polished API
-        res <- httr::GET(
-          paste0(getOption("polished")$api_url, "/subscriptions"),
-          httr::authenticate(
-            user = getOption("polished")$api_key,
-            password = ""
-          ),
-          query = list(
-            app_uid = getOption("polished")$app_uid,
-            user_uid = session$userData$user()$user_uid,
-            is_live = getOption("pp")$is_live
-          )
+
+        stripe_out <- get_stripe(
+          user_uid = hold_user$user_uid,
+          user_roles = hold_user$roles,
+          is_on_payments = identical(payments_query, "TRUE")
         )
 
-        sub_db <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
-
-        if (!identical(httr::status_code(res), 200L)) {
-          print(sub_db)
-          stop("error getting subscription from Polished API", call. = FALSE)
-        }
-
-
-        sub_db <- tibble::as_tibble(sub_db)
-        # user does not have a subscription, so set up the user up with the
-        # default subscription.
-        if (identical(nrow(sub_db), 0L)) {
-
-          # set the user up with the default subscription
-          # Step 1: create Stripe customer
-          customer_id <- create_stripe_customer(
-            email = hold_user$email,
-            user_uid = hold_user$user_uid
+        if (is.null(stripe_out)) {
+          shiny::updateQueryString(
+            queryString = "?payments=TRUE",
+            session = session,
+            mode = "replace"
           )
-
-          if (getOption("pp")$trial_period_days > 0) {
-            # Step 2: Create the Stripe subscription on Stripe
-            stripe_subscription_id <- create_stripe_subscription(
-              customer_id,
-              plan_to_enable = getOption("pp")$prices[1],
-              days_remaining = getOption("pp")$trial_period_days
-            )
-          } else {
-            stripe_subscription_id <- NULL
-          }
-
-          # Step 3: add the newly created Stripe customer + subscription to the "subscriptions" table
-          post_sub_res <- httr::POST(
-            paste0(getOption("polished")$api_url, "/subscriptions"),
-            body = list(
-              "app_uid" = getOption("polished")$app_uid,
-              "user_uid" = hold_user$user_uid,
-              "stripe_customer_id" = customer_id,
-              "stripe_subscription_id" = stripe_subscription_id,
-              "is_live" = getOption("pp")$is_live
-            ),
-            encode = "json",
-            httr::authenticate(
-              user = getOption("polished")$api_key,
-              password = ""
-            )
-          )
-
-          post_sub_res_content <- jsonlite::fromJSON(
-            httr::content(post_sub_res, "text", encoding = "UTF-8")
-          )
-
-          if (!identical(httr::status_code(post_sub_res), 200L)) {
-            print(post_sub_res_content)
-            stop("Error saving subsciption to db", call. = FALSE)
-          }
-
-          # new subscription created, so reload the session to check the newly created subscription
           session$reload()
         } else {
-
-          # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
-          # account page for them to restart their subscription
-          if (is.na(sub_db$stripe_subscription_id)) {
-            shiny::updateQueryString(
-              queryString = "?page=account",
-              session = session,
-              mode = "replace"
-            )
-            session$reload()
-          } else {
-            stripe_sub <- get_stripe_subscription(sub_db$stripe_subscription_id)
-
-            if (stripe_sub$trial_days_remaining > 0 || !is.na(stripe_sub$default_payment_method)) {
-
-              # user is either in trial period or they already have a subscription with
-              # billing enabled, so let them access the app.
-              session$userData$subscription(list(
-                free_user = FALSE,
-                price_id = stripe_sub$plan_id,
-                nickname = stripe_sub$nickname,
-                is_billing_enabled = if (is.na(stripe_sub$default_payment_method)) FALSE else TRUE,
-                trial_days_remaining = stripe_sub$trial_days_remaining
-              ))
-
-              return()
-            } else {
-
-              # user's free trial is over and they have not enabled billing, so redirect
-              # to the account page for them to choose a subscription and enable billing.
-              shiny::updateQueryString(
-                queryString = "?page=account",
-                session = session,
-                mode = "replace"
-              )
-              session$reload()
-
-            }
-          }
+          session$userData$stripe(stripe_out)
         }
+
+
 
       }, error = function(err) {
 
         print(err)
 
-        if (identical(err$message, "unable to create subscription") || identical(err$message, "subscription canceled")) {
+        if (identical(err$message, "subscription canceled")) {
           # you can't create a Stripe subscription until after the Stripe user
           # has entered their payment info.  If the stripe user needs to create
           # a subscription (i.e. )
           shiny::updateQueryString(
-            queryString = "?page=account",
+            queryString = "?payments=TRUE",
             session = session,
             mode = "replace"
           )
@@ -180,24 +71,28 @@ payments_server <- function(
           showToast("error", err$message)
         }
 
-        invisible()
+        invisible(NULL)
       })
-
-
-
-
-
 
     })
 
 
-    observeEvent(session$userData$subscription, {
 
-      server(input, output, session)
+
+    observeEvent(session$userData$stripe(), {
+      query_list <- shiny::getQueryString()
+      payments_query <- query_list$payments
+
+      if (identical(payments_query, "TRUE")) {
+
+        payments_app_server(input, output, session)
+
+      } else {
+
+        server(input, output, session)
+      }
 
     }, once = TRUE)
 
-
   }
-
 }

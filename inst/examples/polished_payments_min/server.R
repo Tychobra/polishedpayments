@@ -10,68 +10,44 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$go_to_payments, {
-    polishedpayments::go_to_account()
+    polishedpayments::go_to_payments()
   })
 
 
-  observeEvent(session$userData$subscription(), {
 
-    polished_user_prep <- reactive({
-      hold_user <- session$userData$user()
+  output$polished_user <- renderPrint({
+    session$userData$user()
+  })
 
-      data.frame(
-        name = names(hold_user),
-        value = unlist(hold_user, use.names = FALSE)
-      )
-    })
 
-    output$polished_user <- DT::renderDT({
-      out <- polished_user_prep()
 
-      DT::datatable(
-        out,
-        rownames = FALSE,
-        selection = "none",
-        options = list(
-          dom = "t",
-          ordering = FALSE
-        )
-      )
-    })
+  output$polished_subscription <- renderPrint({
+    session$userData$stripe()
+  })
 
-    polished_subscription_prep <- reactive({
-      hold_sub <- session$userData$subscription()
 
-      data.frame(
-        name = names(hold_sub),
-        value = unlist(hold_sub, use.names = FALSE)
-      )
-    })
+  callModule(
+    free_trial_banner_module,
+    "trial_banner"
+  )
 
-    output$polished_subscription <- DT::renderDT({
-      out <- polished_subscription_prep()
 
-      DT::datatable(
-        out,
-        rownames = FALSE,
-        selection = "none",
-        options = list(
-          dom = "t",
-          ordering = FALSE
-        )
-      )
-    })
+  payment_return <- shiny::callModule(
+    create_payment_module,
+    "pay_10",
+    amount = 1000,
+    send_receipt_email = FALSE,
+    description = "a $10 one time payment"
+  )
 
-    waiter_hide()
+  observeEvent(payment_return$payment_response(), {
 
-    callModule(
-      free_trial_banner_module,
-      "trial_banner"
-    )
-
-  }, once = TRUE)
+    print(list(
+      payment_response = payment_return$payment_response()
+    ))
+  })
 
 }
 
 payments_server(server) %>%
-  secure_server(account_module = polishedpayments::app_module)
+  secure_server()

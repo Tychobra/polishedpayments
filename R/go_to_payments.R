@@ -1,5 +1,4 @@
-#'
-#' go_to_account
+#' go_to_payments
 #'
 #' trigger event to redirect user to Account (payments) page,
 #' typically used in an `observeEvent`
@@ -11,12 +10,12 @@
 #' @export
 #'
 
-go_to_account <- function(
+go_to_payments <- function(
   session = shiny::getDefaultReactiveDomain()
 ) {
 
   shiny::updateQueryString(
-    queryString = "?page=account",
+    queryString = "?payments=TRUE",
     session = session,
     mode = "push"
   )

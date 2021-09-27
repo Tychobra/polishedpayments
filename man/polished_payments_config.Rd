@@ -7,7 +7,7 @@
 polished_payments_config(
   stripe_secret_key,
   stripe_public_key,
-  stripe_prices,
+  subscription_prices = NULL,
   trial_period_days = 0,
   free_roles = character(0)
 )
@@ -17,8 +17,9 @@ polished_payments_config(
 
 \item{stripe_public_key}{the Stripe publishable key}
 
-\item{stripe_prices}{an unnamed character vector of Stripe price ids for your subscription.  e.g. monthly and
-yearly pricing options.  A Stripe price id looks like this "price_64t6gq76vr78sdhf".}
+\item{subscription_prices}{an unnamed character vector of Stripe price ids for your subscription.  e.g. monthly and
+yearly pricing options.  A Stripe price id looks like this "price_64t6gq76vr78sdhf".  Set to \code{NULL}, the default,
+if you are only using one time payments.}
 
 \item{trial_period_days}{the number of days to offer for a free trial period.  All pricing options
 will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.}
@@ -37,7 +38,7 @@ configure R options for Polished Payments
 polished_payments_config(
   stripe_secret_key = "<your Stripe secret API key>",
   stripe_public_key = "<your Stripe publishable key>",
-  stripe_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
+  subscription_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
   trial_period_days = 30,
   free_roles = "free_user"
 )

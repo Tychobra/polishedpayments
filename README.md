@@ -31,11 +31,11 @@ remotes::install_github("tychobra/polishedpayments")
   
       ```
       polishedpayments::polished_payments_config(
-        stripe_secret_key = <stripe_secret_key>,
-        stripe_public_key = <stripe_public_key>,
-        stripe_prices = <stripe_price(s)>,
-        trial_period_days = <stripe_trial_period_days>,
-        free_roles = <polished_role_for_free_users>
+        stripe_secret_key = <your Stripe secret key>,
+        stripe_public_key = <your Stripe public key>,
+        subscription_prices = <your Stripe subscription price(s)>,
+        trial_period_days = <Stripe subscription trial period days>,
+        free_roles = <polished role(s) to allow free user access to subscriptions>
       )
       ```
 
@@ -56,16 +56,10 @@ remotes::install_github("tychobra/polishedpayments")
     
     ```
     # Server
-    polished::secure_server(
-      my_server, 
-      account_module = polishedpayments::app_module
-    )
+    polished::secure_server(my_server)
     
     # UI
-    polished::secure_ui(
-      ui,
-      account_module_ui = polishedpayments::app_module_ui("account")
-    )
+    polished::secure_ui(ui)
     ```
   
 Your user's subscription status will now be checked before your Shiny app's server logic starts.  If the user does not have a subscription, `polishedpayments` will set them up with the default subscription.  If the user has a subscription that is either in it's free trial period, or the user has set up a payment method, then `polishedpayments` will allow the user to continue to your Shiny app.   If your user has a subscription in which the free trial has expired, but they have not yet enabled a payment method, then `polishedpayments` will redirect them to their account page where they can set up their subscription.   

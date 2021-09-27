@@ -1,18 +1,21 @@
 library(shiny)
-library(DT)
 library(magrittr)
+library(shinyFeedback)
 library(polished)
 library(polishedpayments)
-library(waiter)
 
 app_config <- config::get()
 
 polished_payments_config(
   stripe_secret_key = app_config$stripe$keys$secret,
   stripe_public_key = app_config$stripe$keys$public,
-  stripe_prices = app_config$stripe$prices,
-  trial_period_days = 30,
-  free_roles = "free_user"
+  subscription_prices = app_config$stripe$prices#,
+  #trial_period_days = 30#,
+  #free_subscription_roles = "free_user"
+)
+
+polished:::set_api_url(
+  api_url = "https://auth-api-dev.polished.tech/v1"
 )
 
 global_sessions_config(

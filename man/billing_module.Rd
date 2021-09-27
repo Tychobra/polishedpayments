@@ -4,7 +4,7 @@
 \alias{billing_module}
 \title{billing module}
 \usage{
-billing_module(input, output, session, sub_info)
+billing_module(input, output, session)
 }
 \arguments{
 \item{input}{the Shiny server input}
@@ -12,8 +12,6 @@ billing_module(input, output, session, sub_info)
 \item{output}{the Shiny server output}
 
 \item{session}{the Shiny server session}
-
-\item{sub_info}{the subscription information}
 }
 \description{
 billing module

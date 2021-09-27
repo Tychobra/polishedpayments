@@ -1,37 +1,151 @@
-credit_card_module_ui <- function(id) {
-  ns <- NS(id)
+#' UI element for Stripe Credit Card input
+#'
+#' @param id the Shiny module id
+#'
+#' @export
+credit_card_module_ui <- function(
+  id
+) {
+  ns <- shiny::NS(id)
+
+  wrapper_id <- ns("wrapper")
 
   tagList(
-    tags$script(src = "polishedpayments/js/credit_card_module.js"),
-    tags$script(paste0("credit_card_module('", ns(''), "')"))
+    tags$style(paste0("
+
+#", wrapper_id, "example-1 * {
+  font-family: Roboto, Open Sans, Segoe UI, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#", wrapper_id, " fieldset {
+  margin: 0 0 20px 0;
+  padding: 0;
+  border-style: none;
+  background-color: #FFF;/*#7795f8;*/
+  box-shadow: 0 6px 9px rgba(50, 50, 93, 0.06), 0 2px 5px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 #829fff;
+  border-radius: 4px;
+}
+
+#", wrapper_id, " .stripe-row {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-left: 15px;
+}
+
+#", wrapper_id, " .stripe-row + .stripe-row {
+  border-top: 1px solid #819efc;
+}
+
+#", wrapper_id, " label {
+  width: 15%;
+  min-width: 70px;
+  padding: 11px 0;
+  color: #c4f0ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#", wrapper_id, " input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  border-style: none;
+}
+
+#", wrapper_id, " input:-webkit-autofill {
+  -webkit-text-fill-color: #fce883;
+  transition: background-color 100000000s;
+  -webkit-animation: 1ms void-animation-out;
+}
+
+#", wrapper_id, " .StripeElement--webkit-autofill {
+  background: transparent !important;
+}
+
+#", wrapper_id, " .StripeElement {
+  width: 100%;
+  padding: 11px 15px 11px 0;
+}
+
+#", wrapper_id, " input {
+  width: 100%;
+  padding: 11px 15px 11px 0;
+  color: #fff;
+  background-color: transparent;
+  -webkit-animation: 1ms void-animation-out;
+}
+
+#", wrapper_id, " input::-webkit-input-placeholder {
+  color: #87bbfd;
+}
+
+#", wrapper_id, " input::-moz-placeholder {
+  color: #87bbfd;
+}
+
+#", wrapper_id, " input:-ms-input-placeholder {
+  color: #87bbfd;
+}
+    ")),
+    tags$div(
+      id = wrapper_id,
+      #style = paste0("width: ", width),
+      tags$fieldset(
+        tags$div(
+          class = "stripe-row",
+          div(
+            id = ns("credit_card")
+          )
+        )
+      )
+    ),
+    tags$script(paste0("payments.mount_card_element('", ns('credit_card'), "')"))
   )
 }
 
 
-credit_card_module <- function(
-  input, output, session,
-  open_modal_trigger = reactive(0),
-  disclaimer_text = "Disclaimer",
-  plan_to_enable = NULL,
-  sub_info = NULL
+
+#' Server logic for Stripe Credit Card input
+#'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param trigger the reactive trigger to submit the payment to Stripe
+#' @param amount the amount of the payment
+#' @param currency The currency. Defaults to "usd" (United States Dollar).
+#'
+#' @export
+#'
+credit_card_payment_module <- function(input, output, session,
+  trigger = function() NULL,
+  amount,
+  currency = "usd"
 ) {
   ns <- session$ns
 
-  setup_intent_id <- reactiveVal(NULL)
+  intent_id <- reactiveVal(NULL)
 
-  # Customer is enabling billing, so we create Setup Intent to
-  # attach a (default) payment method to the customer
-  observeEvent(open_modal_trigger(), {
+  observeEvent(trigger(), {
 
-    billing <- session$userData$billing()
+    billing <- session$userData$stripe()
 
     tryCatch({
-      ### CREATE SETUP INTENT ###
+
+      ### CREATE PAYMENT INTENT ###
       setup_res <- httr::POST(
-        "https://api.stripe.com/v1/setup_intents",
+        "https://api.stripe.com/v1/payment_intents",
         body = list(
           "customer" = billing$stripe_customer_id,
-          `payment_method_types[0]` = "card"
+          `payment_method_types[0]` = "card",
+          "amount" = amount,
+          "currency" = currency
         ),
         encode = "form",
         httr::authenticate(
@@ -40,108 +154,99 @@ credit_card_module <- function(
         )
       )
 
-      httr::stop_for_status(setup_res)
-
+      # TODO: check status and stop for error message and handle it and display error to user
       setup_data <- jsonlite::fromJSON(
         httr::content(setup_res, "text", encoding = "UTF-8")
       )
 
-      setup_intent_id(setup_data$id)
+      intent_id(setup_data$id)
 
-      shiny::showModal(
-        shiny::modalDialog(
-          shiny::textInput(
-            ns("cardholder_name"),
-            "Name on Card",
-            width = "100%",
-            placeholder = 'John K Smith'
-          ),
-          tags$br(),
-          tags$form(
-            action = "/charge",
-            method = "post",
-            tags$div(
-              class = "form-row",
-              tags$label(
-                `for` = ns("card_element"),
-                "Credit Card"
-              ),
-              tags$div(
-                id = ns("card_element")
-              ),
-              tags$div(
-                id = ns("card_errors"),
-                role = "alert"
-              )
-            )
-          ),
-          tags$hr(),
-          tags$p(
-            style = "text-align: center;",
-            disclaimer_text
-          ),
-          title = "Billing Information",
-          footer = tags$span(
-            tags$div(
-              class = 'pull-left',
-              shiny::actionButton(
-                ns('close_billing_modal'),
-                'Cancel'
-              )
-            ),
-            shinyFeedback::loadingButton(
-              ns('card_button'),
-              'Submit',
-              loadingLabel = 'Confirming...'
-            )
-          ),
-          size = 's'
-        )
-      )
-
-      ### COLLECT CARD DETAILS ###
       session$sendCustomMessage(
-        ns("create_setup_intent"),
+        ns("create_payment"),
         message = list(
-          stripe_key = getOption("pp")$keys$pub,
-          card_button_id = ns('card_button'),
           client_secret = setup_data$client_secret
         )
       )
-
     }, error = function(err) {
+
+      msg <- "Error in Setup Intent"
+      print(msg)
       print(err)
-      shinyFeedback::showToast("error", "Error in Setup Intent")
+      shinyFeedback::showToast("error", msg)
     })
 
   }, ignoreInit = TRUE)
 
-  # CANCEL Update Payment
-  observeEvent(input$close_billing_modal, {
-    shiny::removeModal()
+  observeEvent(input$payment_intent_result, {
+    hold <- input$payment_intent_result
+    billing <- session$userData$stripe()
+
+    if (is.null(hold$error)) {
+
+      if (isTRUE(input$attach_payment_method)) {
+        tryCatch({
+
+          set_default_payment_method(
+            customer_id = billing$stripe_customer_id,
+            payment_method_id = hold_payment_method_id
+          )
+
+        }, error = function(err) {
+          print(err)
+          shinyFeedback::showToast(
+            "error",
+            "Error saving Credit Card for future usage"
+          )
+        })
+      }
+
+    }
   })
 
-  # FAILED Payment Method
-  observeEvent(input$setup_intent_error, {
-    hold_error <- input$setup_intent_error
-    print(hold_error)
-    shinyFeedback::showToast(
-      type = 'error',
-      message = hold_error$message
+  return(list(
+    payment_result = reactive({input$payment_intent_result})
+  ))
+}
+
+
+#' Server logic for Stripe Credit Card input
+#'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param billing_details reactive returning a named list of billing details. Valid list element names
+#' are:
+#' - "name"
+#' - "email"
+#' - "phone"
+#'
+#'
+#'
+#' @export
+#'
+credit_card_module <- function(input, output, session,
+  trigger = function() NULL,
+  billing_details = function() list()
+) {
+  ns <- session$ns
+
+
+  observeEvent(trigger(), {
+
+    billing <- session$userData$stripe()
+    hold_details <- billing_details()
+
+
+    body_out <- list(
+      "customer" = billing$stripe_customer_id,
+      `payment_method_types[0]` = "card"
     )
-  })
 
-  # SUCCESS Payment Method
-  observeEvent(input$setup_intent_success, {
-    billing <- session$userData$billing()
-    setup_intent_id <- setup_intent_id()
-    hold_sub_info <- sub_info()
 
     tryCatch({
-
-      # GET payment method ID for this Setup Intent
-      si_payment_method <- httr::GET(
-        paste0("https://api.stripe.com/v1/setup_intents/", setup_intent_id),
+      setup_res <- httr::POST(
+        "https://api.stripe.com/v1/setup_intents",
+        body = body_out,
         encode = "form",
         httr::authenticate(
           user = getOption("pp")$keys$secret,
@@ -149,124 +254,34 @@ credit_card_module <- function(
         )
       )
 
-      #httr::stop_for_status(si_payment_method)
+      # TODO: handle actual error message
+      httr::stop_for_status(setup_res)
 
-      si_payment_method_out <- jsonlite::fromJSON(
-        httr::content(si_payment_method, "text", encoding = "UTF-8")
+      setup_data <- jsonlite::fromJSON(
+        httr::content(setup_res, "text", encoding = "UTF-8")
       )
 
-
-      default_payment_method <- si_payment_method_out$payment_method
-
-      if (is.null(plan_to_enable)) {
-        # user is changing their default payment method.  No need to mess with subscription
-        # UPDATE the default payment method
-        res <- httr::POST(
-          paste0("https://api.stripe.com/v1/subscriptions/", billing$stripe_subscription_id),
-          body = list(
-            default_payment_method = default_payment_method,
-            trial_from_plan = "true"
-          ),
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
+      session$sendCustomMessage(
+        "confirm_card_setup",
+        message = list(
+          ns_prefix = ns(""),
+          client_secret = setup_data$client_secret,
+          billing_details = hold_details
         )
-
-        # handle possible errors
-        if (!identical(httr::status_code(res), 200L)) {
-          res_content <- jsonlite::fromJSON(
-            httr::content(res, "text", encoding = "UTF-8")
-          )
-          # print full Stripe error returned from API
-          print(res_content)
-          stop("unable to update credit card", call. = FALSE)
-        }
-
-      } else {
-
-        post_body <- list(
-          "customer" = billing$stripe_customer_id,
-          `items[0][plan]` = plan_to_enable,
-          "default_payment_method" = default_payment_method
-        )
-
-        # if user has already created a free trial, and then canceled their free trial part way through,
-        # we keep track of their free trial days used and send them with the create subscription request
-        # so that the user does not get to completely restart their free trial.
-        if (is.na(billing$free_trial_days_remaining_at_cancel)) {
-          post_body$trial_period_days <- getOption("pp")$trial_period_days
-        } else {
-          post_body$trial_period_days <- floor(as.numeric(billing$free_trial_days_remaining_at_cancel))
-        }
-
-        # Create the subscription and attach Customer & payment method to newly created subscription
-        res <- httr::POST(
-          "https://api.stripe.com/v1/subscriptions",
-          body = post_body,
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
-        )
-
-        res_content <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
-        )
-
-        if (!identical(httr::status_code(res), 200L)) {
-
-          print(res_content)
-          stop("unable to create subscription", call. = FALSE)
-
-        } else {
-
-          # update the Stripe subscription id saved to the database
-          new_subscription_id <- res_content$id
-
-          res <- httr::PUT(
-            url = paste0(getOption("polished")$api_url, "/subscriptions"),
-            encode = "json",
-            body = list(
-              subscription_uid = billing$uid,
-              stripe_subscription_id = new_subscription_id
-            ),
-            httr::authenticate(
-              user = getOption("polished")$api_key,
-              password = ""
-            )
-          )
-
-          if (!identical(httr::status_code(res), 200L)) {
-
-            res_content <- jsonlite::fromJSON(
-              httr::content(res, "text", encoding = "UTF-8")
-            )
-
-            stop(res_content, call. = FALSE)
-          }
-
-        }
-
-      }
-
-      session$userData$billing_trigger(session$userData$billing_trigger() + 1)
-      session$userData$sub_info_trigger(session$userData$sub_info_trigger() + 1)
-
-
-      shinyFeedback::showToast(
-        type = 'success',
-        message = 'Your payment method and subscription have been updated'
       )
+
     }, error = function(err) {
+
+      msg <- "Error in subscription setup"
+      print(msg)
       print(err)
-      shinyFeedback::showToast("error", "Payment method authenticated, but there was an error saving your Payment Method")
+      shinyFeedback::showToast("error", msg)
     })
 
-    setup_intent_id(NULL)
-    shiny::removeModal()
   })
 
+  return(list(
+    setup_intent_result = reactive({input$setup_intent_result})
+  ))
 }
+
