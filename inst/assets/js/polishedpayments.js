@@ -79,10 +79,7 @@ const payments = (() => {
 
             console.log(result.error);
           } else {
-            // If no error, clear name & CC inputs
-            const cc_name_element = message.ns_prefix + "cc_name"
-            $(cc_name_element).val('')
-
+            // If no error, clear CC inputs
             card_element.clear()
           }
 

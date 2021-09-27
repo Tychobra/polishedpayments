@@ -133,6 +133,14 @@ create_payment_module <- function(input, output, session,
     hold_stripe <- session$userData$stripe()
     setup_intent_res <- credit_card_module_return$setup_intent_result()
     if (is.null(setup_intent_res$error)) {
+      # Clear `Cardholder Name` input
+      shiny::updateTextInput(
+        session,
+        "cc_name",
+        value = ""
+      )
+
+
       setup_intent <- setup_intent_res$setupIntent
 
       tryCatch({
