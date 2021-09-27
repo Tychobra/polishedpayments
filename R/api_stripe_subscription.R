@@ -6,22 +6,21 @@
 #' @param plan_to_enable the Stripe plan to enable.
 #' @param days_remaining the number of free trial days remaining.
 #' @param default_payment_method the Stripe ID for the default credit card for the Stripe subscription.
-#' Keep as `NA` if the user has not yet entered their credit card information.
+#' Keep as \code{NULL} if the user has not yet entered their credit card information.
 #'
 #' @return the ID of the newly created Stripe subscription
 #'
 #' @noRd
 #'
-create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NA) {
+create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NULL) {
 
   post_body <- list(
     "customer" = customer_id,
     `items[0][price]` = plan_to_enable
   )
 
-  if (!is.na(default_payment_method)) {
-    post_body$default_payment_method = default_payment_method
-  }
+  post_body$default_payment_method <- default_payment_method
+
 
   # if user has already created a free trial, and then canceled their free trial part way through,
   # we keep track of their free trial days used and send them with the create subscription request

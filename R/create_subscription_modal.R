@@ -93,59 +93,31 @@ create_subscription_modal <- function(input, output, session,
 
         default_payment_method <- si_payment_method_out$payment_method
 
-
-        post_body <- list(
-          "customer" = billing$stripe_customer_id,
-          `items[0][price]` = price_id,
-          "default_payment_method" = default_payment_method
-        )
-
         # if user has already created a free trial, and then canceled their free trial part way through,
         # we keep track of their free trial days used and send them with the create subscription request
         # so that the user does not get to completely restart their free trial.
         if (is.na(billing$trial_days_remaining)) {
-          post_body$trial_period_days <- getOption("pp")$trial_period_days
+          trial_period_days <- getOption("pp")$trial_period_days
         } else {
-          post_body$trial_period_days <- floor(as.numeric(billing$trial_days_remaining))
+          trial_period_days <- floor(as.numeric(billing$trial_days_remaining))
         }
 
-        # Create the subscription and attach Customer & payment method to newly created subscription
-        res <- httr::POST(
-          "https://api.stripe.com/v1/subscriptions",
-          body = post_body,
-          encode = "form",
-          httr::authenticate(
-            user = getOption("pp")$keys$secret,
-            password = ""
-          )
+        new_subscription_id <- create_stripe_subscription(
+          customer_id = billing$stripe_customer_id,
+          plan_to_enable = price_id,
+          days_remaining = trial_period_days,
+          default_payment_method = default_payment_method
         )
 
-        res_content <- jsonlite::fromJSON(
-          httr::content(res, "text", encoding = "UTF-8")
+
+
+
+        # update the Stripe subscription id saved to the database
+        update_customer_res <- update_customer(
+          customer_uid = billing$polished_customer_uid,
+          stripe_subscription_id = new_subscription_id,
+          default_payment_method = default_payment_method
         )
-
-        if (!identical(httr::status_code(res), 200L)) {
-
-          print(res_content)
-          stop("unable to create subscription", call. = FALSE)
-
-        } else {
-
-          # update the Stripe subscription id saved to the database
-          new_subscription_id <- res_content$id
-
-          update_customer_res <- update_customer(
-            customer_uid = billing$polished_customer_uid,
-            stripe_subscription_id = new_subscription_id,
-            default_payment_method = default_payment_method
-          )
-
-          if (!identical(httr::status_code(update_customer_res$response), 200L)) {
-
-            stop(update_customer_res$content, call. = FALSE)
-          }
-
-        }
 
         shinyFeedback::showToast(
           type = 'success',
