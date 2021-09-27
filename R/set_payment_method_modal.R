@@ -95,7 +95,7 @@ set_payment_method_modal <- function(input, output, session,
       })
     } else {
 
-      xshinyFeedback::resetLoadingButton("submit")
+      shinyFeedback::resetLoadingButton("submit")
       msg <- "error getting enable billing setup intent"
       print(msg)
       print(setup_intent_res)
