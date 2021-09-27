@@ -54,7 +54,7 @@ payments_app_ui <- function(
       tags$link(rel = "shortcut icon", href = "polishedpayments/images/polished_logo_transparent.png"),
       tags$script(src = "https://js.stripe.com/v3"),
       tags$script(paste0("var stripe = Stripe('", stripe_key_public, "');")),
-      tags$script(src = "polishedpayments/js/polishedpayments.js?version=2"),
+      tags$script(src = "polishedpayments/js/polishedpayments.js?version=3"),
       shinyjs::useShinyjs(),
       shinyFeedback::useShinyFeedback()
     ),

@@ -58,43 +58,6 @@ const payments = (() => {
 
 
   $(document).on("shiny:sessioninitialized", () => {
-    Shiny.addCustomMessageHandler(
-      "confirm_card_payment",
-      function(message) {
-
-        // TODO: Allow saved cards (after removing `is.na(default_payment_method)`) checks in R
-
-        // var attachPaymentMethod = document.getElementById(ns_prefix + "attach_payment_method").checked;
-        // var hold_future_usage;
-        // if (attachPaymentMethod) {
-        //   hold_future_usage = "on_session";
-        // } else {
-        //   hold_future_usage = null;
-        // }
-
-        stripe.confirmCardPayment(
-          message.client_secret,
-          {
-            payment_method: {
-              card: card_element,
-              billing_details: message.billing_details,
-            },
-            //setup_future_usage: hold_future_usage
-          }
-        ).then(function(result) {
-
-          if (result.error) {
-          // Display error.message in your UI.
-            console.error(result.error)
-          }
-          // send the result back to Shiny
-          Shiny.setInputValue(message.ns_prefix + "payment_intent_result", result, { priority: "event"});
-
-        })
-      }
-
-    )
-
 
     Shiny.addCustomMessageHandler(
       "confirm_card_setup",
