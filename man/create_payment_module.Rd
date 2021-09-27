@@ -12,25 +12,21 @@ create_payment_module(
   currency = "usd",
   send_receipt_email = TRUE,
   description = NULL,
-  ui = NULL,
-  title = NULL,
-  size = "s",
-  easyClose = FALSE,
-  fade = TRUE
+  ui = NULL
 )
 }
 \arguments{
 \item{amount}{the amount of the one time payment}
 
-\item{title}{the title to pass to \code{shiny::modalDialog}}
+\item{currency}{the currency to use for the payment}
 
-\item{size}{the size to pas to \code{shiny::modalDialog}}
+\item{description}{short payment description.  Useful for identifying the payment.}
 
-\item{easyClose}{the easyClose to pass to \code{shiny::modalDialog}}
+\item{ui}{optional UI to place above the submit button.  This is often used to include
+a disclaimer.}
 
-\item{fade}{the fade to pass to \code{shiny::modalDialog}}
-
-\item{open_modal_trigger}{reactive trigger to open the modal}
+\item{send_email_receipt}{boolean - whether or not to send an email receipt.  Defaults
+to \code{TRUE}.}
 }
 \value{
 a list with 1 reactiveVal

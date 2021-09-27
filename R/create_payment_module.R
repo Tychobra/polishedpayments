@@ -11,18 +11,19 @@ create_payment_module_ui <- function(id) {
 
 #' Shiny module server for creating a one time payment
 #'
-#' @param open_modal_trigger reactive trigger to open the modal
 #' @param amount the amount of the one time payment
-#' @param title the title to pass to \code{shiny::modalDialog}
-#' @param size the size to pas to \code{shiny::modalDialog}
-#' @param easyClose the easyClose to pass to \code{shiny::modalDialog}
-#' @param fade the fade to pass to \code{shiny::modalDialog}
+#' @param currency the currency to use for the payment
+#' @param send_email_receipt boolean - whether or not to send an email receipt.  Defaults
+#' to \code{TRUE}.
+#' @param description short payment description.  Useful for identifying the payment.
+#' @param ui optional UI to place above the submit button.  This is often used to include
+#' a disclaimer.
 #'
 #' @return a list with 1 reactiveVal
 #' - payment_response - returns the response to the payment attempt
 #'
-#' @importFrom shiny showModal modalDialog tagList textInput callModule
-#' @importFrom shinyFeedback loadingButton
+#' @importFrom shiny textInput callModule
+#' @importFrom shinyFeedback loadingButton showToast resetLoadingButton
 #'
 #' @export
 #'
@@ -31,12 +32,7 @@ create_payment_module <- function(input, output, session,
   currency = "usd",
   send_receipt_email = TRUE,
   description = NULL,
-  ui = NULL,
-  # modalDialog inputs
-  title = NULL,
-  size = "s",
-  easyClose = FALSE,
-  fade = TRUE
+  ui = NULL
 ) {
   ns <- session$ns
 
@@ -215,10 +211,10 @@ create_payment_module <- function(input, output, session,
       print(msg)
       print(setup_intent_res)
       payment_out(setup_intent_res)
-      showToast("error", setup_intent_res$error$message)
+      shinyFeedback::showToast("error", setup_intent_res$error$message)
     }
 
-    resetLoadingButton("submit_cc")
+    shinyFeedback::resetLoadingButton("submit_cc")
 
   })
 
@@ -244,7 +240,7 @@ create_payment_module <- function(input, output, session,
         description = description
       )
 
-      showToast("success", "Payment Processed")
+      shinyFeedback::showToast("success", "Payment Processed")
       payment_out(payment_res)
 
     }, error = function(err) {
@@ -255,11 +251,11 @@ create_payment_module <- function(input, output, session,
       payment_out(list(
         error = err$message
       ))
-      showToast("error", err$message)
+      shinyFeedback::showToast("error", err$message)
 
     })
 
-    resetLoadingButton("submit_no_cc")
+    shinyFeedback::resetLoadingButton("submit_no_cc")
 
   })
 
