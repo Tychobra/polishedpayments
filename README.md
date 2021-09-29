@@ -50,9 +50,7 @@ remotes::install_github("tychobra/polishedpayments")
       
       ```
   
-6. Add the "Account" page to your app using `app_module_ui` in `secure_ui` & `app_module` in `secure_server`   
-  
-    - **NOTE**: You must use "account" as the `id` for `app_module_ui`  
+6. Add Polished Authentication with `secure_ui()` and `secure_server()`.   
     
     ```
     # Server
@@ -62,9 +60,9 @@ remotes::install_github("tychobra/polishedpayments")
     polished::secure_ui(ui)
     ```
   
-Your user's subscription status will now be checked before your Shiny app's server logic starts.  If the user does not have a subscription, `polishedpayments` will set them up with the default subscription.  If the user has a subscription that is either in it's free trial period, or the user has set up a payment method, then `polishedpayments` will allow the user to continue to your Shiny app.   If your user has a subscription in which the free trial has expired, but they have not yet enabled a payment method, then `polishedpayments` will redirect them to their account page where they can set up their subscription.   
+Your user's subscription status will now be checked before your Shiny app's server logic starts.  If the user does not have a subscription, `polishedpayments` will set them up with the default subscription.  If the user has a subscription that is either in it's free trial period, or the user has set up a payment method, then `polishedpayments` will allow the user to continue to your Shiny app.   If your user has a subscription in which the free trial has expired, but they have not yet enabled a payment method, then `polishedpayments` will redirect them to the "Payments" page where they can set up their subscription.   
   
-7. (Optional) Add button or link to redirect user to 'Account' page with `go_to_account()`  
+7. (Optional) Add button or link to redirect user to 'Account' page with `go_to_payments()`  
 
 - Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
 
