@@ -57,7 +57,7 @@ payments_ui <- function(
           # If the subscription does not have a trial period, then we can't create the subscription until a payment
           # method is enabled, so also do not create the subscription if no trial period.
           stripe_subscription_id <- create_stripe_subscription(
-            customer_id,
+            stripe_customer_id,
             plan_to_enable = getOption("pp")$prices[1],
             days_remaining = getOption("pp")$trial_period_days
           )
