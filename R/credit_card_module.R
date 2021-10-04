@@ -188,7 +188,7 @@ credit_card_payment_module <- function(input, output, session,
       if (isTRUE(input$attach_payment_method)) {
         tryCatch({
 
-          set_default_payment_method(
+          set_stripe_payment_method(
             customer_id = billing$stripe_customer_id,
             payment_method_id = hold_payment_method_id
           )
