@@ -11,7 +11,9 @@ create_payment_module_ui <- function(id) {
 
 #' Shiny module server for creating a one time payment
 #'
-#' @param amount the amount of the one time payment
+#' @param amount a positive integer representing how much to charge in the
+#' smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
+#' ¥100, a zero-decimal currency)
 #' @param currency the currency to use for the payment
 #' @param send_email_receipt boolean - whether or not to send an email receipt.  Defaults
 #' to \code{TRUE}.

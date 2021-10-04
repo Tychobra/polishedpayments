@@ -118,7 +118,9 @@ credit_card_module_ui <- function(
 #' @param output the Shiny server output
 #' @param session the Shiny server session
 #' @param trigger the reactive trigger to submit the payment to Stripe
-#' @param amount the amount of the payment
+#' @param amount a positive integer representing how much to charge in the
+#' smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
+#' ¥100, a zero-decimal currency)
 #' @param currency The currency. Defaults to "usd" (United States Dollar).
 #'
 #' @export
