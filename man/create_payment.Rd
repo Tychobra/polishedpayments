@@ -19,8 +19,9 @@ create_payment(
 
 \item{payment_method_id}{the Stripe payment method ID}
 
-\item{amount}{a positive integer representing how much to charge
-in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100, a zero-decimal currency)}
+\item{amount}{a positive integer representing how much to charge in the
+smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
+¥100, a zero-decimal currency)}
 
 \item{currency}{the currency}
 

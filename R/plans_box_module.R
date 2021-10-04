@@ -1,4 +1,7 @@
 #' @noRd
+#'
+#' @importFrom shiny NS column
+#' @importFrom shinydashboard box
 plans_box_module_ui <- function(id) {
   ns <- NS(id)
 
@@ -45,6 +48,7 @@ plans_box_module_ui <- function(id) {
 #' @noRd
 #'
 #' @importFrom htmltools tags
+#' @importFrom shiny callModule
 #'
 plans_box_module <- function(input, output, session) {
   ns <- session$ns

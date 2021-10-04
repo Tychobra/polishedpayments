@@ -22,7 +22,9 @@ credit_card_payment_module(
 
 \item{trigger}{the reactive trigger to submit the payment to Stripe}
 
-\item{amount}{the amount of the payment}
+\item{amount}{a positive integer representing how much to charge in the
+smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
+¥100, a zero-decimal currency)}
 
 \item{currency}{The currency. Defaults to "usd" (United States Dollar).}
 }

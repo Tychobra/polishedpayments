@@ -8,12 +8,13 @@
 #'
 #' @export
 #'
-#' @importFrom shiny icon
+#' @importFrom shiny actionLink icon
 #' @importFrom shinydashboard dashboardSidebar dashboardBody sidebarMenu menuItem tabItems dashboardHeader dashboardPage
 #' @importFrom htmltools HTML tags tagList
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shinyFeedback useShinyFeedback
 #' @importFrom polished profile_module_ui
+#' @importFrom waiter use_waiter waiter_show_on_load spin_fading_circles
 #'
 #' @return the UI for the "Admin Panel"
 #'
@@ -92,6 +93,7 @@ payments_app_ui <- function(
 #' @importFrom shiny callModule observeEvent reactiveVal reactive req moduleServer
 #' @importFrom polished profile_module remove_query_string
 #' @importFrom shinyFeedback showToast
+#' @importFrom shinyWidgets sendSweetAlert
 #' @importFrom tibble as_tibble
 #'
 #'

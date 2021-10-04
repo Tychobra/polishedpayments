@@ -18,9 +18,9 @@ const payments = (() => {
   const mount_card_element = (el_id) => {
 
     // destroy any existing card elements
-    const existing_card_element = elements.getElement("card")
+    const existing_card_element = elements.getElement("card");
     if (existing_card_element !== null) {
-      existing_card_element.destroy()
+      existing_card_element.destroy();
     }
 
 
@@ -48,10 +48,10 @@ const payments = (() => {
       },
     });
 
-    card_element.mount("#" + el_id)
+    card_element.mount("#" + el_id);
 
-    return card_element
-  }
+    return card_element;
+  };
 
 
 
@@ -63,7 +63,7 @@ const payments = (() => {
       "confirm_card_setup",
       function(message) {
 
-        const card_element = elements.getElement("card")
+        const card_element = elements.getElement("card");
 
         stripe.confirmCardSetup(
           message.client_secret,
@@ -80,20 +80,20 @@ const payments = (() => {
             console.log(result.error);
           } else {
             // If no error, clear CC inputs
-            card_element.clear()
+            card_element.clear();
           }
 
           // The setup has succeeded. Display a success message.
           Shiny.setInputValue(message.ns_prefix + "setup_intent_result", result, { priority: "event"});
-        })
+        });
 
       }
-    )
-  })
+    );
+  });
 
 
 
   return {
     mount_card_element: mount_card_element
-  }
-})()
+  };
+})();

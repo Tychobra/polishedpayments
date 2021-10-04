@@ -1,6 +1,18 @@
 
 
-
+#' Modal to set/update the Stripe payment method
+#'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param open_modal_trigger the reactive trigger to open the modal
+#' @param title the title of the modal
+#'
+#' @importFrom htmltools tagList tags
+#' @importFrom httr status_code
+#' @importFrom shiny observeEvent showModal modalDialog modalButton textInput callModule reactive removeModal
+#' @importFrom shinyFeedback loadingButton resetLoadingButton
+#'
 set_payment_method_modal <- function(input, output, session,
   open_modal_trigger,
   title = "Enable Billing"
@@ -12,7 +24,7 @@ set_payment_method_modal <- function(input, output, session,
     shiny::showModal(
       shiny::modalDialog(
         title = title,
-        footer = shiny::tagList(
+        footer = htmltools::tagList(
           shiny::modalButton("Cancel"),
           shinyFeedback::loadingButton(
             ns("submit"),
@@ -29,8 +41,8 @@ set_payment_method_modal <- function(input, output, session,
           width = "100%"
         ),
         credit_card_module_ui(ns("cc_input")),
-        br(),
-        h5(
+        tags$br(),
+        tags$h5(
           style = "text-align: center",
           "This card will be used for future payments"
         )

@@ -2,6 +2,8 @@
 #'
 #' @param id the module id
 #'
+#' @importFrom shiny NS uiOutput
+#'
 #' @export
 #'
 create_payment_module_ui <- function(id) {
@@ -11,11 +13,14 @@ create_payment_module_ui <- function(id) {
 
 #' Shiny module server for creating a one time payment
 #'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
 #' @param amount a positive integer representing how much to charge in the
 #' smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
 #' ¥100, a zero-decimal currency)
 #' @param currency the currency to use for the payment
-#' @param send_email_receipt boolean - whether or not to send an email receipt.  Defaults
+#' @param send_receipt_email boolean - whether or not to send an email receipt.  Defaults
 #' to \code{TRUE}.
 #' @param description short payment description.  Useful for identifying the payment.
 #' @param ui optional UI to place above the submit button.  This is often used to include
@@ -24,7 +29,8 @@ create_payment_module_ui <- function(id) {
 #' @return a list with 1 reactiveVal
 #' - payment_response - returns the response to the payment attempt
 #'
-#' @importFrom shiny textInput callModule
+#' @importFrom htmltools tags
+#' @importFrom shiny textInput checkboxInput callModule renderUI
 #' @importFrom shinyFeedback loadingButton showToast resetLoadingButton
 #'
 #' @export
@@ -45,14 +51,15 @@ create_payment_module <- function(input, output, session,
 
     if (is.na(hold_stripe$default_payment_method)) {
 
-      out <- div(
+      out <- tags$div(
         shiny::textInput(
           ns("cc_name"),
           "Cardholder Name",
+          placeholder = "Tycho Brahe",
           width = "100%"
         ),
         credit_card_module_ui(ns("cc_input")),
-        checkboxInput(
+        shiny::checkboxInput(
           ns("save_cc"),
           "Save Credit Card for Future Payments"
         ),
@@ -93,12 +100,12 @@ create_payment_module <- function(input, output, session,
 
 
 
-      out <- div(
-        hr(),
-        h4(paste0("Pay with ", tools::toTitleCase(pm$card_brand), " ending in ", pm$card_last4)),
-        h5(paste0("expires ", pm$exp_month, "/", pm$exp_year)),
-        hr(),
-        br(),
+      out <- tags$div(
+        tags$hr(),
+        tags$h4(paste0("Pay with ", tools::toTitleCase(pm$card_brand), " ending in ", pm$card_last4)),
+        tags$h5(paste0("expires ", pm$exp_month, "/", pm$exp_year)),
+        tags$hr(),
+        tags$br(),
         ui,
         shinyFeedback::loadingButton(
           ns("submit_no_cc"),

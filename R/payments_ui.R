@@ -3,6 +3,10 @@
 #' @param ui the Shiny app UI
 #' @param app_name the app name to display to the user in the return to app link.
 #'
+#' @importFrom htmltools tagList tags
+#' @importFrom httr status_code
+#' @importFrom shiny parseQueryString
+#'
 #' @export
 payments_ui <- function(
   ui,
@@ -125,8 +129,8 @@ payments_ui <- function(
 
       if (is.null(getOption("pp")$prices) || length(intersect(user$roles, getOption("pp")$free_roles)) > 0) {
         # No subscription required, so Go to app
-        out <- shiny::tagList(
-          shiny::tags$head(
+        out <- htmltools::tagList(
+          htmltools::tags$head(
             tags$script(src = "https://js.stripe.com/v3"),
             tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
             tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
@@ -141,8 +145,8 @@ payments_ui <- function(
           (stripe_sub$trial_days_remaining > 0 || !is.na(customer$default_payment_method))
         ) {
           # Go to payments page
-          out <- shiny::tagList(
-            shiny::tags$head(
+          out <- htmltools::tagList(
+            htmltools::tags$head(
               tags$script(src = "https://js.stripe.com/v3"),
               tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
               tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")

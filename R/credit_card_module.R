@@ -2,6 +2,9 @@
 #'
 #' @param id the Shiny module id
 #'
+#' @importFrom htmltools tagList tags
+#' @importFrom shiny NS
+#'
 #' @export
 credit_card_module_ui <- function(
   id
@@ -100,7 +103,7 @@ credit_card_module_ui <- function(
       tags$fieldset(
         tags$div(
           class = "stripe-row",
-          div(
+          tags$div(
             id = ns("credit_card")
           )
         )
@@ -122,6 +125,11 @@ credit_card_module_ui <- function(
 #' smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
 #' ¥100, a zero-decimal currency)
 #' @param currency The currency. Defaults to "usd" (United States Dollar).
+#'
+#' @importFrom httr POST authenticate content
+#' @importFrom jsonlite fromJSON
+#' @importFrom shiny reactiveVal observeEvent reactive
+#' @importFrom shinyFeedback showToast
 #'
 #' @export
 #'
@@ -216,13 +224,17 @@ credit_card_payment_module <- function(input, output, session,
 #' @param input the Shiny server input
 #' @param output the Shiny server output
 #' @param session the Shiny server session
+#' @param trigger the reactive trigger to submit the payment to Stripe
 #' @param billing_details reactive returning a named list of billing details. Valid list element names
 #' are:
 #' - "name"
 #' - "email"
 #' - "phone"
 #'
-#'
+#' @importFrom httr POST authenticate content
+#' @importFrom jsonlite fromJSON
+#' @importFrom shiny observeEvent reactive
+#' @importFrom shinyFeedback showToast
 #'
 #' @export
 #'

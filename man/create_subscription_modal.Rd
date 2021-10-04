@@ -10,7 +10,7 @@ create_subscription_modal(
   session,
   open_modal_trigger,
   price_id,
-  ui = p(style = "text-align: center", "You are signing up for a subscription"),
+  ui = tags$p(style = "text-align: center", "You are signing up for a subscription"),
   title = NULL,
   size = "s",
   easyClose = FALSE,
@@ -18,7 +18,17 @@ create_subscription_modal(
 )
 }
 \arguments{
+\item{input}{the Shiny server input}
+
+\item{output}{the Shiny server output}
+
+\item{session}{the Shiny server session}
+
+\item{open_modal_trigger}{the reactive trigger to open the modal}
+
 \item{price_id}{the Stripe price id}
+
+\item{ui}{custom UI added to bottom of the modal}
 
 \item{title}{the title to pass to \code{shiny::modalDialog}}
 

@@ -7,7 +7,7 @@
 #'
 #' @param id the Shiny module id
 #'
-#' @importFrom shiny NS actionButton
+#' @importFrom shiny NS actionButton textOutput
 #' @importFrom shinyjs hidden
 #' @importFrom shinyFeedback loadingButton
 #' @importFrom htmltools tagList tags
@@ -71,8 +71,8 @@ free_trial_banner_module_ui <- function(id) {
 #' @param output the Shiny output
 #' @param session the Shiny session
 #'
-#' @importFrom shiny observeEvent reactive renderText outputOptions
-#' @importFrom shinyjs hideElement
+#' @importFrom shiny observeEvent reactive renderText outputOptions updateQueryString
+#' @importFrom shinyjs delay hideElement
 #'
 #' @export
 #'

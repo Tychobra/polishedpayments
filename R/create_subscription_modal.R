@@ -2,19 +2,28 @@
 
 #' Credit Card Modal to create a subscription
 #'
+#' @param input the Shiny server input
+#' @param output the Shiny server output
+#' @param session the Shiny server session
+#' @param open_modal_trigger the reactive trigger to open the modal
 #' @param price_id the Stripe price id
+#' @param ui custom UI added to bottom of the modal
 #' @param title the title to pass to \code{shiny::modalDialog}
 #' @param size the size to pas to \code{shiny::modalDialog}
 #' @param easyClose the easyClose to pass to \code{shiny::modalDialog}
 #' @param fade the fade to pass to \code{shiny::modalDialog}
 #'
-#' @importFrom shiny showModal modalDialog tagList actionButton textInput callModule
+#' @importFrom htmltools tags tagList
+#' @importFrom httr GET authenticate content
+#' @importFrom jsonlite fromJSON
+#' @importFrom shiny showModal modalDialog modalButton actionButton textInput callModule observeEvent reactive removeModal
+#' @importFrom shinyFeedback showToast
 #'
 #'
 create_subscription_modal <- function(input, output, session,
   open_modal_trigger,
   price_id,
-  ui = p(
+  ui = tags$p(
     style = "text-align: center",
     "You are signing up for a subscription"
   ),
@@ -48,7 +57,7 @@ create_subscription_modal <- function(input, output, session,
           width = "100%"
         ),
         credit_card_module_ui(ns("cc_input")),
-        br(),
+        tags$br(),
         ui
       )
     )

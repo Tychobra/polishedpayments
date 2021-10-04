@@ -9,7 +9,8 @@
 #'
 #' @param server the Shiny server function
 #'
-#' @importFrom shiny getDefaultReactiveDomain observeEvent
+#' @importFrom shiny reactiveVal observeEvent getQueryString updateQueryString
+#' @importFrom shinyFeedback showToast
 #' @importFrom httr status_code
 #'
 #' @export
@@ -68,7 +69,7 @@ payments_server <- function(
           session$reload()
         } else {
 
-          showToast("error", err$message)
+          shinyFeedback::showToast("error", err$message)
         }
 
         invisible(NULL)

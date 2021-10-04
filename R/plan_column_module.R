@@ -2,7 +2,7 @@
 #' @noRd
 #'
 #' @importFrom htmltools tags tagList
-#' @importFrom shiny actionButton
+#' @importFrom shiny actionButton textOutput
 #' @importFrom shinyjs hidden
 #' @importFrom shinydashboard box
 plan_column_module_ui <- function(id, width) {
@@ -55,6 +55,15 @@ plan_column_module_ui <- function(id, width) {
   )
 }
 
+#' @noRd
+#'
+#' @importFrom htmltools tags HTML
+#' @importFrom httr GET POST authenticate content status_code
+#' @importFrom jsonlite fromJSON
+#' @importFrom shiny reactive renderText observeEvent reactiveVal callModule showModal modalDialog modalButton removeModal
+#' @importFrom shinyFeedback showToast loadingButton
+#' @importFrom shinyjs hideElement showElement
+#' @importFrom waiter waiter_hide
 plan_column_module <- function(input, output, session,
   plan_id,
   hide_waiter = FALSE
@@ -187,7 +196,7 @@ plan_column_module <- function(input, output, session,
         tags$div(
           class = "text-center",
           style = "padding: 30px; line-height: 1.7",
-          h3(htmltools::HTML(
+          tags$h3(htmltools::HTML(
             paste0("Confirm purchase of the ", tags$b(hold_plan$nickname), " plan.")
           ))
         ),

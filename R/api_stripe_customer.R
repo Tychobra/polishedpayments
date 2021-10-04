@@ -1,5 +1,17 @@
-
-
+#' Get relevant information about a Stripe customer
+#'
+#' @param user_uid the customer's `polished` user uid
+#' @param user_roles the customer's `polished` user roles
+#' @param is_on_payments whether the customer is on the payments page or not (Default: \code{FALSE})
+#' @param app_uid the `polished` app uid; defaults to the current app
+#' (e.g. \code{getOption("polished")$app_uid})
+#' @param stripe_prices the Stripe prices; defaults to the current Stripe prices
+#' provided in \code{polished_payments_config} (e.g. \code{getOption("pp")$prices})
+#' @param free_roles the roles for free Stripe users; defaults to the roles
+#' provided in \code{polished_payments_config} (e.g. \code{getOption("pp")$free_roles})
+#'
+#' @importFrom httr status_code
+#'
 get_stripe <- function(
   user_uid,
   user_roles,
@@ -108,6 +120,9 @@ get_stripe <- function(
 #' @param email The new Stripe customer's email address.
 #' @param user_uid the new Stripe customer's polished user uid.
 #'
+#' @importFrom httr POST authenticate content status_code
+#' @importFrom jsonlite fromJSON
+#'
 #' @export
 #'
 #'
@@ -149,6 +164,9 @@ create_stripe_customer <- function(email, user_uid) {
 #' Collect information for a Stripe customer
 #'
 #' @param stripe_customer_id The Stripe customer's ID.
+#'
+#' @importFrom httr GET authenticate content status_code
+#' @importFrom jsonlite fromJSON
 #'
 #' @export
 #'

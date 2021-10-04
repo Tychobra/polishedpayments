@@ -19,6 +19,8 @@ credit_card_module(
 
 \item{session}{the Shiny server session}
 
+\item{trigger}{the reactive trigger to submit the payment to Stripe}
+
 \item{billing_details}{reactive returning a named list of billing details. Valid list element names
 are:
 - "name"

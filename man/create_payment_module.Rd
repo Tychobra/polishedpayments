@@ -16,17 +16,25 @@ create_payment_module(
 )
 }
 \arguments{
-\item{amount}{the amount of the one time payment}
+\item{input}{the Shiny server input}
+
+\item{output}{the Shiny server output}
+
+\item{session}{the Shiny server session}
+
+\item{amount}{a positive integer representing how much to charge in the
+smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge
+¥100, a zero-decimal currency)}
 
 \item{currency}{the currency to use for the payment}
+
+\item{send_receipt_email}{boolean - whether or not to send an email receipt.  Defaults
+to \code{TRUE}.}
 
 \item{description}{short payment description.  Useful for identifying the payment.}
 
 \item{ui}{optional UI to place above the submit button.  This is often used to include
 a disclaimer.}
-
-\item{send_email_receipt}{boolean - whether or not to send an email receipt.  Defaults
-to \code{TRUE}.}
 }
 \value{
 a list with 1 reactiveVal

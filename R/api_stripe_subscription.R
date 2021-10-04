@@ -10,6 +10,9 @@
 #'
 #' @return the ID of the newly created Stripe subscription
 #'
+#' @importFrom httr POST authenticate content status_code
+#' @importFrom jsonlite fromJSON
+#'
 #' @noRd
 #'
 create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NULL) {
@@ -59,6 +62,9 @@ create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaini
 #' Get information on the user's Stripe subscription
 #'
 #' @param stripe_subscription_id Your user's Stripe subscription ID.
+#'
+#' @importFrom httr GET authenticate content status_code
+#' @importFrom jsonlite fromJSON
 #'
 #' @export
 #'
