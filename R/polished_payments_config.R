@@ -20,6 +20,7 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' polished_payments_config(
 #'   stripe_secret_key = "<your Stripe secret API key>",
 #'   stripe_public_key = "<your Stripe publishable key>",
@@ -27,6 +28,7 @@
 #'   trial_period_days = 30,
 #'   free_roles = "free_user"
 #' )
+#' }
 #'
 #'
 #'
