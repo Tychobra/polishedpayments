@@ -198,7 +198,7 @@ credit_card_payment_module <- function(input, output, session,
 
           set_stripe_payment_method(
             customer_id = billing$stripe_customer_id,
-            payment_method_id = hold_payment_method_id
+            payment_method_id = hold$payment_method_id
           )
 
         }, error = function(err) {
