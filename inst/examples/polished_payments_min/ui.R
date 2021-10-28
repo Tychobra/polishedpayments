@@ -50,7 +50,7 @@ ui <- fluidPage(
       br(),
       br(),
       div(
-        style="max-width: 400px; margin: 0 auto;",
+        style = "max-width: 400px; margin: 0 auto;",
         wellPanel(
           h2(
             class = "text-center",
