@@ -39,7 +39,7 @@ remotes::install_github("tychobra/polishedpayments")
       )
       ```
 
-5. Wrap your Shiny server in `payments_server()`. e.g.
+5. Wrap your Shiny server in `polishedpayments::payments_server()` and `polished::secure_server()`. e.g.
 
       ```
       my_server <- polishedpayments::payments_server(
@@ -53,33 +53,20 @@ remotes::install_github("tychobra/polishedpayments")
       polished::secure_server(my_server)
       
       ```
-      
-      **OR**
-      
-      ```
-      my_server <- function(input, output, session) (
-        
-        # your custom Shiny app's server logic
-        
-      )
-      
-      payments_server(my_server) %>%
-        polished::secure_server()
-      ```
   
-6. Add Polished Authentication with `polished::secure_ui()` and `polished::secure_server()`.   
+6. Wrap your Shiny UI in `polishedpayments::payments_ui()` and `polished::secure_ui()`.   
     
     ```
-    # Server
-    polished::secure_server(my_server)
+    my_ui <- polishedpayments::payments_ui(fluidPage(
+      h1("My Shiny App")
+    ))
     
-    # UI
-    polished::secure_ui(ui)
+    polished::secure_ui(my_ui)
     ```
   
 Each user's subscription status will be checked before the Shiny app's server logic starts.  If the user does not have a subscription, `polishedpayments` will set them up with the default subscription.  If the user has a subscription that is either in it's free trial period, or the user has set up a payment method for a subscription, then `polishedpayments` will allow the user to continue to the Shiny app after signing in.  If the user has a subscription in which the free trial has expired, and they still have not enabled a payment method, `polishedpayments` will redirect the user to the **Payments** page to enable billing for their subscription.  In this case (expired trial period), the user will not be able to access the main Shiny app until they've enabled billing.
   
-7. (Optional) Add a button or link to redirect user to the **Account** page with `go_to_payments()`  
+7. (Optional) Add a button or link to redirect user to the **Payments** page with `go_to_payments()`  
 
 - Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
 
