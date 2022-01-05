@@ -27,7 +27,7 @@ payments_ui <- function(
     }
 
     query <- shiny::parseQueryString(request$QUERY_STRING)
-    payments_query <- query$payments
+    page_query <- query$page
 
 
     err_out <- NULL
@@ -119,7 +119,7 @@ payments_ui <- function(
     }
 
 
-    if (identical(payments_query, "TRUE")) {
+    if (identical(page_query, "payments")) {
 
       out <- payments_app_ui(
         app_name = app_name

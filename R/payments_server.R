@@ -27,7 +27,7 @@ payments_server <- function(
     shiny::observeEvent(session$userData$user(), {
 
       query_list <- shiny::getQueryString()
-      payments_query <- query_list$payments
+      query_page <- query_list$page
 
       hold_user <- session$userData$user()
 
@@ -37,12 +37,12 @@ payments_server <- function(
         stripe_out <- get_stripe(
           user_uid = hold_user$user_uid,
           user_roles = hold_user$roles,
-          is_on_payments = identical(payments_query, "TRUE")
+          is_on_payments = identical(query_page, "payments")
         )
 
         if (is.null(stripe_out)) {
           shiny::updateQueryString(
-            queryString = "?payments=TRUE",
+            queryString = "?page=payments",
             session = session,
             mode = "replace"
           )
@@ -60,9 +60,9 @@ payments_server <- function(
         if (identical(err$message, "subscription canceled")) {
           # you can't create a Stripe subscription until after the Stripe user
           # has entered their payment info.  If the stripe user needs to create
-          # a subscription (i.e. )
+          # a subscription, send them to the payments page.
           shiny::updateQueryString(
-            queryString = "?payments=TRUE",
+            queryString = "?page=payments",
             session = session,
             mode = "replace"
           )
@@ -82,9 +82,9 @@ payments_server <- function(
 
     observeEvent(session$userData$stripe(), {
       query_list <- shiny::getQueryString()
-      payments_query <- query_list$payments
+      page_query <- query_list$page
 
-      if (identical(payments_query, "TRUE")) {
+      if (identical(page_query, "payments")) {
 
         payments_app_server(input, output, session)
 

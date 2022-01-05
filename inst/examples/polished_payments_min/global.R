@@ -18,7 +18,7 @@ polished:::set_api_url(
   api_url = "https://auth-api-dev.polished.tech/v1"
 )
 
-global_sessions_config(
+polished_config(
   api_key = app_config$api_key,
   app_name = "polished_payments_min",
   is_invite_required = FALSE
