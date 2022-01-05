@@ -19,7 +19,7 @@
 #' @return the UI for the "Admin Panel"
 #'
 payments_app_ui <- function(
-  app_name = getOption("polished")$app_name_display
+  app_name = getOption("polished")$app_name
 ) {
 
   stripe_key_public <- getOption("pp")$keys$public

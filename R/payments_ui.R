@@ -10,7 +10,7 @@
 #' @export
 payments_ui <- function(
   ui,
-  app_name = getOption("polished")$app_name_display
+  app_name = getOption("polished")$app_name
 ) {
 
   function(request) {
