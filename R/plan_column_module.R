@@ -221,6 +221,15 @@ plan_column_module <- function(input, output, session,
     hold_sub_info <- hold_stripe$subscription
     shiny::removeModal()
 
+    # show appropriate message to free user
+    if (any(hold_user$roles %in% getOption("pp")$free_roles)) {
+      shinyFeedback::showToast(
+        "warning",
+        "Free users cannot have subscriptions.  Subscription Not Created."
+      )
+      return()
+    }
+
     # update the pricing plan for an existing subscription
     tryCatch({
 
