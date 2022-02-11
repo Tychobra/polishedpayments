@@ -8,7 +8,7 @@ get_customers(
   app_uid = NULL,
   user_uid = NULL,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 )
 }
 \arguments{

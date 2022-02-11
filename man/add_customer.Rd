@@ -10,7 +10,7 @@ add_customer(
   stripe_customer_id,
   stripe_subscription_id = NULL,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 )
 }
 \arguments{

@@ -29,13 +29,13 @@ ua <- httr::user_agent("http://github.com/tychobra/polishedpayments")
 #' @seealso [add_customer()] [update_customer()]
 #'
 #' @importFrom httr GET authenticate
-#' @importFrom polished polished_api_res api_list_to_df
+#' @importFrom polished polished_api_res api_list_to_df get_api_key
 #'
 get_customers <- function(
   app_uid = NULL,
   user_uid = NULL,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 ) {
 
   query_out <- list()
@@ -78,7 +78,7 @@ get_customers <- function(
 #' @seealso [get_customers()] [update_customer()]
 #'
 #' @importFrom httr POST authenticate
-#' @importFrom polished polished_api_res
+#' @importFrom polished polished_api_res get_api_key
 #'
 add_customer <- function(
   app_uid,
@@ -86,7 +86,7 @@ add_customer <- function(
   stripe_customer_id,
   stripe_subscription_id = NULL,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 ) {
 
   body_out <- list(
@@ -135,7 +135,7 @@ add_customer <- function(
 #' @seealso [get_customers()] [add_customer()]
 #'
 #' @importFrom httr PUT authenticate
-#' @importFrom polished polished_api_res
+#' @importFrom polished polished_api_res get_api_key
 #'
 update_customer <- function(
   customer_uid,
@@ -144,7 +144,7 @@ update_customer <- function(
   default_payment_method = NULL,
   cancel_subscription = FALSE,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 ) {
 
   # required parameters

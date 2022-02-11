@@ -11,7 +11,7 @@ update_customer(
   default_payment_method = NULL,
   cancel_subscription = FALSE,
   is_live = getOption("pp")$is_live,
-  api_key = getOption("polished")$api_key
+  api_key = polished::get_api_key()
 )
 }
 \arguments{
