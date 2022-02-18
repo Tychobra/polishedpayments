@@ -34,7 +34,7 @@ ua <- httr::user_agent("http://github.com/tychobra/polishedpayments")
 get_customers <- function(
   app_uid = NULL,
   user_uid = NULL,
-  is_live = getOption("pp")$is_live,
+  is_live = .pp$is_live,
   api_key = polished::get_api_key()
 ) {
 
@@ -85,7 +85,7 @@ add_customer <- function(
   user_uid,
   stripe_customer_id,
   stripe_subscription_id = NULL,
-  is_live = getOption("pp")$is_live,
+  is_live = .pp$is_live,
   api_key = polished::get_api_key()
 ) {
 
@@ -109,7 +109,7 @@ add_customer <- function(
     encode = "json"
   )
 
-  polished_api_res(resp)
+  polished::polished_api_res(resp)
 }
 
 
@@ -143,7 +143,7 @@ update_customer <- function(
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
   cancel_subscription = FALSE,
-  is_live = getOption("pp")$is_live,
+  is_live = .pp$is_live,
   api_key = polished::get_api_key()
 ) {
 
@@ -171,5 +171,5 @@ update_customer <- function(
     encode = "json"
   )
 
-  polished_api_res(resp)
+  polished::polished_api_res(resp)
 }

@@ -66,7 +66,8 @@ plan_column_module_ui <- function(id, width) {
 #' @importFrom waiter waiter_hide
 plan_column_module <- function(input, output, session,
   plan_id,
-  hide_waiter = FALSE
+  hide_waiter = FALSE,
+  stripe_secret_key = .pp$keys$secret
 ) {
   ns <- session$ns
 
@@ -80,7 +81,7 @@ plan_column_module <- function(input, output, session,
       res <- httr::GET(
         paste0("https://api.stripe.com/v1/plans/", plan_id),
         httr::authenticate(
-          user = getOption("pp")$keys$secret,
+          user = stripe_secret_key,
           password = ""
         )
       )
@@ -222,7 +223,7 @@ plan_column_module <- function(input, output, session,
     shiny::removeModal()
 
     # show appropriate message to free user
-    if (any(hold_user$roles %in% getOption("pp")$free_roles)) {
+    if (any(hold_user$roles %in% .pp$free_roles)) {
       shinyFeedback::showToast(
         "warning",
         "Free users cannot have subscriptions.  Subscription Not Created."
@@ -246,7 +247,7 @@ plan_column_module <- function(input, output, session,
           ),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = stripe_secret_key,
             password = ""
           )
         )
@@ -278,7 +279,7 @@ plan_column_module <- function(input, output, session,
           ),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = stripe_secret_key,
             password = ""
           )
         )

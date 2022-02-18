@@ -136,7 +136,8 @@ credit_card_module_ui <- function(
 credit_card_payment_module <- function(input, output, session,
   trigger = function() NULL,
   amount,
-  currency = "usd"
+  currency = "usd",
+  stripe_secret_key = .pp$keys$secret
 ) {
   ns <- session$ns
 
@@ -159,7 +160,7 @@ credit_card_payment_module <- function(input, output, session,
         ),
         encode = "form",
         httr::authenticate(
-          user = getOption("pp")$keys$secret,
+          user = stripe_secret_key,
           password = ""
         )
       )
@@ -240,7 +241,8 @@ credit_card_payment_module <- function(input, output, session,
 #'
 credit_card_module <- function(input, output, session,
   trigger = function() NULL,
-  billing_details = function() list()
+  billing_details = function() list(),
+  stripe_secret_key = .pp$keys$secret
 ) {
   ns <- session$ns
 
@@ -263,7 +265,7 @@ credit_card_module <- function(input, output, session,
         body = body_out,
         encode = "form",
         httr::authenticate(
-          user = getOption("pp")$keys$secret,
+          user = stripe_secret_key,
           password = ""
         )
       )

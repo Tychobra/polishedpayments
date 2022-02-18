@@ -159,7 +159,7 @@ create_payment_module <- function(input, output, session,
           paste0("https://api.stripe.com/v1/setup_intents/", setup_intent$id),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = .pp$keys$secret,
             password = ""
           )
         )

@@ -4,7 +4,10 @@
 \alias{get_stripe_payment_method}
 \title{get payment method information from Stripe for a particular Payment Method ID}
 \usage{
-get_stripe_payment_method(payment_method_id)
+get_stripe_payment_method(
+  payment_method_id,
+  stripe_secret_key = getOption("pp")$keys$secret
+)
 }
 \arguments{
 \item{payment_method_id}{the Stripe payment method id.}

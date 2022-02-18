@@ -10,7 +10,7 @@ update_customer(
   free_trial_days_remaining_at_cancel = NULL,
   default_payment_method = NULL,
   cancel_subscription = FALSE,
-  is_live = getOption("pp")$is_live,
+  is_live = .pp$is_live,
   api_key = polished::get_api_key()
 )
 }

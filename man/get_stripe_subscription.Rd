@@ -4,7 +4,10 @@
 \alias{get_stripe_subscription}
 \title{Get information on the user's Stripe subscription}
 \usage{
-get_stripe_subscription(stripe_subscription_id)
+get_stripe_subscription(
+  stripe_subscription_id,
+  stripe_secret_key = getOption("pp")$keys$secret
+)
 }
 \arguments{
 \item{stripe_subscription_id}{Your user's Stripe subscription ID.}

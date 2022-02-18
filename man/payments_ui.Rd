@@ -4,7 +4,7 @@
 \alias{payments_ui}
 \title{adds polished payments to your Shiny UI}
 \usage{
-payments_ui(ui, app_name = getOption("polished")$app_name)
+payments_ui(ui, app_name = .polished$app_name)
 }
 \arguments{
 \item{ui}{the Shiny app UI}

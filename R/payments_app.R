@@ -19,10 +19,10 @@
 #' @return the UI for the "Admin Panel"
 #'
 payments_app_ui <- function(
-  app_name = getOption("polished")$app_name
+  app_name = .polished$app_name
 ) {
 
-  stripe_key_public <- getOption("pp")$keys$public
+  stripe_key_public <- .pp$keys$public
 
   head <- shinydashboard::dashboardHeader(
     title = "Payments",
@@ -109,7 +109,7 @@ payments_app_server <- function(input, output, session) {
     hold_stripe <- session$userData$stripe()
     hold_user <- session$userData$user()
 
-    if (length(intersect(hold_user$roles, getOption("pp")$free_roles)) > 0 || is.null(getOption("pp")$prices)) {
+    if (length(intersect(hold_user$roles, .pp$free_roles)) > 0 || is.null(.pp$prices)) {
       # User has a free role (or `subscription_prices = NULL`), so go to the Shiny app
       polished::remove_query_string()
       session$reload()

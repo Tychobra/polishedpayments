@@ -7,7 +7,7 @@ billing_module_ui <- function(id) {
   ns <- NS(id)
 
   subscription_ui <- tagList(
-    if (!is.null(getOption("pp")$prices)) {
+    if (!is.null(.pp$prices)) {
       tagList(
         shiny::fluidRow(
           shinydashboard::box(
@@ -208,7 +208,7 @@ billing_module <- function(input, output, session) {
   ns <- session$ns
 
   ### SUBSCRIPTION ONLY LOGIC ###
-  if (!is.null(getOption("pp")$prices)) {
+  if (!is.null(.pp$prices)) {
 
     ### CANCEL SUBSCRIPTION ###
     observeEvent(input$cancel_subscription, {
@@ -260,7 +260,7 @@ billing_module <- function(input, output, session) {
           paste0("https://api.stripe.com/v1/subscriptions/", subscription$stripe_subscription_id),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = .pp$keys$secret,
             password = ""
           )
         )
@@ -505,7 +505,7 @@ billing_module <- function(input, output, session) {
           ),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = .pp$keys$secret,
             password = ""
           )
         )

@@ -4,7 +4,11 @@
 \alias{create_stripe_customer}
 \title{Create a new Stripe customer}
 \usage{
-create_stripe_customer(email, user_uid)
+create_stripe_customer(
+  email,
+  user_uid,
+  stripe_secret_key = getOption("pp")$keys$secret
+)
 }
 \arguments{
 \item{email}{The new Stripe customer's email address.}

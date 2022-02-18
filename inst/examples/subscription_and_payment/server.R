@@ -2,8 +2,11 @@
 
 server <- function(input, output, session) {
 
+
+
   observeEvent(input$sign_out, {
 
+    print(session$user)
     polished::sign_out_from_shiny()
     session$reload()
 

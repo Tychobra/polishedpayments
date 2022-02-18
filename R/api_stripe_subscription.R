@@ -15,7 +15,13 @@
 #'
 #' @noRd
 #'
-create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaining = 30, default_payment_method = NULL) {
+create_stripe_subscription <- function(
+  customer_id,
+  plan_to_enable,
+  days_remaining = 30,
+  default_payment_method = NULL,
+  stripe_secret_key = .pp$keys$secret
+) {
 
   post_body <- list(
     "customer" = customer_id,
@@ -38,7 +44,7 @@ create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaini
     body = post_body,
     encode = "form",
     httr::authenticate(
-      user = getOption("pp")$keys$secret,
+      user = stripe_secret_key,
       password = ""
     )
   )
@@ -69,14 +75,15 @@ create_stripe_subscription <- function(customer_id, plan_to_enable, days_remaini
 #' @export
 #'
 get_stripe_subscription <- function(
-  stripe_subscription_id
+  stripe_subscription_id,
+  stripe_secret_key = .pp$keys$secret
 ) {
 
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/subscriptions/", stripe_subscription_id),
     encode = "form",
     httr::authenticate(
-      user = getOption("pp")$keys$secret,
+      user = stripe_secret_key,
       password = ""
     )
   )

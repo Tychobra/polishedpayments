@@ -10,7 +10,7 @@
 #' @export
 payments_ui <- function(
   ui,
-  app_name = getOption("polished")$app_name
+  app_name = .polished$app_name
 ) {
 
   function(request) {
@@ -34,7 +34,7 @@ payments_ui <- function(
     tryCatch({
       # get existing subscriptions from Polished API
       customer_res <- get_customers(
-        app_uid = getOption("polished")$app_uid,
+        app_uid = .polished$app_uid,
         user_uid = user$user_uid
       )
 
@@ -56,14 +56,14 @@ payments_ui <- function(
         )
 
 
-        if (!is.null(getOption("pp")$prices) && getOption("pp")$trial_period_days > 0) {
+        if (!is.null(.pp$prices) && .pp$trial_period_days > 0) {
           # Step 2: If the app is using polishedpayments subscriptions, create the Stripe subscription on Stripe.
           # If the subscription does not have a trial period, then we can't create the subscription until a payment
           # method is enabled, so also do not create the subscription if no trial period.
           stripe_subscription_id <- create_stripe_subscription(
             stripe_customer_id,
-            plan_to_enable = getOption("pp")$prices[1],
-            days_remaining = getOption("pp")$trial_period_days
+            plan_to_enable = .pp$prices[1],
+            days_remaining = .pp$trial_period_days
           )
         } else {
           stripe_subscription_id <- NULL
@@ -71,7 +71,7 @@ payments_ui <- function(
 
         # Step 3: add the newly created Stripe customer + possible subscription to the "customers" table
         add_customer_res <- add_customer(
-          app_uid = getOption("polished")$app_uid,
+          app_uid = .polished$app_uid,
           user_uid = user$user_uid,
           stripe_customer_id = stripe_customer_id,
           stripe_subscription_id = stripe_subscription_id
@@ -83,7 +83,7 @@ payments_ui <- function(
         }
 
         customer_res <- get_customers(
-          app_uid = getOption("polished")$app_uid,
+          app_uid = .polished$app_uid,
           user_uid = user$user_uid
         )
 
@@ -127,12 +127,12 @@ payments_ui <- function(
 
     } else {
 
-      if (is.null(getOption("pp")$prices) || length(intersect(user$roles, getOption("pp")$free_roles)) > 0) {
+      if (is.null(.pp$prices) || length(intersect(user$roles, .pp$free_roles)) > 0) {
         # No subscription required, so Go to app
         out <- htmltools::tagList(
           htmltools::tags$head(
             tags$script(src = "https://js.stripe.com/v3"),
-            tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
+            tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
             tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
           ),
           ui
@@ -148,7 +148,7 @@ payments_ui <- function(
           out <- htmltools::tagList(
             htmltools::tags$head(
               tags$script(src = "https://js.stripe.com/v3"),
-              tags$script(paste0("var stripe = Stripe('", getOption("pp")$keys$public, "');")),
+              tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
               tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
             ),
             ui

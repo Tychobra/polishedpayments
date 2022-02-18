@@ -10,7 +10,8 @@ credit_card_payment_module(
   session,
   trigger = function() NULL,
   amount,
-  currency = "usd"
+  currency = "usd",
+  stripe_secret_key = getOption("pp")$keys$secret
 )
 }
 \arguments{

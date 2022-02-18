@@ -88,7 +88,7 @@ create_subscription_modal <- function(input, output, session,
           paste0("https://api.stripe.com/v1/setup_intents/", setup_intent$id),
           encode = "form",
           httr::authenticate(
-            user = getOption("pp")$keys$secret,
+            user = .pp$keys$secret,
             password = ""
           )
         )
@@ -106,7 +106,7 @@ create_subscription_modal <- function(input, output, session,
         # we keep track of their free trial days used and send them with the create subscription request
         # so that the user does not get to completely restart their free trial.
         if (is.na(billing$trial_days_remaining)) {
-          trial_period_days <- getOption("pp")$trial_period_days
+          trial_period_days <- .pp$trial_period_days
         } else {
           trial_period_days <- floor(as.numeric(billing$trial_days_remaining))
         }

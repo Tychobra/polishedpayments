@@ -4,7 +4,10 @@
 \alias{get_stripe_customer}
 \title{Collect information for a Stripe customer}
 \usage{
-get_stripe_customer(stripe_customer_id)
+get_stripe_customer(
+  stripe_customer_id,
+  stripe_secret_key = getOption("pp")$keys$secret
+)
 }
 \arguments{
 \item{stripe_customer_id}{The Stripe customer's ID.}

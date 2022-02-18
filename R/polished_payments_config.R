@@ -1,7 +1,6 @@
 
 
-
-#' configure R options for Polished Payments
+#' configure Polished Payments
 #'
 #' @param stripe_secret_key the Stripe secret key
 #' @param stripe_public_key the Stripe publishable key
@@ -31,7 +30,6 @@
 #' }
 #'
 #'
-#'
 polished_payments_config <- function(
   stripe_secret_key,
   stripe_public_key,
@@ -53,14 +51,23 @@ polished_payments_config <- function(
     stop("invalid Stripe API keys", call. = FALSE)
   }
 
-  options("pp" = list(
-    keys = list(
-      secret = stripe_secret_key,
-      public = stripe_public_key
-    ),
+  out <- list(
     prices = subscription_prices,
     trial_period_days = trial_period_days,
     free_roles = free_roles,
-    is_live = is_live
-  ))
+    is_live = is_live,
+    keys = list(
+      secret = stripe_secret_key,
+      public = stripe_public_key
+    )
+  )
+
+
+  assign(
+    ".pp",
+    out,
+    envir = .GlobalEnv
+  )
+
+  invisible(out)
 }

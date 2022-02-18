@@ -4,7 +4,11 @@
 \alias{set_stripe_payment_method}
 \title{Set the Default Payment Method for a Customer}
 \usage{
-set_stripe_payment_method(customer_id, payment_method_id)
+set_stripe_payment_method(
+  customer_id,
+  payment_method_id,
+  stripe_secret_key = getOption("pp")$keys$secret
+)
 }
 \arguments{
 \item{customer_id}{the Stripe customer id}

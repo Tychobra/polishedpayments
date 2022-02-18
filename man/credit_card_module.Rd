@@ -9,7 +9,8 @@ credit_card_module(
   output,
   session,
   trigger = function() NULL,
-  billing_details = function() list()
+  billing_details = function() list(),
+  stripe_secret_key = getOption("pp")$keys$secret
 )
 }
 \arguments{

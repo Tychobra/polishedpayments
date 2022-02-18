@@ -7,7 +7,12 @@
 #' @importFrom jsonlite fromJSON
 #'
 #' @export
-set_stripe_payment_method <- function(customer_id, payment_method_id) {
+set_stripe_payment_method <- function(
+  customer_id,
+  payment_method_id,
+  stripe_secret_key = .pp$keys$secret
+) {
+
   res <- httr::POST(
     paste0("https://api.stripe.com/v1/customers/", customer_id),
     body = list(
@@ -15,7 +20,7 @@ set_stripe_payment_method <- function(customer_id, payment_method_id) {
     ),
     encode = "form",
     httr::authenticate(
-      user = getOption("pp")$keys$secret,
+      user = stripe_secret_key,
       password = ""
     )
   )
@@ -41,13 +46,16 @@ set_stripe_payment_method <- function(customer_id, payment_method_id) {
 #' @importFrom httr GET authenticate content status_code
 #' @importFrom jsonlite fromJSON
 #'
-get_stripe_payment_method <- function(payment_method_id) {
+get_stripe_payment_method <- function(
+  payment_method_id,
+  stripe_secret_key = .pp$keys$secret
+) {
 
   res <- httr::GET(
     paste0("https://api.stripe.com/v1/payment_methods/", payment_method_id),
     encode = "form",
     httr::authenticate(
-      user = getOption("pp")$keys$secret,
+      user = stripe_secret_key,
       password = ""
     )
   )
@@ -105,7 +113,7 @@ create_payment <- function(
   currency = "usd",
   receipt_email = NULL,
   description = NULL,
-  stripe_secret_key = getOption("pp")$keys$secret
+  stripe_secret_key = .pp$keys$secret
 ) {
 
 

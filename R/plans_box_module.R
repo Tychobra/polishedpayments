@@ -5,7 +5,7 @@
 plans_box_module_ui <- function(id) {
   ns <- NS(id)
 
-  all_prices <- getOption("pp")$prices
+  all_prices <- .pp$prices
 
   n_prices <- length(all_prices)
 
@@ -53,7 +53,7 @@ plans_box_module_ui <- function(id) {
 plans_box_module <- function(input, output, session) {
   ns <- session$ns
 
-  all_pricing_plans <- getOption("pp")$prices
+  all_pricing_plans <- .pp$prices
 
   lapply(seq_along(all_pricing_plans), function(i) {
 
