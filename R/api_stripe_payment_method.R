@@ -66,7 +66,6 @@ get_stripe_payment_method <- function(
 
   if (!identical(httr::status_code(res), 200L)) {
     msg <- "error getting default payment method"
-    print()
     print(res_dat)
     stop(msg, call. = FALSE)
   }
