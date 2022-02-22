@@ -11,7 +11,7 @@ create_payment(
   currency = "usd",
   receipt_email = NULL,
   description = NULL,
-  stripe_secret_key = getOption("pp")$keys$secret
+  stripe_secret_key = .pp$keys$secret
 )
 }
 \arguments{

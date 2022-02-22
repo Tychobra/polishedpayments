@@ -199,8 +199,7 @@ create_payment_module <- function(input, output, session,
           )
 
           session$userData$stripe(get_stripe(
-            user_uid = hold_user$user_uid,
-            user_roles = hold_user$roles,
+            user_uid = hold_user$user_uid
           ))
         }
 

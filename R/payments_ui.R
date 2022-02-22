@@ -29,14 +29,15 @@ payments_ui <- function(
     query <- shiny::parseQueryString(request$QUERY_STRING)
     page_query <- query$page
 
-
     err_out <- NULL
     tryCatch({
       # get existing subscriptions from Polished API
+
       customer_res <- get_customers(
         app_uid = .polished$app_uid,
         user_uid = user$user_uid
       )
+
 
       if (!identical(httr::status_code(customer_res$response), 200L)) {
         stop(customer_res$content, call. = FALSE)
@@ -50,10 +51,13 @@ payments_ui <- function(
         # set the user up with the default subscription
 
         # Step 1: create Stripe customer
+
         stripe_customer_id <- create_stripe_customer(
           email = user$email,
           user_uid = user$user_uid
         )
+
+
 
 
         if (!is.null(.pp$prices) && .pp$trial_period_days > 0) {
@@ -91,20 +95,21 @@ payments_ui <- function(
 
       }
 
-      if (!is.na(customer$stripe_subscription_id)) {
-        stripe_sub <- get_stripe_subscription(customer$stripe_subscription_id)
-      }
+
+      stripe_user <- get_stripe(
+        user_uid = user$user_uid
+      )
 
     }, error = function(err) {
 
-      if (identical(err$message, "subscription canceled")) {
-        update_customer(
-          customer_uid = customer$uid,
-          cancel_subscription = TRUE,
-          free_trial_days_remaining_at_cancel = 0
-        )
-        customer$stripe_subscription_id <- NA
-      }
+      # if (identical(err$message, "subscription canceled")) {
+      #   update_customer(
+      #     customer_uid = customer$uid,
+      #     cancel_subscription = TRUE,
+      #     free_trial_days_remaining_at_cancel = 0
+      #   )
+      #   customer$stripe_subscription_id <- NA
+      # }
 
       msg <- "unable to load UI"
       print(msg)
@@ -127,7 +132,7 @@ payments_ui <- function(
 
     } else {
 
-      if (is.null(.pp$prices) || length(intersect(user$roles, .pp$free_roles)) > 0) {
+      if (!is_subscription_required(user_roles = user$roles)) {
         # No subscription required, so Go to app
         out <- htmltools::tagList(
           htmltools::tags$head(
@@ -139,12 +144,8 @@ payments_ui <- function(
         )
       }  else {
 
-
-        if (
-          !is.na(customer$stripe_subscription_id) &&
-          (stripe_sub$trial_days_remaining > 0 || !is.na(customer$default_payment_method))
-        ) {
-          # Go to payments page
+        if (is_subscription_valid(stripe_user)) {
+          # Go to custom Shiny app using polishedpayments
           out <- htmltools::tagList(
             htmltools::tags$head(
               tags$script(src = "https://js.stripe.com/v3"),

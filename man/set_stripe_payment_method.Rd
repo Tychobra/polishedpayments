@@ -7,7 +7,7 @@
 set_stripe_payment_method(
   customer_id,
   payment_method_id,
-  stripe_secret_key = getOption("pp")$keys$secret
+  stripe_secret_key = .pp$keys$secret
 )
 }
 \arguments{

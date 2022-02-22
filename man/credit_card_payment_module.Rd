@@ -11,7 +11,7 @@ credit_card_payment_module(
   trigger = function() NULL,
   amount,
   currency = "usd",
-  stripe_secret_key = getOption("pp")$keys$secret
+  stripe_secret_key = .pp$keys$secret
 )
 }
 \arguments{

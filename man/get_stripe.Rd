@@ -4,30 +4,31 @@
 \alias{get_stripe}
 \title{Get relevant information about a Stripe customer from Stripe and Polished}
 \usage{
-get_stripe(
-  user_uid,
-  user_roles,
-  is_on_payments = FALSE,
-  app_uid = .polished$app_uid,
-  stripe_prices = .pp$prices,
-  free_roles = .pp$free_roles
-)
+get_stripe(user_uid, app_uid)
 }
 \arguments{
 \item{user_uid}{the customer's `polished` user uid}
 
-\item{user_roles}{the customer's `polished` user roles}
-
-\item{is_on_payments}{whether the customer is on the payments page or not (Default: \code{FALSE})}
-
 \item{app_uid}{the `polished` app uid; defaults to the current app
 (e.g. \code{.polished$app_uid})}
-
-\item{stripe_prices}{the Stripe prices; defaults to the current Stripe prices
-provided in \code{PolishedPayments} (e.g. \code{.pp$prices})}
-
-\item{free_roles}{the roles for free Stripe users; defaults to the roles
-provided in \code{PolishedPayments} (e.g. \code{.pp$free_roles})}
+}
+\value{
+a list with the following elements:
+- polished_customer_uid
+- stripe_customer_id
+- free_user
+- default_payment_method
+- trial_days_remaining
+- subscription: either NA if no subscription in Stripe, or a list of with the following
+elements retrieved from the Stripe API:
+  - stripe_subscription_id
+  - item_id
+  - plan_id
+  - nickname
+  - amount
+  - interval
+  - trial_end
+  - created_at
 }
 \description{
 This is a helper API wrapper for internal use in Polished Payments Shiny apps.

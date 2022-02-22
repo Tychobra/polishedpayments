@@ -85,9 +85,7 @@ set_payment_method_modal <- function(input, output, session,
 
         session$userData$stripe(
           get_stripe(
-            user_uid = hold_user$user_uid,
-            user_roles = hold_user$roles,
-            is_on_payments = TRUE
+            user_uid = hold_user$user_uid
           )
         )
 

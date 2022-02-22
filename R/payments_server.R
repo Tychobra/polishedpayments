@@ -23,24 +23,22 @@ payments_server <- function(
 
     session$userData$stripe <- reactiveVal(NULL)
     session$userData$stripe_trigger <- reactiveVal(0)
-
     shiny::observeEvent(session$userData$user(), {
 
       query_list <- shiny::getQueryString()
       query_page <- query_list$page
 
-      hold_user <- session$userData$user()
 
+      hold_user <- session$userData$user()
+      is_on_payments <- identical(query_page, "payments")
       tryCatch({
         # get any existing subscriptions from Polished API
 
         stripe_out <- get_stripe(
-          user_uid = hold_user$user_uid,
-          user_roles = hold_user$roles,
-          is_on_payments = identical(query_page, "payments")
+          user_uid = hold_user$user_uid
         )
 
-        if (is.null(stripe_out)) {
+        if (!is_on_payments && is_subscription_required(hold_user$roles) && !is_subscription_valid(stripe_out)) {
           shiny::updateQueryString(
             queryString = "?page=payments",
             session = session,

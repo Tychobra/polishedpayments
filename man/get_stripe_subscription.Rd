@@ -6,7 +6,7 @@
 \usage{
 get_stripe_subscription(
   stripe_subscription_id,
-  stripe_secret_key = getOption("pp")$keys$secret
+  stripe_secret_key = .pp$keys$secret
 )
 }
 \arguments{
