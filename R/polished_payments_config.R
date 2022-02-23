@@ -51,23 +51,20 @@ polished_payments_config <- function(
     stop("invalid Stripe API keys", call. = FALSE)
   }
 
-  out <- list(
-    prices = subscription_prices,
-    trial_period_days = trial_period_days,
-    free_roles = free_roles,
-    is_live = is_live,
-    keys = list(
+
+  assign("prices", subscription_prices, envir = .pp)
+  assign("trial_period_days", trial_period_days, envir = .pp)
+  assign("free_roles", free_roles, envir = .pp)
+  assign("is_live", is_live, envir = .pp)
+  assign("keys", list(
       secret = stripe_secret_key,
       public = stripe_public_key
-    )
+    ),
+    envir = .pp
   )
 
-
-  assign(
-    ".pp",
-    out,
-    envir = .GlobalEnv
-  )
-
-  invisible(out)
+  invisible(NULL)
 }
+
+#' @export
+.pp <- new.env()
