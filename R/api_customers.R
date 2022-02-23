@@ -44,7 +44,7 @@ get_customers <- function(
   query_out$is_live <- is_live
 
   resp <- httr::GET(
-    url = paste0(getOption("polished")$api_url, "/customers"),
+    url = paste0(.polished$api_url, "/customers"),
     ua,
     httr::authenticate(
       user = api_key,
@@ -99,7 +99,7 @@ add_customer <- function(
   body_out$stripe_subscription_id <- stripe_subscription_id
 
   resp <- httr::POST(
-    url = paste0(getOption("polished")$api_url, "/customers"),
+    url = paste0(.polished$api_url, "/customers"),
     ua,
     httr::authenticate(
       user = api_key,
@@ -161,7 +161,7 @@ update_customer <- function(
 
 
   resp <- httr::PUT(
-    url = paste0(getOption("polished")$api_url, "/customers"),
+    url = paste0(.polished$api_url, "/customers"),
     ua,
     httr::authenticate(
       user = api_key,
