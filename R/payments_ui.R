@@ -10,7 +10,7 @@
 #' @export
 payments_ui <- function(
   ui,
-  app_name = .polished$app_name
+  app_name = polished::.polished$app_name
 ) {
 
   function(request) {
@@ -29,12 +29,13 @@ payments_ui <- function(
     query <- shiny::parseQueryString(request$QUERY_STRING)
     page_query <- query$page
 
+
     err_out <- NULL
     tryCatch({
       # get existing subscriptions from Polished API
 
       customer_res <- get_customers(
-        app_uid = .polished$app_uid,
+        app_uid = polished::.polished$app_uid,
         user_uid = user$user_uid
       )
 
@@ -75,7 +76,7 @@ payments_ui <- function(
 
         # Step 3: add the newly created Stripe customer + possible subscription to the "customers" table
         add_customer_res <- add_customer(
-          app_uid = .polished$app_uid,
+          app_uid = polished::.polished$app_uid,
           user_uid = user$user_uid,
           stripe_customer_id = stripe_customer_id,
           stripe_subscription_id = stripe_subscription_id
@@ -87,7 +88,7 @@ payments_ui <- function(
         }
 
         customer_res <- get_customers(
-          app_uid = .polished$app_uid,
+          app_uid = polished::.polished$app_uid,
           user_uid = user$user_uid
         )
 

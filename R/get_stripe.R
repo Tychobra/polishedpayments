@@ -5,7 +5,7 @@
 #'
 #' @param user_uid the customer's `polished` user uid
 #' @param app_uid the `polished` app uid; defaults to the current app
-#' (e.g. \code{.polished$app_uid})
+#' (e.g. \code{polished::.polished$app_uid})
 #'
 #' @return a list with the following elements:
 #' - polished_customer_uid
@@ -24,11 +24,16 @@
 #'   - created_at
 #'
 #' @importFrom httr status_code
+#' @importFrom polished .polished
 #'
 get_stripe <- function(
   user_uid,
-  app_uid = .pp$app_uid
+  app_uid = polished::.polished$app_uid
 ) {
+
+  if (!is.character(app_uid) && length(app_uid) != 1L) {
+    stop("`app_uid` must be a length 1 character vector", call. = FALSE)
+  }
 
   customer_res <- get_customers(
     app_uid = app_uid,
@@ -55,7 +60,7 @@ get_stripe <- function(
     trial_days_remaining = customer$free_trial_days_remaining_at_cancel
   )
 
-  if (is.na(customer$stripe_subscription_id)) {
+  if (is.na(customer$stripe_subscription_id[1])) {
     out$subscription <- NA
   } else {
 
@@ -63,7 +68,7 @@ get_stripe <- function(
 
     # if subscription is NA, that means the user has canceled their subscription, so redirect them to the
     # account page for them to restart their subscription
-    if (is.na(stripe_sub)) {
+    if (is.na(stripe_sub[1])) {
       out$subscription <- NA
     } else {
 

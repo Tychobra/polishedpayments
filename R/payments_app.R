@@ -13,13 +13,13 @@
 #' @importFrom htmltools HTML tags tagList
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shinyFeedback useShinyFeedback
-#' @importFrom polished profile_module_ui
+#' @importFrom polished profile_module_ui .polished
 #' @importFrom waiter use_waiter waiter_show_on_load spin_fading_circles
 #'
 #' @return the UI for the "Admin Panel"
 #'
 payments_app_ui <- function(
-  app_name = .polished$app_name
+  app_name = polished::.polished$app_name
 ) {
 
   stripe_key_public <- .pp$keys$public
