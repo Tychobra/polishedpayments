@@ -68,5 +68,4 @@ Each user's subscription status will be checked before the Shiny app's server lo
   
 7. (Optional) Add a button or link to redirect user to the **Payments** page with `go_to_payments()`  
 
-- Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
-
+- Source code for example apps is available [here](https://github.com/Tychobra/polishedpayments/tree/master/inst/examples)
