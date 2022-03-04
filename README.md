@@ -4,16 +4,27 @@
 
 R package to easily add a [Stripe](https://stripe.com/) subscription with multiple price tiers to a Shiny app using the [polished R package](https://github.com/Tychobra/polished).
 
-### Installation
+### Installation & Dependencies
 
-This package requires the most recent dev version of the {polished} package.  Install it from GitHub using the following command:
+1. This package requires the most recent version of the `{polished}` package. Install it from `CRAN` using the following command:
 
-```
+```R
 # Install `polished` if you don't already have it
-remotes::install_github("tychobra/polished")
+install.packages("polished")
 
+# Alternatively, install the most recent development version
+#   - NOTE: The most recent development version of `polished` may contain bugs or breaking changes. We recommend using the most recent CRAN version.
+remotes::install_github("tychobra/polished")
+```
+
+2. Create a [Polished](https://polished.tech) account at the [Polished Dashboard](https://dashboard.polished.tech) if you don't have one already.  
+
+
+3. Then install the most recent version of `{polishedpayments}`:
+```R
 remotes::install_github("tychobra/polishedpayments")
 ```
+
 
 ### Getting Started
 
@@ -29,7 +40,7 @@ remotes::install_github("tychobra/polishedpayments")
 
 4. Configure your Shiny app with your Stripe information using `polished_payments_config()` in `global.R`.  
   
-      ```
+      ```R
       polishedpayments::polished_payments_config(
         stripe_secret_key = <your Stripe secret key>,
         stripe_public_key = <your Stripe public key>,
@@ -41,7 +52,7 @@ remotes::install_github("tychobra/polishedpayments")
 
 5. Wrap your Shiny server in `polishedpayments::payments_server()` and `polished::secure_server()`. e.g.
 
-      ```
+      ```R
       my_server <- polishedpayments::payments_server(
         server = function(input, output, session) (
         
@@ -56,7 +67,7 @@ remotes::install_github("tychobra/polishedpayments")
   
 6. Wrap your Shiny UI in `polishedpayments::payments_ui()` and `polished::secure_ui()`.   
     
-    ```
+    ```R
     my_ui <- polishedpayments::payments_ui(fluidPage(
       h1("My Shiny App")
     ))
@@ -68,5 +79,4 @@ Each user's subscription status will be checked before the Shiny app's server lo
   
 7. (Optional) Add a button or link to redirect user to the **Payments** page with `go_to_payments()`  
 
-- Example app available: <a href="https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min">https://github.com/Tychobra/polishedpayments/tree/master/inst/examples/polished_payments_min</a>
-
+- Source code for example apps is available [here](https://github.com/Tychobra/polishedpayments/tree/master/inst/examples)
