@@ -4,7 +4,7 @@
 \alias{payments_app_ui}
 \title{The payments Shiny app}
 \usage{
-payments_app_ui(app_name = .polished$app_name)
+payments_app_ui(app_name = polished::.polished$app_name)
 }
 \arguments{
 \item{app_name}{the app name to display to users.}

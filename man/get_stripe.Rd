@@ -4,19 +4,18 @@
 \alias{get_stripe}
 \title{Get relevant information about a Stripe customer from Stripe and Polished}
 \usage{
-get_stripe(user_uid, app_uid)
+get_stripe(user_uid, app_uid = polished::.polished$app_uid)
 }
 \arguments{
 \item{user_uid}{the customer's `polished` user uid}
 
 \item{app_uid}{the `polished` app uid; defaults to the current app
-(e.g. \code{.polished$app_uid})}
+(e.g. \code{polished::.polished$app_uid})}
 }
 \value{
 a list with the following elements:
 - polished_customer_uid
 - stripe_customer_id
-- free_user
 - default_payment_method
 - trial_days_remaining
 - subscription: either NA if no subscription in Stripe, or a list of with the following

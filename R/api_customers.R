@@ -67,9 +67,6 @@ get_customers <- function(
 #' @param user_uid the user uid.
 #' @param stripe_customer_id the Stripe customer id.
 #' @param stripe_subscription_id the Stripe subscription id.
-#' @param is_live whether or not the Stripe key is live or test mode.
-#' @param api_key your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
-#' so that you do not need to supply this argument with each function call.
 #'
 #' @inheritParams get_customers
 #'
@@ -124,9 +121,6 @@ add_customer <- function(
 #' @param default_payment_method the Stripe payment method ID for the customer's
 #' default payment method.
 #' @param cancel_subscription boolean - whether or not to cancel the existing subscription.
-#' @param is_live whether or not the Stripe key is live or test mode
-#' @param api_key your Polished API key. Set your polished api key using \code{\link{set_api_key}()}
-#' so that you do not need to supply this argument with each function call.
 #'
 #' @inheritParams get_customers
 #'
