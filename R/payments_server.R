@@ -38,7 +38,7 @@ payments_server <- function(
           user_uid = hold_user$user_uid
         )
 
-        if (!is_on_payments && is_subscription_required(hold_user$roles) && !is_subscription_valid(stripe_out)) {
+        if (!is_on_payments && isTRUE(.pp$is_subscription_required) && !is_subscription_valid(stripe_out)) {
           shiny::updateQueryString(
             queryString = "?page=payments",
             session = session,

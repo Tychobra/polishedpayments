@@ -133,7 +133,7 @@ payments_ui <- function(
 
     } else {
 
-      if (!is_subscription_required(user_roles = user$roles)) {
+      if (isFALSE(.pp$is_subscription_required)) {
         # No subscription required, so Go to app
         out <- htmltools::tagList(
           htmltools::tags$head(

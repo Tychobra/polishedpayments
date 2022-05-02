@@ -109,12 +109,7 @@ payments_app_server <- function(input, output, session) {
     hold_stripe <- session$userData$stripe()
     hold_user <- session$userData$user()
 
-    if (length(intersect(hold_user$roles, .pp$free_roles)) > 0 || is.null(.pp$prices)) {
-      # User has a free role (or `subscription_prices = NULL`), so go to the Shiny app
-      polished::remove_query_string()
-      session$reload()
-
-    } else if (is.na(hold_stripe$subscription[1])) {
+    if (is.na(hold_stripe$subscription[1]) && isTRUE(.pp$is_subscription_required)) {
 
       shinyWidgets::sendSweetAlert(
         session = session,

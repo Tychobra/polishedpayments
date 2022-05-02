@@ -9,7 +9,7 @@ polished_payments_config(
   stripe_public_key,
   subscription_prices = NULL,
   trial_period_days = 0,
-  free_roles = character(0)
+  is_subscription_required = TRUE
 )
 }
 \arguments{
@@ -24,11 +24,9 @@ if you are only using one time payments.}
 \item{trial_period_days}{the number of days to offer for a free trial period.  All pricing options
 will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.}
 
-\item{free_roles}{Polished user roles that can bypass having to set up a subscription and get free
-access to your Shiny app.  This is often used to give certain users (e.g. your beta testers) free
-access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role
-and add that role to specific users, or use the `polished` package's API wrapper functions
-(`polished::create_role` & `polished::add_user_role`).}
+\item{is_subscription_required}{\code{TRUE} or \code{FALSE} for whether or not a subscription is
+required.  If there are no subscription prices passed to \code{subscription_prices} argument, then
+this argument is always treated as \code{FALSE}.}
 }
 \description{
 configure Polished Payments
@@ -40,8 +38,7 @@ polished_payments_config(
   stripe_secret_key = "<your Stripe secret API key>",
   stripe_public_key = "<your Stripe publishable key>",
   subscription_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
-  trial_period_days = 30,
-  free_roles = "free_user"
+  trial_period_days = 30
 )
 }
 

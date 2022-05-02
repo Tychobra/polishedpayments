@@ -9,11 +9,9 @@
 #' if you are only using one time payments.
 #' @param trial_period_days the number of days to offer for a free trial period.  All pricing options
 #' will use this free trial period.  It overrides any free trial period set on your Stripe dashboard.
-#' @param free_roles Polished user roles that can bypass having to set up a subscription and get free
-#' access to your Shiny app.  This is often used to give certain users (e.g. your beta testers) free
-#' access to your app.  Go to \url{https://dashboard.polished.tech} to create a user role
-#' and add that role to specific users, or use the `polished` package's API wrapper functions
-#' (`polished::create_role` & `polished::add_user_role`).
+#' @param is_subscription_required \code{TRUE} or \code{FALSE} for whether or not a subscription is
+#' required.  If there are no subscription prices passed to \code{subscription_prices} argument, then
+#' this argument is always treated as \code{FALSE}.
 #'
 #' @export
 #'
@@ -24,8 +22,7 @@
 #'   stripe_secret_key = "<your Stripe secret API key>",
 #'   stripe_public_key = "<your Stripe publishable key>",
 #'   subscription_prices = c("price_jkashdkfjh", "price_jakhkljgakwf"),
-#'   trial_period_days = 30,
-#'   free_roles = "free_user"
+#'   trial_period_days = 30
 #' )
 #' }
 #'
@@ -35,7 +32,7 @@ polished_payments_config <- function(
   stripe_public_key,
   subscription_prices = NULL,
   trial_period_days = 0,
-  free_roles = character(0)
+  is_subscription_required = TRUE
 ) {
 
   if (!is.numeric(trial_period_days) && trial_period_days >= 0 && !is.null(subscription_prices)) {
@@ -51,10 +48,26 @@ polished_payments_config <- function(
     stop("invalid Stripe API keys", call. = FALSE)
   }
 
+  if (!(is.null(subscription_prices) || (is.character(subscription_prices) && length(subscription_prices) > 0))) {
+    stop("`subscription_prices` must be a character vector or `NULL`", call. = FALSE)
+  }
+
+  if (!(
+    is.logical(is_subscription_required) &&
+    identical(length(is_subscription_required), 1L) &&
+    !is.na(is_subscription_required)
+  )) {
+    stop("`is_subscription_required` must be `TRUE` or FALSE", call. = FALSE)
+  }
+
+  # force is_subscription_required to FALSE if no subscriptions provided
+  if (is.null(subscription_prices) && isTRUE(is_subscription_required)) {
+    warning("`is_subscription_required` cannot be `TRUE` when `subscription_prices` is NULL.  `is_subscription_required` set to `FALSE`.")
+    is_subscription_required <- FALSE
+  }
 
   assign("prices", subscription_prices, envir = .pp)
   assign("trial_period_days", trial_period_days, envir = .pp)
-  assign("free_roles", free_roles, envir = .pp)
   assign("is_live", is_live, envir = .pp)
   assign("keys", list(
       secret = stripe_secret_key,
@@ -62,6 +75,7 @@ polished_payments_config <- function(
     ),
     envir = .pp
   )
+  assign("is_subscription_required", is_subscription_required)
 
   invisible(NULL)
 }

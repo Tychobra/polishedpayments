@@ -20,6 +20,5 @@ polished_payments_config(
   stripe_secret_key = app_config$stripe$keys$secret,
   stripe_public_key = app_config$stripe$keys$public,
   subscription_prices = app_config$stripe$prices,
-  trial_period_days = 30,
-  free_roles = "free_user"
+  trial_period_days = 30
 )

@@ -45,8 +45,7 @@ remotes::install_github("tychobra/polishedpayments")
         stripe_secret_key = <your Stripe secret key>,
         stripe_public_key = <your Stripe public key>,
         subscription_prices = <your Stripe subscription price(s)>,
-        trial_period_days = <Stripe subscription trial period days>,
-        free_roles = <polished role(s) to allow free user access to subscriptions>
+        trial_period_days = <Stripe subscription trial period days>
       )
       ```
 
