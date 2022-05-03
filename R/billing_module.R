@@ -323,7 +323,7 @@ billing_module <- function(input, output, session) {
       req(session$userData$stripe())
       subscription <- session$userData$stripe()$subscription
 
-      if (is.null(subscription$stripe_subscription_id) || is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription[[1]]) || is.na(subscription$stripe_subscription_id)) {
         out <- "No Plan"
       } else {
         out <- subscription$nickname
@@ -338,7 +338,7 @@ billing_module <- function(input, output, session) {
       subscription <- hold_stripe$subscription
 
 
-      if (is.null(subscription$stripe_subscription_id) || is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription[[1]]) || is.na(subscription$stripe_subscription_id)) {
 
         if (is.na(hold_stripe$trial_days_remaining)) {
           out <- ""
