@@ -31,7 +31,7 @@ payments_server <- function(
       hold_user <- session$userData$user()
       is_on_payments <- identical(query_page, "payments")
 
-      browser()
+
       stripe_out <- NULL
       if (!is.null(hold_user)) {
         tryCatch({
