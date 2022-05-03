@@ -311,7 +311,7 @@ billing_module <- function(input, output, session) {
 
       subscription <- session$userData$stripe()$subscription
 
-      if (is.null(subscription$stripe_subscription_id) || is.na(subscription$stripe_subscription_id)) {
+      if (is.na(subscription[[1]]) || is.na(subscription$stripe_subscription_id)) {
         shinyjs::hide("cancel_subscription")
       } else {
         shinyjs::show("cancel_subscription")
