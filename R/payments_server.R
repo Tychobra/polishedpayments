@@ -67,7 +67,7 @@ payments_server <- function(
 
       if (is_on_payments) {
 
-        if (is.null(user)) {
+        if (is.null(hold_user)) {
           # go to registration.  User must register before they can create subscription
           shiny::updateQueryString(
             queryString = "?page=sign_in&register=TRUE",
@@ -87,7 +87,7 @@ payments_server <- function(
 
         if (isTRUE(.pp$is_subscription_required)) {
 
-          if (is.null(user)) {
+          if (is.null(hold_user)) {
             # redirect to registration page
             shiny::updateQueryString(
               queryString = "?page=sign_in&register=TRUE",
