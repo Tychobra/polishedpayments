@@ -22,8 +22,8 @@ payments_ui <- function(
 
     user <- request$polished_user
 
-    if (is.null(user)) {
-      return()
+    if (is.null(user) && isTRUE(.pp$is_subscription_required)) {
+      stop("not authorized", call. = FALSE)
     }
 
     query <- shiny::parseQueryString(request$QUERY_STRING)
@@ -133,18 +133,7 @@ payments_ui <- function(
 
     } else {
 
-      if (isFALSE(.pp$is_subscription_required)) {
-        # No subscription required, so Go to app
-        out <- htmltools::tagList(
-          htmltools::tags$head(
-            tags$script(src = "https://js.stripe.com/v3"),
-            tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
-            tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
-          ),
-          ui
-        )
-      }  else {
-
+      if (isTRUE(.pp$is_subscription_required)) {
         if (is_subscription_valid(stripe_user)) {
           # Go to custom Shiny app using polishedpayments
           out <- htmltools::tagList(
@@ -155,11 +144,22 @@ payments_ui <- function(
             ),
             ui
           )
-
         } else {
           # Not Authorized - No subscription found - Redirecting to Payments
           out <- NULL
         }
+
+      }  else {
+
+        # No subscription required, so Go to app
+        out <- htmltools::tagList(
+          htmltools::tags$head(
+            tags$script(src = "https://js.stripe.com/v3"),
+            tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
+            tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
+          ),
+          ui
+        )
 
       }
 

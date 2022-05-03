@@ -38,17 +38,20 @@ payments_server <- function(
           user_uid = hold_user$user_uid
         )
 
+
+
         if (!is_on_payments && isTRUE(.pp$is_subscription_required) && !is_subscription_valid(stripe_out)) {
+
           shiny::updateQueryString(
             queryString = "?page=payments",
             session = session,
             mode = "replace"
           )
           session$reload()
+
         } else {
           session$userData$stripe(stripe_out)
         }
-
 
 
       }, error = function(err) {
@@ -77,7 +80,11 @@ payments_server <- function(
 
 
 
-
+    if (isTRUE(.pp$is_subscription_required)) {
+      ignore_null <- TRUE
+    } else {
+      ignore_null <- FALSE
+    }
     observeEvent(session$userData$stripe(), {
       query_list <- shiny::getQueryString()
       page_query <- query_list$page
@@ -91,7 +98,7 @@ payments_server <- function(
         server(input, output, session)
       }
 
-    }, once = TRUE)
+    }, once = TRUE, ignoreNULL = ignore_null)
 
   }
 }
