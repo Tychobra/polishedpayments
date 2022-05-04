@@ -5,6 +5,7 @@
 #'
 #' @importFrom htmltools tagList tags
 #' @importFrom httr status_code
+#' @importFrom polished normalize_ui .polished
 #' @importFrom shiny parseQueryString
 #'
 #' @export
@@ -14,12 +15,6 @@ payments_ui <- function(
 ) {
 
   function(request) {
-
-    # TODO: should pass stripe wih request (i.e. `request$stripe`) like we do with polished user
-    if (is.function(ui)) {
-      ui <- ui(request)
-    }
-    ui <- force(ui)
 
     query <- shiny::parseQueryString(request$QUERY_STRING)
     page_query <- query$page
@@ -126,6 +121,7 @@ payments_ui <- function(
     }
 
 
+    request$stripe <- stripe_user
 
     if (identical(page_query, "payments")) {
 
@@ -154,7 +150,7 @@ payments_ui <- function(
                 tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
                 tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
               ),
-              ui
+              force(polished::normalize_ui(ui, request))
             )
         } else {
           # Not Authorized - No subscription found - Redirecting to Payments
@@ -170,7 +166,7 @@ payments_ui <- function(
             tags$script(paste0("var stripe = Stripe('", .pp$keys$public, "');")),
             tags$script(src = "polishedpayments/js/polishedpayments.js?version=3")
           ),
-          ui
+          force(polished::normalize_ui(ui, request))
         )
 
       }
