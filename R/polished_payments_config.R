@@ -75,7 +75,7 @@ polished_payments_config <- function(
     ),
     envir = .pp
   )
-  assign("is_subscription_required", is_subscription_required)
+  assign("is_subscription_required", is_subscription_required, envir = .pp)
 
   invisible(NULL)
 }
