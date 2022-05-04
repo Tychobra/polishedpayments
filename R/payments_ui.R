@@ -131,6 +131,7 @@ payments_ui <- function(
       } else {
         # continue to payments page
         out <- payments_app_ui(
+          request = request,
           app_name = app_name
         )
       }

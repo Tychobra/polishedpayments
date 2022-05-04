@@ -4,6 +4,7 @@
 #' The Shiny module UI for the Stripe payments Shiny app.  This app can be easily added
 #' to your Shiny apps that use polished.
 #'
+#' @param request the request environment
 #' @param app_name the app name to display to users.
 #'
 #' @export
@@ -19,6 +20,7 @@
 #' @return the UI for the "Admin Panel"
 #'
 payments_app_ui <- function(
+  request,
   app_name = polished::.polished$app_name
 ) {
 
