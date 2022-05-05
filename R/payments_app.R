@@ -111,27 +111,36 @@ payments_app_server <- function(input, output, session) {
     hold_stripe <- session$userData$stripe()
     hold_user <- session$userData$user()
 
-    if (is.na(hold_stripe$subscription[1]) && isTRUE(.pp$is_subscription_required)) {
 
-      shinyWidgets::sendSweetAlert(
-        session = session,
-        title = "Update Subscription",
-        text = "Please select a subscription to access the Shiny app.",
-        type = "error"
-      )
-
-    } else if (hold_stripe$trial_days_remaining > 0 || !is.na(hold_stripe$default_payment_method)) {
+    if (isFALSE(.pp$is_subscription_required)) {
       # to to the Shiny app
       polished::remove_query_string()
       session$reload()
 
     } else {
-      shinyWidgets::sendSweetAlert(
-        session = session,
-        title = "Update Payment Method",
-        text = 'Go to the "Billing" page and enter your credit card information to access the app.',
-        type = "error"
-      )
+      # sub required
+      if (is.null(hold_stripe) || is.na(hold_stripe$subscription[1])) {
+        # user does not have sub
+        shinyWidgets::sendSweetAlert(
+          session = session,
+          title = "Update Subscription",
+          text = "Please select a subscription to access the Shiny app.",
+          type = "error"
+        )
+      } else if (hold_stripe$trial_days_remaining > 0 || !is.na(hold_stripe$default_payment_method)) {
+
+        # user has sub, so go to to the Shiny app
+        polished::remove_query_string()
+        session$reload()
+
+      } else {
+        shinyWidgets::sendSweetAlert(
+          session = session,
+          title = "Update Payment Method",
+          text = 'Go to the "Billing" page and enter your credit card information to access the app.',
+          type = "error"
+        )
+      }
     }
 
   }, ignoreInit = TRUE)
